@@ -46,7 +46,7 @@ const clipboardLink = document.getElementById("clipboardLink");
 const editClipboardBtn = document.getElementById("editClipboard");
 const clearClipboardBtn = document.getElementById("clearClipboard");
 const copyLinkBtn = document.getElementById("copyLink");
-const shareClipboardBtn = document.getElementById("shareClipboard");
+// Share buttons removed from individual constants to be query-selected below
 const charCountEl = document.getElementById("charCount");
 
 const feedbackForm = document.getElementById("feedbackForm");
@@ -724,21 +724,26 @@ qrModal.addEventListener("click", (e) => {
   }
 });
 
-// Share Clipboard
-shareClipboardBtn.addEventListener("click", () => {
-  const link = clipboardLink.textContent;
+// Share Clipboard / Link
+const shareButtons = document.querySelectorAll(".share-button, #shareLinkInlineBtn");
+shareButtons.forEach(btn => {
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const link = clipboardLink.textContent;
 
-  if (navigator.share) {
-    navigator.share({
-      title: 'ClipChain - Shared Clipboard',
-      text: 'Check out my clipboard content:',
-      url: link,
-    })
-      .then(() => showNotification('Shared successfully!', 'success'))
-      .catch((error) => console.log('Error sharing:', error));
-  } else {
-    navigator.clipboard.writeText(link).then(() => {
-      showNotification("Link copied to clipboard! You can now share it manually.", "success");
+      if (navigator.share) {
+        navigator.share({
+          title: 'ClipChain - Shared Clipboard',
+          text: 'Check out my clipboard content:',
+          url: link,
+        })
+          .then(() => showNotification('Shared successfully!', 'success'))
+          .catch((error) => console.log('Error sharing:', error));
+      } else {
+        navigator.clipboard.writeText(link).then(() => {
+          showNotification("Link copied to clipboard! You can now share it.", "success");
+        });
+      }
     });
   }
 });

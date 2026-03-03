@@ -261,12 +261,7 @@ textarea#clipboard:focus {
 }
 
 /* --- ANIMATIONS & DECORATION --- */
-/* Floating shapes moved to JS or simple CSS */
-.square,
-.circle {
-  z-index: -1;
-  pointer-events: none;
-}
+
 
 /* --- ANIMATED SCROLLBAR (Sleek) --- */
 ::-webkit-scrollbar {
@@ -996,115 +991,7 @@ mark {
 }
 
 /* --- BACKGROUND DECORATIONS --- */
-.background-decorations {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  overflow: hidden;
-}
 
-.shape {
-  position: absolute;
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  z-index: -1;
-  opacity: 0.6;
-}
-
-/* 1. Circle */
-.shape-circle {
-  top: 10%;
-  left: 5%;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.4), rgba(192, 132, 252, 0.1));
-  animation: float-slow 12s ease-in-out infinite alternate;
-}
-
-/* 2. Triangle (using clip-path) */
-.shape-triangle {
-  top: 40%;
-  right: 5%;
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.3), rgba(251, 191, 36, 0.1));
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  animation: rotate-float 18s linear infinite;
-}
-
-/* 3. Square (rotated diamond) */
-.shape-square {
-  bottom: 10%;
-  left: 20%;
-  width: 150px;
-  height: 150px;
-  border-radius: 20px;
-  background: linear-gradient(45deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2));
-  transform: rotate(45deg);
-  animation: float-pulse 10s ease-in-out infinite;
-}
-
-/* Dark Mode Adjustments */
-[data-theme="dark"] .shape {
-  opacity: 0.25;
-  /* Subtler in dark mode */
-}
-
-[data-theme="dark"] .shape-circle {
-  background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.3), rgba(30, 41, 59, 0));
-}
-
-[data-theme="dark"] .shape-triangle {
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(99, 102, 241, 0.1));
-}
-
-[data-theme="dark"] .shape-square {
-  background: linear-gradient(45deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15));
-}
-
-
-/* --- ANIMATIONS --- */
-@keyframes float-slow {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-
-  100% {
-    transform: translateY(-40px) scale(1.05);
-  }
-}
-
-@keyframes rotate-float {
-  0% {
-    transform: translateY(0) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-30px) rotate(180deg);
-  }
-
-  100% {
-    transform: translateY(0) rotate(360deg);
-  }
-}
-
-@keyframes float-pulse {
-  0% {
-    transform: rotate(45deg) translateY(0) scale(1);
-  }
-
-  50% {
-    transform: rotate(45deg) translateY(-20px) scale(1.1);
-  }
-
-  100% {
-    transform: rotate(45deg) translateY(0) scale(1);
-  }
-
-
-}
 
 /* --- FOOTER FIXES (Dark Mode) --- */
 [data-theme="dark"] footer {
@@ -1139,3 +1026,135 @@ mark {
   color: rgba(255, 255, 255, 0.4);
 
 }
+/* --- TOASTER BUTTON ANIMATIONS --- */
+.toaster-btn {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; /* Collapse width */
+  height: 44px;
+  padding: 0;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-theme="dark"] .toaster-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.toaster-text {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .toaster-text {
+  color: var(--text-primary);
+}
+
+.icon-anim {
+  transition: transform 0.3s ease;
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .icon-anim {
+  color: var(--text-primary);
+}
+
+/* Hover Expanding Effect */
+.toaster-btn:hover {
+  width: 130px; /* Expanded width to fit text */
+  padding: 0 16px;
+  background: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .toaster-btn:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.toaster-btn:hover .toaster-text {
+  max-width: 100px;
+  opacity: 1;
+  margin-left: 8px; /* Space between icon and text */
+}
+
+.toaster-btn:hover .icon-anim {
+  transform: scale(1.1);
+  color: var(--primary-color);
+}
+
+/* Primary Toaster Button (Copy All) */
+.toaster-btn-primary {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+[data-theme="dark"] .toaster-btn-primary {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.toaster-btn-primary .icon-anim {
+  color: var(--primary-color);
+}
+
+/* Danger Toaster Button (Clear) */
+.toaster-btn-danger:hover {
+  border-color: #ef4444;
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.15);
+}
+
+.toaster-btn-danger:hover .icon-anim,
+.toaster-btn-danger:hover .toaster-text {
+  color: #ef4444;
+}
+
+/* --- CLASSIC GLASSY NAVBAR --- */
+.classic-glass-nav {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(25px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="dark"] .classic-glass-nav {
+  background: rgba(15, 23, 42, 0.4) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/* Reset Toaster Button back to classic glassy */
+.toaster-btn, .toaster-text, .icon-anim {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.toaster-btn:hover {
+  transform: translateY(-1px);
+  background: white;
+}
+[data-theme="dark"] .toaster-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+/* Re-enable hover borders */
+.border-primary-200 { border-color: rgba(191,219,254,0.8); }
+.border-primary-800 { border-color: rgba(30,64,175,0.8); }
+[data-theme="dark"] .border-primary-800 { border-color: rgba(30,64,175,0.8); }
