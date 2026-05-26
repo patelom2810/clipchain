@@ -86,6 +86,7 @@ let currentPassword = null;
 let isLocked = false;
 let isPasswordModalOpen = false;
 let passwordMode = 'unlock'; // 'unlock' | 'set'
+let currentViewMode = 'edit'; // 'edit' | 'preview' | 'split'
 
 // Mobile Menu Toggle (Removed as per user request)
 if (mobileMenuBtn && mobileMenu) {
@@ -116,6 +117,91 @@ renderHistory();
 // Set up Firebase reference and listener
 let clipboardRef = db.ref(`clipboards/${username}`);
 
+// Countdown Timer State & Functions
+let countdownInterval = null;
+
+function startCountdown(expiresAt) {
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  const expiryBadge = document.getElementById("expiryBadge");
+  const expiryTimeText = document.getElementById("expiryTimeText");
+  const expiryProgressBar = document.getElementById("expiryProgressBar");
+
+  if (!expiryBadge || !expiryTimeText) return;
+
+  // Determine baseline total duration for progress percentage
+  let remaining = expiresAt - Date.now();
+  if (remaining <= 0) return;
+
+  let totalDuration = 10 * 60 * 1000; // 10m
+  if (remaining > 60 * 60 * 1000) {
+    totalDuration = 24 * 60 * 60 * 1000; // 24h
+  } else if (remaining > 10 * 60 * 1000) {
+    totalDuration = 60 * 60 * 1000; // 1h
+  }
+
+  expiryBadge.classList.remove("hidden");
+  expiryBadge.classList.add("flex");
+  if (expiryProgressBar) expiryProgressBar.classList.remove("hidden");
+
+  function update() {
+    const now = Date.now();
+    const timeLeft = expiresAt - now;
+
+    if (timeLeft <= 0) {
+      clearInterval(countdownInterval);
+      expiryBadge.classList.add("hidden");
+      expiryBadge.classList.remove("flex");
+      if (expiryProgressBar) {
+        expiryProgressBar.classList.add("hidden");
+        expiryProgressBar.style.width = "0%";
+      }
+      clipboardTextArea.value = "";
+      renderMarkdownPreview();
+      showNotification("This clip has self-destructed.", "error");
+      return;
+    }
+
+    let seconds = Math.floor((timeLeft / 1000) % 60);
+    let minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+    let hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+
+    let timeString = "";
+    if (hours > 0) {
+      timeString = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    } else {
+      timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    expiryTimeText.textContent = timeString;
+
+    if (expiryProgressBar) {
+      const percentage = Math.max(0, Math.min(100, (timeLeft / totalDuration) * 100));
+      expiryProgressBar.style.width = `${percentage}%`;
+    }
+  }
+
+  update();
+  countdownInterval = setInterval(update, 1000);
+}
+
+function stopCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  const expiryBadge = document.getElementById("expiryBadge");
+  const expiryProgressBar = document.getElementById("expiryProgressBar");
+  if (expiryBadge) {
+    expiryBadge.classList.add("hidden");
+    expiryBadge.classList.remove("flex");
+  }
+  if (expiryProgressBar) {
+    expiryProgressBar.classList.add("hidden");
+    expiryProgressBar.style.width = "0%";
+  }
+}
+
 // Initialize Clipboard Listener
 function initClipboardListener() {
   clipboardRef.on("value", snapshot => {
@@ -124,13 +210,34 @@ function initClipboardListener() {
     const savedPassword = typeof data === 'object' ? data.password : null;
     const expiresAt = typeof data === 'object' ? data.expiresAt : null;
 
-    // Check Expiration
-    if (expiresAt && Date.now() > expiresAt) {
-      // Expired! Delete it.
-      clipboardRef.set(null);
-      clipboardTextArea.value = "";
-      showNotification("This clip has self-destructed due to timer expiry.", "error");
-      return;
+    // Check Expiration and manage countdown
+    const selfDestructSelect = document.getElementById("selfDestructTimer");
+    if (expiresAt) {
+      if (Date.now() > expiresAt) {
+        // Expired! Delete it.
+        clipboardRef.set(null);
+        clipboardTextArea.value = "";
+        if (currentViewMode !== 'edit') renderMarkdownPreview();
+        stopCountdown();
+        showNotification("This clip has self-destructed.", "error");
+        return;
+      } else {
+        startCountdown(expiresAt);
+        // Sync self-destruct dropdown selection based on time remaining
+        let remaining = expiresAt - Date.now();
+        let selectedOption = 'never';
+        if (remaining > 60 * 60 * 1000) {
+          selectedOption = '24h';
+        } else if (remaining > 10 * 60 * 1000) {
+          selectedOption = '1h';
+        } else if (remaining > 0) {
+          selectedOption = '10m';
+        }
+        if (selfDestructSelect) selfDestructSelect.value = selectedOption;
+      }
+    } else {
+      stopCountdown();
+      if (selfDestructSelect) selfDestructSelect.value = 'never';
     }
 
     // Update Timer UI if needed (optional, or just keep user's selection)
@@ -168,7 +275,7 @@ function initClipboardListener() {
         clipboardTextArea.value = text;
         updateCharCount();
         updateHighlight();
-        if (isMarkdownMode) markdownPreview.innerHTML = marked.parse(text); // Update preview if active
+        if (currentViewMode !== 'edit') renderMarkdownPreview();
       }
 
       // Add to history if new and not empty
@@ -333,14 +440,43 @@ passwordForm.addEventListener("submit", (e) => {
 
 
 // Event Listeners for Clipboard Input
+let syncTimeout;
 clipboardTextArea.addEventListener("input", () => {
   const text = clipboardTextArea.value;
+  
+  // Dynamic sync status indicator feedback
+  const statusIndicator = document.getElementById("statusIndicator");
+  if (statusIndicator) {
+    statusIndicator.innerHTML = `
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+      </span>
+      Syncing...
+    `;
+  }
+
   // If locked, we shouldn't be able to edit, but double check
   if (!isLocked) {
     clipboardRef.update({ text: text });
     updateCharCount();
     updateHighlight();
+    if (currentViewMode !== 'edit') renderMarkdownPreview();
   }
+
+  // Debounce status change back to Synced
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(() => {
+    if (statusIndicator) {
+      statusIndicator.innerHTML = `
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+        </span>
+        Synced
+      `;
+    }
+  }, 600);
 });
 
 
@@ -459,40 +595,144 @@ setUsernameBtn.addEventListener("click", () => {
 });
 
 // Edit Clipboard
-editClipboardBtn.addEventListener("click", () => {
-  clipboardTextArea.disabled = false;
-  clipboardTextArea.focus();
-});
+if (editClipboardBtn) {
+  editClipboardBtn.addEventListener("click", () => {
+    clipboardTextArea.disabled = false;
+    clipboardTextArea.focus();
+  });
+}
 
-// Markdown Preview Logic
-const toggleMarkdownBtn = document.getElementById("toggleMarkdown");
+// Markdown Editor Integration & View Modes
+const editPane = document.getElementById("editPane");
+const previewPane = document.getElementById("previewPane");
+const editorContentGrid = document.getElementById("editorContentGrid");
+const btnViewEdit = document.getElementById("btnViewEdit");
+const btnViewPreview = document.getElementById("btnViewPreview");
+const btnViewSplit = document.getElementById("btnViewSplit");
 const markdownPreview = document.getElementById("markdownPreview");
-let isMarkdownMode = false;
 
-toggleMarkdownBtn.addEventListener("click", () => {
-  isMarkdownMode = !isMarkdownMode;
-
-  if (isMarkdownMode) {
-    // Switch to Preview
-    const text = clipboardTextArea.value;
-    markdownPreview.innerHTML = marked.parse(text);
-    markdownPreview.classList.remove("hidden");
-    clipboardTextArea.classList.add("hidden");
-    highlightOverlay.classList.add("hidden"); // Hide highlight in preview
-
-    toggleMarkdownBtn.innerHTML = `<i data-lucide="edit-2" class="h-4 w-4 mr-1.5"></i> Editor`;
-    toggleMarkdownBtn.classList.add("bg-primary-100", "text-primary-700");
-  } else {
-    // Switch to Editor
-    markdownPreview.classList.add("hidden");
-    clipboardTextArea.classList.remove("hidden");
-    highlightOverlay.classList.remove("hidden");
-
-    toggleMarkdownBtn.innerHTML = `<i data-lucide="file-text" class="h-4 w-4 mr-1.5"></i> Preview`;
-    toggleMarkdownBtn.classList.remove("bg-primary-100", "text-primary-700");
+function renderMarkdownPreview() {
+  const text = clipboardTextArea.value;
+  if (typeof marked !== 'undefined') {
+    const renderedHtml = marked.parse(text);
+    if (markdownPreview) {
+      markdownPreview.innerHTML = renderedHtml;
+      // Trigger highlight.js syntax highlighting
+      if (typeof hljs !== 'undefined') {
+        markdownPreview.querySelectorAll('pre code').forEach(block => {
+          hljs.highlightElement(block);
+        });
+      }
+    }
   }
-  lucide.createIcons();
-});
+}
+
+function setViewMode(mode) {
+  currentViewMode = mode;
+
+  // Reset tab button styles
+  const tabs = [btnViewEdit, btnViewPreview, btnViewSplit];
+  tabs.forEach(tab => {
+    if (tab) {
+      tab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white";
+    }
+  });
+
+  // Active tab styles
+  const activeTab = mode === 'edit' ? btnViewEdit : mode === 'preview' ? btnViewPreview : btnViewSplit;
+  if (activeTab) {
+    activeTab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm";
+  }
+
+  // Toggle grid and layout columns
+  if (mode === 'edit') {
+    if (editPane) {
+      editPane.classList.remove("hidden");
+      editPane.classList.add("block");
+    }
+    if (previewPane) {
+      previewPane.classList.add("hidden");
+      previewPane.classList.remove("block");
+    }
+    if (editorContentGrid) {
+      editorContentGrid.classList.remove("grid-cols-2", "md:grid-cols-2");
+      editorContentGrid.classList.add("grid-cols-1");
+    }
+  } else if (mode === 'preview') {
+    if (editPane) {
+      editPane.classList.add("hidden");
+      editPane.classList.remove("block");
+    }
+    if (previewPane) {
+      previewPane.classList.remove("hidden");
+      previewPane.classList.add("block");
+    }
+    if (editorContentGrid) {
+      editorContentGrid.classList.remove("grid-cols-2", "md:grid-cols-2");
+      editorContentGrid.classList.add("grid-cols-1");
+    }
+    renderMarkdownPreview();
+  } else {
+    // Split mode
+    if (editPane) {
+      editPane.classList.remove("hidden");
+      editPane.classList.add("block");
+    }
+    if (previewPane) {
+      previewPane.classList.remove("hidden");
+      previewPane.classList.add("block");
+    }
+    if (editorContentGrid) {
+      editorContentGrid.classList.remove("grid-cols-1");
+      editorContentGrid.classList.add("grid-cols-2", "md:grid-cols-2");
+    }
+    renderMarkdownPreview();
+  }
+}
+
+if (btnViewEdit) btnViewEdit.addEventListener("click", () => setViewMode('edit'));
+if (btnViewPreview) btnViewPreview.addEventListener("click", () => setViewMode('preview'));
+if (btnViewSplit) btnViewSplit.addEventListener("click", () => setViewMode('split'));
+
+// Formatting Shortcuts Toolbar Logic
+const fmtBold = document.getElementById("fmtBold");
+const fmtItalic = document.getElementById("fmtItalic");
+const fmtHeading = document.getElementById("fmtHeading");
+const fmtListBullet = document.getElementById("fmtListBullet");
+const fmtListCheck = document.getElementById("fmtListCheck");
+const fmtCode = document.getElementById("fmtCode");
+const fmtQuote = document.getElementById("fmtQuote");
+const fmtLink = document.getElementById("fmtLink");
+
+function insertMarkdown(beforeText, afterText = "") {
+  const textarea = clipboardTextArea;
+  if (!textarea) return;
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const selectedText = text.substring(start, end);
+  const replacement = beforeText + selectedText + afterText;
+
+  textarea.value = text.substring(0, start) + replacement + text.substring(end);
+  textarea.focus();
+  textarea.selectionStart = start + beforeText.length;
+  textarea.selectionEnd = start + beforeText.length + selectedText.length;
+
+  // Trigger input event to sync to Firebase and update highlight overlay
+  const event = new Event('input', { bubbles: true });
+  textarea.dispatchEvent(event);
+  renderMarkdownPreview();
+}
+
+if (fmtBold) fmtBold.addEventListener("click", () => insertMarkdown("**", "**"));
+if (fmtItalic) fmtItalic.addEventListener("click", () => insertMarkdown("*", "*"));
+if (fmtHeading) fmtHeading.addEventListener("click", () => insertMarkdown("# "));
+if (fmtListBullet) fmtListBullet.addEventListener("click", () => insertMarkdown("- "));
+if (fmtListCheck) fmtListCheck.addEventListener("click", () => insertMarkdown("- [ ] "));
+if (fmtCode) fmtCode.addEventListener("click", () => insertMarkdown("```\n", "\n```"));
+if (fmtQuote) fmtQuote.addEventListener("click", () => insertMarkdown("> "));
+if (fmtLink) fmtLink.addEventListener("click", () => insertMarkdown("[", "](url)"));
 
 // Clear Clipboard
 // Clear Clipboard
@@ -521,7 +761,7 @@ function closeConfirmModal() {
 if (confirmClearBtn) {
   confirmClearBtn.addEventListener("click", () => {
     clipboardTextArea.value = "";
-    if (typeof isMarkdownMode !== 'undefined' && isMarkdownMode && typeof markdownPreview !== 'undefined') {
+    if (typeof currentViewMode !== 'undefined' && currentViewMode !== 'edit' && typeof markdownPreview !== 'undefined' && markdownPreview) {
       markdownPreview.innerHTML = "";
     }
     clipboardRef.set("");
@@ -532,25 +772,7 @@ if (confirmClearBtn) {
 }
 
 // Share Functionality
-if (shareClipboardBtn) {
-  shareClipboardBtn.addEventListener("click", () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'ClipChain',
-        text: clipboardLink.href, // Use href for full URL
-        url: clipboardLink.href,
-      })
-        .then(() => console.log('Successful share'))
-        .catch((error) => console.log('Error sharing', error));
-    } else {
-      // Fallback
-      const link = clipboardLink.textContent;
-      navigator.clipboard.writeText(link).then(() => {
-        showNotification("Link copied to clipboard (Share not supported)", "info");
-      });
-    }
-  });
-}
+// Duplicate shareClipboardBtn click handler removed (handled by .share-button listeners below)
 
 if (cancelConfirmBtn) {
   cancelConfirmBtn.addEventListener("click", closeConfirmModal);
@@ -617,7 +839,7 @@ if (exportBtn) {
     const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
     a.href = url;
-    a.download = `clipchain-export-${timestamp}.txt`;
+    a.download = `clipchain-export-${timestamp}.md`;
     document.body.appendChild(a);
     a.click();
 
@@ -753,17 +975,24 @@ const themeToggle = document.getElementById("themeToggle");
 const mobileThemeToggle = document.getElementById("mobileThemeToggle");
 
 function setTheme(isDark) {
+  const hljsLight = document.getElementById("hljs-light-theme");
+  const hljsDark = document.getElementById("hljs-dark-theme");
+
   if (isDark) {
     document.documentElement.setAttribute("data-theme", "dark");
     document.documentElement.classList.add("dark");
     if (themeToggle) themeToggle.checked = true;
     if (mobileThemeToggle) mobileThemeToggle.checked = true;
+    if (hljsLight) hljsLight.disabled = true;
+    if (hljsDark) hljsDark.disabled = false;
     localStorage.setItem("theme", "dark");
   } else {
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.classList.remove("dark");
     if (themeToggle) themeToggle.checked = false;
     if (mobileThemeToggle) mobileThemeToggle.checked = false;
+    if (hljsLight) hljsLight.disabled = false;
+    if (hljsDark) hljsDark.disabled = true;
     localStorage.setItem("theme", "light");
   }
 }
@@ -965,50 +1194,52 @@ if (clearHistoryBtn && historyClearOverlay) {
 }
 
 // Feedback Form Submission
-feedbackForm.addEventListener("submit", (e) => {
-  e.preventDefault();
+if (feedbackForm) {
+  feedbackForm.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-  const name = document.getElementById("feedbackName").value;
-  const email = document.getElementById("feedbackEmail").value;
-  const rating = document.querySelector('input[name="rating"]:checked').value;
-  const message = document.getElementById("feedbackMessage").value;
+    const name = document.getElementById("feedbackName").value;
+    const email = document.getElementById("feedbackEmail").value;
+    const rating = document.querySelector('input[name="rating"]:checked').value;
+    const message = document.getElementById("feedbackMessage").value;
 
-  // Save feedback to Firebase
-  const feedbackRef = db.ref('feedback').push();
-  feedbackRef.set({
-    name: name,
-    email: email,
-    rating: rating,
-    message: message,
-    timestamp: Date.now()
-  }).then(() => {
-    // Send Email via EmailJS
-    if (window.emailjs) {
-      const templateParams = {
-        name: name,
-        email: email,
-        rating: rating,
-        message: message
-      };
+    // Save feedback to Firebase
+    const feedbackRef = db.ref('feedback').push();
+    feedbackRef.set({
+      name: name,
+      email: email,
+      rating: rating,
+      message: message,
+      timestamp: Date.now()
+    }).then(() => {
+      // Send Email via EmailJS
+      if (window.emailjs) {
+        const templateParams = {
+          name: name,
+          email: email,
+          rating: rating,
+          message: message
+        };
 
-      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-        .then(function (response) {
-          console.log('SUCCESS!', response.status, response.text);
-          showNotification("Feedback sent successfully!", "success");
-        }, function (error) {
-          console.log('FAILED...', error);
-          showNotification("Feedback saved, but email failed.", "warning");
-        });
-    } else {
-      showNotification("Thank you for your feedback!", "success");
-    }
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+          .then(function (response) {
+            console.log('SUCCESS!', response.status, response.text);
+            showNotification("Feedback sent successfully!", "success");
+          }, function (error) {
+            console.log('FAILED...', error);
+            showNotification("Feedback saved, but email failed.", "warning");
+          });
+      } else {
+        showNotification("Thank you for your feedback!", "success");
+      }
 
-    feedbackForm.reset();
-  }).catch(error => {
-    showNotification("Error submitting feedback. Please try again.", "error");
-    console.error("Error submitting feedback:", error);
+      feedbackForm.reset();
+    }).catch(error => {
+      showNotification("Error submitting feedback. Please try again.", "error");
+      console.error("Error submitting feedback:", error);
+    });
   });
-});
+}
 
 // Newsletter Form Submission
 if (newsletterForm) {
@@ -1148,7 +1379,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // Add resize listener to handle mobile menu state
 window.addEventListener('resize', () => {
-  if (window.innerWidth >= 768 && !mobileMenu.classList.contains('translate-x-full')) {
+  if (mobileMenu && window.innerWidth >= 768 && !mobileMenu.classList.contains('translate-x-full')) {
     mobileMenu.classList.add('translate-x-full');
     document.body.style.overflow = '';
   }

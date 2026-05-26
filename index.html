@@ -65,6 +65,11 @@
 <!-- Marked.js -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+<!-- highlight.js for Syntax Highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light-theme">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 <!-- Custom styles -->
 <link rel="stylesheet" href="style.css">
 </head>
@@ -157,8 +162,8 @@
 
   </nav>
 
-  <!-- Main Content -->
   <main class="pt-24 pb-24 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto animate-enter delay-200">
+    <div class="space-y-6">
 
     <!-- URL/Link Display Section -->
     <div class="mb-6">
@@ -206,6 +211,22 @@
           <span
             class="ml-3 text-xs font-semibold text-secondary-500 uppercase tracking-widest hidden sm:inline-block">Live
             Editor</span>
+          
+          <!-- View Modes Tab Bar -->
+          <div class="flex items-center bg-secondary-100/50 dark:bg-slate-800/40 rounded-lg p-0.5 ml-4 border border-white/20 dark:border-slate-700/50">
+            <button id="btnViewEdit" class="px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm">
+              <i data-lucide="edit-3" class="h-3.5 w-3.5"></i>
+              <span class="hidden md:inline">Edit</span>
+            </button>
+            <button id="btnViewPreview" class="px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
+              <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+              <span class="hidden md:inline">Preview</span>
+            </button>
+            <button id="btnViewSplit" class="px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
+              <i data-lucide="columns" class="h-3.5 w-3.5"></i>
+              <span class="hidden md:inline">Split</span>
+            </button>
+          </div>
         </div>
 
         <!-- Search -->
@@ -221,40 +242,57 @@
         </div>
       </div>
 
-      <!-- Text Area Wrapper -->
-      <div class="relative w-full h-[50vh] min-h-[400px]">
+      <!-- Formatting Toolbar -->
+      <div id="formattingToolbar" class="flex flex-wrap items-center gap-1 px-4 py-2 bg-white/20 dark:bg-slate-800/20 border-b border-white/20 dark:border-slate-800/50">
+        <button id="fmtBold" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Bold">
+          <i data-lucide="bold" class="h-4 w-4"></i>
+        </button>
+        <button id="fmtItalic" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Italic">
+          <i data-lucide="italic" class="h-4 w-4"></i>
+        </button>
+        <button id="fmtHeading" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Heading">
+          <i data-lucide="heading" class="h-4 w-4"></i>
+        </button>
+        <div class="h-4 w-px bg-white/20 dark:bg-slate-800/50 mx-1"></div>
+        <button id="fmtListBullet" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Bullet List">
+          <i data-lucide="list" class="h-4 w-4"></i>
+        </button>
+        <button id="fmtListCheck" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Checklist">
+          <i data-lucide="check-square" class="h-4 w-4"></i>
+        </button>
+        <div class="h-4 w-px bg-white/20 dark:bg-slate-800/50 mx-1"></div>
+        <button id="fmtCode" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Code Block">
+          <i data-lucide="code" class="h-4 w-4"></i>
+        </button>
+        <button id="fmtQuote" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Blockquote">
+          <i data-lucide="quote" class="h-4 w-4"></i>
+        </button>
+        <button id="fmtLink" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Insert Link">
+          <i data-lucide="link" class="h-4 w-4"></i>
+        </button>
+      </div>
 
-        <!-- Highlight Overlay for Search -->
-        <div id="highlightOverlay"
-          class="absolute inset-0 p-6 font-mono text-lg leading-relaxed whitespace-pre-wrap break-words pointer-events-none text-transparent z-10 overflow-auto bg-transparent">
-        </div>
+      <!-- Expiry Progress Bar -->
+      <div id="expiryProgressBar" class="h-0.5 w-full bg-gradient-to-r from-red-500 via-amber-500 to-primary-500 transition-all duration-1000 hidden"></div>
 
-        <!-- Markdown <span class="hidden md:inline group-hover:inline ml-1.5">Preview</span> (Hidden by default) -->
-        <div id="markdown<span class=" hidden md:inline group-hover:inline ml-1.5">Preview</span>"
-          class="absolute inset-0 p-6 bg-white/60 overflow-auto z-20 hidden prose prose-lg max-w-none
-          text-secondary-800">
-        </div>
-
+      <!-- Editor Viewport Grid -->
+      <div id="editorContentGrid" class="grid grid-cols-1 w-full h-[50vh] min-h-[400px] relative">
+        
         <!-- Lock Overlay -->
         <div id="lockOverlay"
-          class="absolute inset-0 z-30 bg-white/10 backdrop-blur-md flex flex-col items-center justify-center hidden">
-          <div class="bg-white/80 p-6 rounded-2xl shadow-2xl text-center max-w-sm mx-4">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          class="absolute inset-0 z-30 bg-white/10 dark:bg-slate-900/10 backdrop-blur-md flex flex-col items-center justify-center hidden">
+          <div class="bg-white/80 dark:bg-slate-800/80 p-6 rounded-2xl shadow-2xl text-center max-w-sm mx-4 border border-white/20 dark:border-slate-700/50">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <i data-lucide="lock" class="h-8 w-8 text-red-500"></i>
             </div>
-            <h3 class="text-xl font-bold text-secondary-900 mb-2">Content Locked</h3>
-            <p class="text-secondary-600 mb-6">This clipboard is password protected.</p>
+            <h3 class="text-xl font-bold text-secondary-900 dark:text-white mb-2">Content Locked</h3>
+            <p class="text-secondary-600 dark:text-gray-300 mb-6">This clipboard is password protected.</p>
             <button id="unlockBtn"
               class="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-primary-500/30">
               Unlock Now
             </button>
           </div>
         </div>
-
-        <!-- Main Text Area -->
-        <textarea id="clipboard"
-          class="w-full h-full p-6 bg-transparent border-none outline-none resize-none font-mono text-lg leading-relaxed text-secondary-800 placeholder-secondary-400 focus:ring-0 z-0 relative"
-          placeholder="Type or paste your text here... It will sync instantly across all devices."></textarea>
 
         <!-- QR Overlay (Moved Inside) -->
         <div id="qrModal"
@@ -309,11 +347,9 @@
           <div
             class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-secondary-100 dark:border-slate-700 p-6 w-full max-w-xs mx-4 transform transition-all scale-100">
             <h3 id="passwordModalTitle" class="text-xl font-bold text-secondary-900 dark:text-white mb-2 text-center">
-              Set
-              Password</h3>
+              Set Password</h3>
             <p id="passwordModalDesc" class="text-secondary-600 dark:text-secondary-400 mb-6 text-center text-sm">
-              Protect
-              your content.</p>
+              Protect your content.</p>
 
             <form id="passwordForm" class="space-y-4">
               <input type="password" id="passwordInput" placeholder="Enter password"
@@ -339,70 +375,112 @@
             </form>
           </div>
         </div>
+
+        <!-- Edit Pane -->
+        <div id="editPane" class="relative h-full w-full border-r border-white/20 dark:border-slate-800/50 animate-enter delay-100">
+          <!-- Highlight Overlay for Search -->
+          <div id="highlightOverlay"
+            class="absolute inset-0 p-6 font-mono text-lg leading-relaxed whitespace-pre-wrap break-words pointer-events-none text-transparent z-10 overflow-auto bg-transparent">
+          </div>
+          <!-- Main Text Area -->
+          <textarea id="clipboard"
+            class="w-full h-full p-6 bg-transparent border-none outline-none resize-none font-mono text-lg leading-relaxed text-secondary-800 dark:text-gray-200 placeholder-secondary-400 focus:ring-0 z-0 relative"
+            placeholder="Type or paste your text here... It will sync instantly across all devices."></textarea>
+        </div>
+
+        <!-- Preview Pane -->
+        <div id="previewPane" class="h-full w-full p-6 overflow-auto bg-white/30 dark:bg-slate-900/30 hidden animate-enter delay-100">
+          <div id="markdownPreview" class="prose prose-lg dark:prose-invert max-w-none text-secondary-800 dark:text-gray-100">
+            <!-- Rendered Markdown -->
+          </div>
+        </div>
+
       </div>
 
       <!-- Footer of Editor -->
       <div
         class="bg-white/40 border-t border-white/30 px-4 py-2 flex items-center justify-between text-xs font-medium text-secondary-500">
-        <span id="statusIndicator" class="flex items-center gap-1.5">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+        <div class="flex items-center gap-3">
+          <span id="statusIndicator" class="flex items-center gap-1.5">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            Synced
           </span>
-          Synced
-        </span>
+          <!-- Expiry Badge -->
+          <span id="expiryBadge" class="hidden items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50/80 dark:bg-red-950/30 text-red-500 dark:text-red-400 font-bold border border-red-100 dark:border-red-900/30 transition-all">
+            <i data-lucide="clock" class="h-3 w-3 animate-pulse"></i>
+            <span id="expiryTimeText">00:00</span>
+          </span>
+        </div>
         <span id="charCount">0 characters</span>
       </div>
     </div>
 
-    <!-- Action Buttons (Responsive Toast Bar) -->
+    <!-- Action Buttons (Responsive Toast Bar / Docker) -->
     <div
       class="fixed bottom-0 left-0 w-full px-4 pb-4 z-50 md:relative md:bottom-auto md:left-auto md:w-full md:px-0 md:pb-0 md:mt-6 pointer-events-none md:pointer-events-auto">
       <div
-        class="glass-panel p-2 md:p-3 flex overflow-x-auto items-center gap-2 md:flex-wrap md:justify-center pointer-events-auto md:rounded-full rounded-2xl shadow-xl border border-white/50 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        class="glass-panel p-2.5 flex justify-between md:justify-center items-center gap-2 md:gap-3 pointer-events-auto md:rounded-full rounded-2xl shadow-xl border border-white/50">
 
-        <div class="relative inline-block flex-shrink-0">
+        <!-- Self-Destruct Timer (Styled as a circular toaster button) -->
+        <div class="relative flex-shrink-0 toaster-btn group" title="Set Self-Destruct Timer">
           <select id="selfDestructTimer"
-            class="pl-8 pr-8 py-2 glass-button text-secondary-700 dark:text-gray-200 font-medium rounded-full transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-primary-500 w-[130px] appearance-none text-sm">
+            class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
             <option value="never" selected>No Timer</option>
             <option value="10m">10 Mins</option>
             <option value="1h">1 Hour</option>
             <option value="24h">24 Hours</option>
           </select>
-          <div class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary-600">
+          <div class="flex items-center justify-center pointer-events-none icon-anim gap-0.5">
             <i data-lucide="timer" class="h-4 w-4"></i>
+            <i data-lucide="chevron-down" class="h-3 w-3 text-secondary-400 dark:text-gray-500"></i>
+            <span class="toaster-text">Timer</span>
           </div>
         </div>
 
+        <!-- Copy All Button -->
         <button id="copyAllBtn"
-          class="flex-shrink-0 px-4 py-2 glass-button text-primary-600 dark:text-primary-400 font-bold border-primary-200 dark:border-primary-800 rounded-full transition-colors flex items-center group">
-          <i data-lucide="clipboard-copy" class="h-4 w-4 mr-1.5 transition-transform group-hover:scale-110"></i>
-          <span class="text-sm">Copy All</span>
+          class="toaster-btn toaster-btn-primary flex-shrink-0 group"
+          title="Copy All Content">
+          <i data-lucide="clipboard-copy" class="icon-anim h-4 w-4"></i>
+          <span class="toaster-text">Copy All</span>
         </button>
+
+        <!-- Export Button -->
         <button id="exportBtn"
-          class="flex-shrink-0 px-4 py-2 glass-button text-secondary-700 dark:text-gray-200 font-semibold rounded-full transition-colors flex items-center group">
-          <i data-lucide="download" class="h-4 w-4 mr-1.5 transition-transform group-hover:scale-110"></i>
-          <span class="text-sm">Export</span>
+          class="toaster-btn flex-shrink-0 group"
+          title="Export as File">
+          <i data-lucide="download" class="icon-anim h-4 w-4"></i>
+          <span class="toaster-text">Export</span>
         </button>
+
+        <!-- Clear Button -->
         <button id="clearClipboard"
-          class="flex-shrink-0 px-4 py-2 glass-button text-secondary-700 dark:text-gray-200 font-semibold rounded-full transition-colors flex items-center group hover:!border-red-400 hover:!text-red-500">
-          <i data-lucide="trash" class="h-4 w-4 mr-1.5 transition-transform group-hover:scale-110"></i>
-          <span class="text-sm">Clear</span>
+          class="toaster-btn toaster-btn-danger flex-shrink-0 group hover:!border-red-400 hover:!text-red-500"
+          title="Clear Clipboard">
+          <i data-lucide="trash" class="icon-anim h-4 w-4"></i>
+          <span class="toaster-text">Clear</span>
         </button>
+
+        <!-- QR Code Button -->
         <button id="showQrBtn"
-          class="flex-shrink-0 px-4 py-2 glass-button text-secondary-700 dark:text-gray-200 font-semibold rounded-full transition-colors flex items-center group">
-          <i data-lucide="qr-code" class="h-4 w-4 mr-1.5 transition-transform group-hover:scale-110"></i>
-          <span class="text-sm">QR Code</span>
+          class="toaster-btn flex-shrink-0 group"
+          title="Show QR Code">
+          <i data-lucide="qr-code" class="icon-anim h-4 w-4"></i>
+          <span class="toaster-text">QR Code</span>
         </button>
-      </div>
     </div>
-    <div class="pt-8 border-t border-secondary-200 flex flex-col md:flex-row justify-between items-center">
+  </main>
+
+  <footer class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="pt-8 border-t border-secondary-200 dark:border-slate-800/80 flex flex-col md:flex-row justify-between items-center">
       <p class="text-secondary-500 text-sm mb-4 md:mb-0">
         &copy; 2026 ClipChain. Made with <span class="text-red-500">&hearts;</span> by Om Patel.
       </p>
     </div>
-    </div>
-    </footer>
+  </footer>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>

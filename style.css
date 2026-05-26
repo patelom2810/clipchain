@@ -422,10 +422,6 @@ textarea#clipboard:focus {
   color: transparent;
 }
 
-/* Responsive Menu */
-.mobile-menu {
-  /* Existing logic is fine, just updated theme vars will apply */
-}
 
 
 /* Search Highlight Fixed */
@@ -986,8 +982,20 @@ mark {
 }
 
 .history-item {
-  @apply p-3 bg-white/40 hover:bg-white/60 rounded-lg cursor-pointer transition-all border border-white/20;
-  /* Ensure it looks good in narrow column */
+  padding: 0.75rem; /* p-3 */
+  background-color: rgba(255, 255, 255, 0.4); /* bg-white/40 */
+  border-radius: 0.5rem; /* rounded-lg */
+  cursor: pointer; /* cursor-pointer */
+  transition-property: all; /* transition-all */
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* border border-white/20 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.history-item:hover {
+  background-color: rgba(255, 255, 255, 0.6); /* hover:bg-white/60 */
 }
 
 /* --- BACKGROUND DECORATIONS --- */
@@ -1101,19 +1109,22 @@ mark {
   color: var(--primary-color);
 }
 
-/* Primary Toaster Button (Copy All) */
-.toaster-btn-primary {
-  background: rgba(37, 99, 235, 0.1);
-  border-color: rgba(37, 99, 235, 0.3);
+/* Primary Toaster Button (Copy All) - Apply Accents on Hover only */
+.toaster-btn-primary:hover {
+  background: rgba(37, 99, 235, 0.1) !important;
+  border-color: rgba(37, 99, 235, 0.5) !important;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15) !important;
 }
 
-[data-theme="dark"] .toaster-btn-primary {
-  background: rgba(96, 165, 250, 0.15);
-  border-color: rgba(96, 165, 250, 0.3);
+[data-theme="dark"] .toaster-btn-primary:hover {
+  background: rgba(96, 165, 250, 0.15) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
-.toaster-btn-primary .icon-anim {
-  color: var(--primary-color);
+.toaster-btn-primary:hover .icon-anim,
+.toaster-btn-primary:hover .toaster-text {
+  color: var(--primary-color) !important;
 }
 
 /* Danger Toaster Button (Clear) */
@@ -1143,18 +1154,12 @@ mark {
 }
 
 
-/* Reset Toaster Button back to classic glassy */
-.toaster-btn, .toaster-text, .icon-anim {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.toaster-btn:hover {
-  transform: translateY(-1px);
-  background: white;
-}
-[data-theme="dark"] .toaster-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
 /* Re-enable hover borders */
 .border-primary-200 { border-color: rgba(191,219,254,0.8); }
 .border-primary-800 { border-color: rgba(30,64,175,0.8); }
 [data-theme="dark"] .border-primary-800 { border-color: rgba(30,64,175,0.8); }
+
+/* Expiry Progress Bar Glow */
+#expiryProgressBar {
+  box-shadow: 0 1px 4px rgba(239, 68, 68, 0.4);
+}
