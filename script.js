@@ -703,6 +703,12 @@ const fmtListCheck = document.getElementById("fmtListCheck");
 const fmtCode = document.getElementById("fmtCode");
 const fmtQuote = document.getElementById("fmtQuote");
 const fmtLink = document.getElementById("fmtLink");
+const fmtTable = document.getElementById("fmtTable");
+const fmtColor = document.getElementById("fmtColor");
+const fmtColorDropdown = document.getElementById("fmtColorDropdown");
+const fmtColorPicker = document.getElementById("fmtColorPicker");
+const fmtFont = document.getElementById("fmtFont");
+const fmtFontDropdown = document.getElementById("fmtFontDropdown");
 
 function insertMarkdown(beforeText, afterText = "") {
   const textarea = clipboardTextArea;
@@ -733,6 +739,72 @@ if (fmtListCheck) fmtListCheck.addEventListener("click", () => insertMarkdown("-
 if (fmtCode) fmtCode.addEventListener("click", () => insertMarkdown("```\n", "\n```"));
 if (fmtQuote) fmtQuote.addEventListener("click", () => insertMarkdown("> "));
 if (fmtLink) fmtLink.addEventListener("click", () => insertMarkdown("[", "](url)"));
+
+// Table format shortcut
+if (fmtTable) {
+  fmtTable.addEventListener("click", () => {
+    insertMarkdown("| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |");
+  });
+}
+
+// Text Color Dropdown Logic
+if (fmtColor && fmtColorDropdown) {
+  fmtColor.addEventListener("click", (e) => {
+    e.stopPropagation();
+    fmtColorDropdown.classList.toggle("hidden");
+    if (fmtFontDropdown) fmtFontDropdown.classList.add("hidden");
+  });
+}
+
+// Text Font Dropdown Logic
+if (fmtFont && fmtFontDropdown) {
+  fmtFont.addEventListener("click", (e) => {
+    e.stopPropagation();
+    fmtFontDropdown.classList.toggle("hidden");
+    if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
+  });
+}
+
+// Close dropdowns on click outside
+document.addEventListener("click", () => {
+  if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
+  if (fmtFontDropdown) fmtFontDropdown.classList.add("hidden");
+});
+
+// Prevent dropdown close on clicking inside the dropdown container
+if (fmtColorDropdown) {
+  fmtColorDropdown.addEventListener("click", (e) => e.stopPropagation());
+}
+if (fmtFontDropdown) {
+  fmtFontDropdown.addEventListener("click", (e) => e.stopPropagation());
+}
+
+// Color preset listeners
+document.querySelectorAll(".color-preset").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const color = btn.getAttribute("data-color");
+    insertMarkdown(`<span style="color: ${color}">`, '</span>');
+    if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
+  });
+});
+
+// Custom color picker listener
+if (fmtColorPicker) {
+  fmtColorPicker.addEventListener("change", (e) => {
+    const color = e.target.value;
+    insertMarkdown(`<span style="color: ${color}">`, '</span>');
+    if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
+  });
+}
+
+// Font preset listeners
+document.querySelectorAll(".font-preset").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const font = btn.getAttribute("data-font");
+    insertMarkdown(`<span style="font-family: ${font}">`, '</span>');
+    if (fmtFontDropdown) fmtFontDropdown.classList.add("hidden");
+  });
+});
 
 // Clear Clipboard
 // Clear Clipboard

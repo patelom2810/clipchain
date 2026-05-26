@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help & Support - ClipChain</title>
+  
+  <!-- Google Fonts: Outfit & Dancing Script -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Shortcut Icon -->
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/a/a1/Clipboard_icon.svg" type="image/x-icon">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#e6f1ff',
+              100: '#cce3ff',
+              200: '#99c7ff',
+              300: '#66abff',
+              400: '#338fff',
+              500: '#0073ff',
+              600: '#005ccc',
+              700: '#004599',
+              800: '#002e66',
+              900: '#001733',
+            },
+            secondary: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Styles (imported from style.css layout) -->
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+      opacity: 0;
+    }
+    .faq-item.active .faq-answer {
+      max-height: 250px;
+      opacity: 1;
+    }
+    .faq-item.active .faq-chevron {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+
+<body class="bg-secondary-50 dark:bg-slate-900 text-secondary-900 dark:text-gray-100 font-sans transition-colors duration-300 antialiased overflow-x-hidden">
+  <!-- Navbar -->
+  <nav class="glass-header fixed w-full top-0 z-50 border-b border-white/20 animate-enter">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center space-x-2">
+          <div class="bg-primary-500/10 p-2 rounded-lg">
+            <i data-lucide="clipboard-check" class="h-6 w-6 text-primary-600"></i>
+          </div>
+          <span class="font-bold text-xl tracking-tight text-secondary-900 dark:text-white font-cursive text-gradient-animate">Clip<span class="text-primary-600">Chain</span></span>
+        </a>
+
+        <!-- Right Side Nav -->
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="px-4 py-2 rounded-xl text-sm font-bold text-primary-600 dark:text-primary-400 bg-white/60 dark:bg-slate-800/60 border border-white/40 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-700 hover:shadow transition-all flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Back to Editor</span>
+          </a>
+
+          <!-- Theme Toggle -->
+          <button id="themeToggleBtn" class="p-2 text-secondary-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors rounded-full hover:bg-secondary-100 dark:hover:bg-slate-800" title="Toggle Light/Dark Theme">
+            <i data-lucide="moon" id="themeIcon" class="h-5 w-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-enter delay-200">
+    <!-- Hero Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-primary-600 to-indigo-500 dark:from-primary-400 dark:to-indigo-300 bg-clip-text text-transparent">
+        Help &amp; Support Center
+      </h1>
+      <p class="text-secondary-600 dark:text-gray-400 text-lg max-w-xl mx-auto">
+        Learn how to sync, format, and secure your clipboard clipsets easily.
+      </p>
+
+      <!-- Live Search Bar -->
+      <div class="relative max-w-md mx-auto mt-8">
+        <i data-lucide="search" class="absolute left-3.5 top-3.5 h-5 w-5 text-secondary-400"></i>
+        <input type="text" id="faqSearch" placeholder="Search support topics..." class="w-full pl-11 pr-4 py-3 bg-white/70 dark:bg-slate-800/70 border border-secondary-200 dark:border-slate-700 focus:bg-white focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 rounded-2xl text-sm outline-none transition-all shadow-sm">
+      </div>
+    </div>
+
+    <!-- Quick Features Guide -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+      <div class="glass-panel p-6 rounded-2xl border border-white/50 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-amber-500/10 p-2 rounded-xl text-amber-600 dark:text-amber-400">
+            <i data-lucide="zap" class="h-6 w-6"></i>
+          </div>
+          <h3 class="text-lg font-bold text-secondary-900 dark:text-white">Instant Synchronization</h3>
+        </div>
+        <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+          Type or paste content on one device, and it synchronizes instantly across all connected screens. Access your clips by entering your custom identifier (ID) in the top nav.
+        </p>
+      </div>
+
+      <div class="glass-panel p-6 rounded-2xl border border-white/50 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-primary-500/10 p-2 rounded-xl text-primary-600 dark:text-primary-400">
+            <i data-lucide="edit-3" class="h-6 w-6"></i>
+          </div>
+          <h3 class="text-lg font-bold text-secondary-900 dark:text-white">Rich Markdown Editor</h3>
+        </div>
+        <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+          Format your clips using headings, bold, italic, code-highlighting, lists, and links. Use the newly added toolbar buttons to format tables, custom font families, or text colors.
+        </p>
+      </div>
+
+      <div class="glass-panel p-6 rounded-2xl border border-white/50 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-red-500/10 p-2 rounded-xl text-red-600 dark:text-red-400">
+            <i data-lucide="lock" class="h-6 w-6"></i>
+          </div>
+          <h3 class="text-lg font-bold text-secondary-900 dark:text-white">Passcode Security</h3>
+        </div>
+        <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+          Need privacy? Tap "Set Password" inline next to your clipboard link. Unauthorized users visiting your link must supply the correct passcode to decrypt and edit the clipboard content.
+        </p>
+      </div>
+
+      <div class="glass-panel p-6 rounded-2xl border border-white/50 dark:border-slate-700/50 hover:shadow-lg transition-all duration-300">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-violet-500/10 p-2 rounded-xl text-violet-600 dark:text-violet-400">
+            <i data-lucide="timer" class="h-6 w-6"></i>
+          </div>
+          <h3 class="text-lg font-bold text-secondary-900 dark:text-white">Self-Destruct Timers</h3>
+        </div>
+        <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+          Configure a countdown timer for sensitive assets (10 mins, 1 hour, or 24 hours). Once the countdown completes, the database wipes the clipboard cleanly for safety.
+        </p>
+      </div>
+    </div>
+
+    <!-- FAQ Accordion -->
+    <div class="mb-16">
+      <h2 class="text-2xl font-extrabold text-secondary-900 dark:text-white mb-6 flex items-center gap-2">
+        <i data-lucide="help-circle" class="h-6 w-6 text-primary-500"></i>
+        <span>Frequently Asked Questions</span>
+      </h2>
+
+      <div class="space-y-4" id="faqAccordion">
+        <!-- FAQ 1 -->
+        <div class="faq-item glass-panel border border-white/40 dark:border-slate-700/50 rounded-2xl overflow-hidden shadow-sm transition-all">
+          <button class="faq-trigger w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none select-none">
+            <span class="font-bold text-secondary-800 dark:text-slate-100">How do I share my clipboard with another device?</span>
+            <i data-lucide="chevron-down" class="faq-chevron h-5 w-5 text-secondary-400 dark:text-slate-500 transition-transform"></i>
+          </button>
+          <div class="faq-answer px-6 pb-5">
+            <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+              Simply click the <strong>QR Code</strong> button in the bottom floating toolbar to scan a share code directly, or click <strong>Copy Link</strong> next to your clipboard URL to copy the direct shortlink. Opening that link on any device connects it to your sync pool.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item glass-panel border border-white/40 dark:border-slate-700/50 rounded-2xl overflow-hidden shadow-sm transition-all">
+          <button class="faq-trigger w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none select-none">
+            <span class="font-bold text-secondary-800 dark:text-slate-100">How do I format custom fonts and text colors?</span>
+            <i data-lucide="chevron-down" class="faq-chevron h-5 w-5 text-secondary-400 dark:text-slate-500 transition-transform"></i>
+          </button>
+          <div class="faq-answer px-6 pb-5">
+            <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+              Highlight the text you wish to format, then click either the <strong>palette icon</strong> (Text Color) or <strong>T-icon</strong> (Text Font) in the editor's shortcuts bar. Pick your preset, and it wraps your text in HTML styling syntax (e.g. <code>&lt;span style="color: #ef4444"&gt;text&lt;/span&gt;</code>) which compiles on the Preview pane.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item glass-panel border border-white/40 dark:border-slate-700/50 rounded-2xl overflow-hidden shadow-sm transition-all">
+          <button class="faq-trigger w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none select-none">
+            <span class="font-bold text-secondary-800 dark:text-slate-100">What is Split view in the editor?</span>
+            <i data-lucide="chevron-down" class="faq-chevron h-5 w-5 text-secondary-400 dark:text-slate-500 transition-transform"></i>
+          </button>
+          <div class="faq-answer px-6 pb-5">
+            <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+              Split view splits your editor viewport into two side-by-side columns: the raw Markdown input panel on the left and the real-time compiled preview on the right. You can write content and see styling, tables, code blocks, lists, colors, and fonts render live.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item glass-panel border border-white/40 dark:border-slate-700/50 rounded-2xl overflow-hidden shadow-sm transition-all">
+          <button class="faq-trigger w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none select-none">
+            <span class="font-bold text-secondary-800 dark:text-slate-100">Are my locked clipboards fully encrypted?</span>
+            <i data-lucide="chevron-down" class="faq-chevron h-5 w-5 text-secondary-400 dark:text-slate-500 transition-transform"></i>
+          </button>
+          <div class="faq-answer px-6 pb-5">
+            <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+              When a passcode is assigned, ClipChain restricts viewport rendering. Visitors will only see a lock overlay screen. The actual data is synced dynamically only when the validated passcode is supplied.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 5 -->
+        <div class="faq-item glass-panel border border-white/40 dark:border-slate-700/50 rounded-2xl overflow-hidden shadow-sm transition-all">
+          <button class="faq-trigger w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none select-none">
+            <span class="font-bold text-secondary-800 dark:text-slate-100">How do I export my formatted clipboard?</span>
+            <i data-lucide="chevron-down" class="faq-chevron h-5 w-5 text-secondary-400 dark:text-slate-500 transition-transform"></i>
+          </button>
+          <div class="faq-answer px-6 pb-5">
+            <p class="text-sm text-secondary-600 dark:text-gray-400 leading-relaxed">
+              Simply tap the <strong>Export</strong> button in the bottom floating dock. It triggers a client-side download of a <code>.md</code> text file containing your formatted markdown clipboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact support form -->
+    <div class="glass-panel p-8 rounded-2xl border border-white/50 dark:border-slate-700/50 shadow-md">
+      <h2 class="text-2xl font-extrabold text-secondary-900 dark:text-white mb-2 flex items-center gap-2">
+        <i data-lucide="mail" class="h-6 w-6 text-primary-500"></i>
+        <span>Need More Assistance?</span>
+      </h2>
+      <p class="text-secondary-600 dark:text-gray-400 text-sm mb-6">
+        Submit a support request below and our team will get back to you shortly.
+      </p>
+
+      <form id="supportForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-secondary-500 dark:text-gray-400 uppercase tracking-wider mb-2">Your Name</label>
+            <input type="text" required class="w-full px-4 py-2.5 bg-white/50 dark:bg-slate-900/50 border border-secondary-200 dark:border-slate-700 dark:text-white rounded-xl focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-secondary-500 dark:text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
+            <input type="email" required class="w-full px-4 py-2.5 bg-white/50 dark:bg-slate-900/50 border border-secondary-200 dark:border-slate-700 dark:text-white rounded-xl focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-secondary-500 dark:text-gray-400 uppercase tracking-wider mb-2">Issue / Message</label>
+          <textarea rows="4" required class="w-full px-4 py-2.5 bg-white/50 dark:bg-slate-900/50 border border-secondary-200 dark:border-slate-700 dark:text-white rounded-xl focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all text-sm resize-none" placeholder="Describe your issue in detail..."></textarea>
+        </div>
+
+        <button type="submit" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-md shadow-primary-500/20 hover:shadow-lg">
+          Send Message
+        </button>
+      </form>
+      
+      <div id="formSuccess" class="hidden mt-4 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-medium">
+        Thank you! Your message has been sent successfully. We will respond soon.
+      </div>
+    </div>
+  </main>
+
+  <footer class="max-w-4xl mx-auto px-4 pb-12 border-t border-secondary-200 dark:border-slate-800/80 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-secondary-500">
+    <p class="mb-4 md:mb-0">
+      &copy; 2026 ClipChain. Made with <span class="text-red-500">&hearts;</span> by Om Patel.
+    </p>
+    <div class="flex gap-4">
+      <a href="index.html" class="hover:underline">Home Editor</a>
+      <a href="support.html" class="hover:underline font-bold text-primary-600 dark:text-primary-400">Help &amp; Support</a>
+    </div>
+  </footer>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Theme Management
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themeIcon = document.getElementById("themeIcon");
+
+    function applyTheme(theme) {
+      if (theme === "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+        document.documentElement.classList.add("dark");
+        if (themeIcon) {
+          themeIcon.setAttribute("data-lucide", "sun");
+        }
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+        document.documentElement.classList.remove("dark");
+        if (themeIcon) {
+          themeIcon.setAttribute("data-lucide", "moon");
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // Load saved theme on startup
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener("click", () => {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        const newTheme = isDark ? "light" : "dark";
+        localStorage.setItem("theme", newTheme);
+        applyTheme(newTheme);
+      });
+    }
+
+    // FAQ Accordion Trigger
+    const faqTriggers = document.querySelectorAll(".faq-trigger");
+    faqTriggers.forEach(trigger => {
+      trigger.addEventListener("click", () => {
+        const faqItem = trigger.closest(".faq-item");
+        
+        // Toggle active class on clicked item
+        const isActive = faqItem.classList.contains("active");
+        
+        // Close other items
+        document.querySelectorAll(".faq-item").forEach(item => {
+          item.classList.remove("active");
+        });
+
+        if (!isActive) {
+          faqItem.classList.add("active");
+        }
+      });
+    });
+
+    // FAQ Live Search
+    const faqSearch = document.getElementById("faqSearch");
+    if (faqSearch) {
+      faqSearch.addEventListener("input", (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        const faqItems = document.querySelectorAll(".faq-item");
+
+        faqItems.forEach(item => {
+          const question = item.querySelector(".faq-trigger").textContent.toLowerCase();
+          const answer = item.querySelector(".faq-answer").textContent.toLowerCase();
+          
+          if (question.includes(term) || answer.includes(term)) {
+            item.style.display = "block";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    }
+
+    // Contact Form Action
+    const supportForm = document.getElementById("supportForm");
+    const formSuccess = document.getElementById("formSuccess");
+    if (supportForm) {
+      supportForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        supportForm.classList.add("hidden");
+        if (formSuccess) {
+          formSuccess.classList.remove("hidden");
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

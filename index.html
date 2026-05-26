@@ -110,7 +110,12 @@
             </button>
           </div>
 
-          <div class="h-6 w-px bg-secondary-200 mx-2"></div>
+          <div class="h-6 w-px bg-secondary-200 dark:bg-slate-700 mx-2"></div>
+
+          <a href="support.html" class="px-3 py-1.5 text-sm font-bold text-secondary-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex items-center gap-1.5" title="Help & Support">
+            <i data-lucide="help-circle" class="h-4.5 w-4.5"></i>
+            <span>Help & Support</span>
+          </a>
 
           <div class="flex items-center space-x-2">
             <!-- Premium Theme Toggle -->
@@ -137,6 +142,13 @@
         <!-- Mobile Controls (No Sidebar) -->
         <div class="md:hidden flex items-center gap-3">
 
+
+          <!-- Mobile Help & Support Link -->
+          <a href="support.html"
+            class="p-2 text-secondary-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors rounded-full hover:bg-secondary-100 dark:hover:bg-slate-800"
+            title="Help & Support">
+            <i data-lucide="help-circle" class="h-5 w-5"></i>
+          </a>
 
           <!-- Mobile Theme Toggle -->
           <button id="mobileThemeToggleBtn"
@@ -270,6 +282,61 @@
         <button id="fmtLink" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Insert Link">
           <i data-lucide="link" class="h-4 w-4"></i>
         </button>
+        <div class="h-4 w-px bg-white/20 dark:bg-slate-800/50 mx-1"></div>
+        <button id="fmtTable" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Table">
+          <i data-lucide="table" class="h-4 w-4"></i>
+        </button>
+        
+        <!-- Text Color Dropdown -->
+        <div class="relative inline-block">
+          <button id="fmtColor" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Color">
+            <i data-lucide="palette" class="h-4 w-4"></i>
+          </button>
+          <div id="fmtColorDropdown" class="hidden absolute right-0 mt-1 p-2 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-40">
+            <div class="grid grid-cols-5 gap-1.5">
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ef4444;" data-color="#ef4444" title="Red"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #f97316;" data-color="#f97316" title="Orange"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #eab308;" data-color="#eab308" title="Yellow"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #22c55e;" data-color="#22c55e" title="Green"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #3b82f6;" data-color="#3b82f6" title="Blue"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #6366f1;" data-color="#6366f1" title="Indigo"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #a855f7;" data-color="#a855f7" title="Purple"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ec4899;" data-color="#ec4899" title="Pink"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform bg-black dark:bg-white" data-color="currentColor" title="Default"></button>
+              <div class="relative w-5 h-5 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden cursor-pointer hover:scale-110 transition-transform" title="Custom Color">
+                <i data-lucide="plus" class="w-3.5 h-3.5 absolute text-gray-500 pointer-events-none"></i>
+                <input type="color" id="fmtColorPicker" class="opacity-0 w-full h-full cursor-pointer absolute inset-0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Font Family Dropdown -->
+        <div class="relative inline-block">
+          <button id="fmtFont" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Font">
+            <i data-lucide="type" class="h-4 w-4"></i>
+          </button>
+          <div id="fmtFontDropdown" class="hidden absolute right-0 mt-1 py-1 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-44">
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: inherit;" data-font="inherit">
+              Default Font
+            </button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: sans-serif;" data-font="sans-serif">
+              Sans-Serif
+            </button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: serif;" data-font="serif">
+              Serif
+            </button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: monospace;" data-font="monospace">
+              Monospace
+            </button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Dancing Script', cursive;" data-font="'Dancing Script', cursive">
+              Cursive (Script)
+            </button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Outfit', sans-serif;" data-font="'Outfit', sans-serif">
+              Outfit (Modern)
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Expiry Progress Bar -->
@@ -422,10 +489,10 @@
     <div
       class="fixed bottom-0 left-0 w-full px-4 pb-4 z-50 md:relative md:bottom-auto md:left-auto md:w-full md:px-0 md:pb-0 md:mt-6 pointer-events-none md:pointer-events-auto">
       <div
-        class="glass-panel p-2.5 flex justify-between md:justify-center items-center gap-2 md:gap-3 pointer-events-auto md:rounded-full rounded-2xl shadow-xl border border-white/50">
+        class="glass-panel p-2 flex justify-center items-center gap-3 pointer-events-auto md:rounded-full rounded-2xl shadow-xl border border-white/50 px-4 mx-auto w-fit max-w-full">
 
-        <!-- Self-Destruct Timer (Styled as a circular toaster button) -->
-        <div class="relative flex-shrink-0 toaster-btn group" title="Set Self-Destruct Timer">
+        <!-- Self-Destruct Timer -->
+        <div class="relative flex-shrink-0 toaster-btn btn-timer group" title="Set Self-Destruct Timer">
           <select id="selfDestructTimer"
             class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
             <option value="never" selected>No Timer</option>
@@ -433,16 +500,18 @@
             <option value="1h">1 Hour</option>
             <option value="24h">24 Hours</option>
           </select>
-          <div class="flex items-center justify-center pointer-events-none icon-anim gap-0.5">
+          <div class="flex items-center justify-center pointer-events-none icon-anim">
             <i data-lucide="timer" class="h-4 w-4"></i>
-            <i data-lucide="chevron-down" class="h-3 w-3 text-secondary-400 dark:text-gray-500"></i>
-            <span class="toaster-text">Timer</span>
+            <span class="toaster-text flex items-center gap-0.5">
+              <span class="ml-1.5">Timer</span>
+              <i data-lucide="chevron-down" class="h-3 w-3 opacity-60"></i>
+            </span>
           </div>
         </div>
 
         <!-- Copy All Button -->
         <button id="copyAllBtn"
-          class="toaster-btn toaster-btn-primary flex-shrink-0 group"
+          class="toaster-btn btn-copy flex-shrink-0 group"
           title="Copy All Content">
           <i data-lucide="clipboard-copy" class="icon-anim h-4 w-4"></i>
           <span class="toaster-text">Copy All</span>
@@ -450,7 +519,7 @@
 
         <!-- Export Button -->
         <button id="exportBtn"
-          class="toaster-btn flex-shrink-0 group"
+          class="toaster-btn btn-export flex-shrink-0 group"
           title="Export as File">
           <i data-lucide="download" class="icon-anim h-4 w-4"></i>
           <span class="toaster-text">Export</span>
@@ -458,7 +527,7 @@
 
         <!-- Clear Button -->
         <button id="clearClipboard"
-          class="toaster-btn toaster-btn-danger flex-shrink-0 group hover:!border-red-400 hover:!text-red-500"
+          class="toaster-btn btn-clear flex-shrink-0 group"
           title="Clear Clipboard">
           <i data-lucide="trash" class="icon-anim h-4 w-4"></i>
           <span class="toaster-text">Clear</span>
@@ -466,11 +535,12 @@
 
         <!-- QR Code Button -->
         <button id="showQrBtn"
-          class="toaster-btn flex-shrink-0 group"
+          class="toaster-btn btn-qr flex-shrink-0 group"
           title="Show QR Code">
           <i data-lucide="qr-code" class="icon-anim h-4 w-4"></i>
           <span class="toaster-text">QR Code</span>
         </button>
+      </div>
     </div>
   </main>
 
