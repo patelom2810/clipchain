@@ -122,6 +122,8 @@ let isPasswordModalOpen = false;
 let passwordMode = 'unlock'; // 'unlock' | 'set'
 let currentViewMode = 'edit'; // 'edit' | 'preview' | 'split'
 let lastKnownRemoteText = "";
+let floatingNotes = {};
+let activeNoteId = null;
 
 // Mobile Menu Toggle (Removed as per user request)
 if (mobileMenuBtn && mobileMenu) {
@@ -248,6 +250,7 @@ function initClipboardListener() {
   db.ref(`clipboards/${username}/expiresAt`).off();
   db.ref(`clipboards/${username}/text`).off();
   db.ref(`clipboards/${username}/stickyText`).off();
+  db.ref(`clipboards/${username}/floatingNotes`).off();
 
   let passwordVal = null;
   let expiresAtVal = null;
@@ -281,6 +284,41 @@ function initClipboardListener() {
           }
         }
       }
+      const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+      if (floatingNoteTextArea && !isLocked) {
+        if (floatingNoteTextArea.value !== stickyText) {
+          floatingNoteTextArea.value = stickyText;
+        }
+      }
+    });
+
+    db.ref(`clipboards/${username}/floatingNotes`).on("value", snapshot => {
+      const remoteNotes = snapshot.val() || {};
+      floatingNotes = remoteNotes;
+      
+      // Sync active note state
+      if (activeNoteId && !floatingNotes[activeNoteId]) {
+        // If active note was deleted, switch to first remaining or close panel
+        activeNoteId = Object.keys(floatingNotes)[0] || null;
+        if (activeNoteId) {
+          loadActiveNoteData();
+        } else {
+          closeFloatingNotePanelDirectly();
+        }
+      } else if (activeNoteId) {
+        const curNote = floatingNotes[activeNoteId];
+        const titleInput = document.getElementById("floatingNoteTitle");
+        const textArea = document.getElementById("floatingNoteTextArea");
+        if (titleInput && titleInput.value !== (curNote.title || "")) {
+          titleInput.value = curNote.title || "";
+        }
+        if (textArea && textArea.value !== (curNote.content || "")) {
+          textArea.value = curNote.content || "";
+        }
+        updateNotePanelColorClass(curNote.color || "babyyellow");
+      }
+      
+      renderPinnedNotes();
     });
   }
 
@@ -296,6 +334,8 @@ function initClipboardListener() {
         clipboardTextArea.value = "";
         const stickyTextArea = document.getElementById("stickyTextArea");
         if (stickyTextArea) stickyTextArea.value = "";
+        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+        if (floatingNoteTextArea) floatingNoteTextArea.value = "";
         updateCharCount();
         updateHighlight();
         if (currentViewMode !== 'edit') renderMarkdownPreview();
@@ -325,6 +365,10 @@ function initClipboardListener() {
             updateCharCount();
           }
         }
+        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+        if (floatingNoteTextArea && floatingNoteTextArea.value !== stickyText) {
+          floatingNoteTextArea.value = stickyText;
+        }
       });
     }
   });
@@ -338,6 +382,8 @@ function initClipboardListener() {
         clipboardTextArea.value = "";
         const stickyTextArea = document.getElementById("stickyTextArea");
         if (stickyTextArea) stickyTextArea.value = "";
+        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+        if (floatingNoteTextArea) floatingNoteTextArea.value = "";
         if (currentViewMode !== 'edit') renderMarkdownPreview();
         stopCountdown();
         showNotification("This clip has self-destructed.", "error");
@@ -528,6 +574,8 @@ passwordForm.addEventListener("submit", (e) => {
         clipboardTextArea.value = text;
         const stickyTextArea = document.getElementById("stickyTextArea");
         if (stickyTextArea) stickyTextArea.value = stickyText;
+        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+        if (floatingNoteTextArea) floatingNoteTextArea.value = stickyText;
         updateCharCount();
         updateHighlight();
         if (currentViewMode !== 'edit') renderMarkdownPreview();
@@ -1084,6 +1132,8 @@ if (confirmClearBtn) {
     if (currentViewMode === 'sticky') {
       const stickyTextArea = document.getElementById("stickyTextArea");
       if (stickyTextArea) stickyTextArea.value = "";
+      const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+      if (floatingNoteTextArea) floatingNoteTextArea.value = "";
       clipboardRef.update({ stickyText: "" });
       showNotification("Sticky note cleared", "success");
     } else {
@@ -1675,40 +1725,150 @@ function updateCharCount() {
   }
 }
 
-function showNotification(message, type = 'info') {
-  // Create notification element
+function showNotification(message, type = 'info', title = null) {
+  // Context-aware smart titles
+  if (!title) {
+    const msgLower = message.toLowerCase();
+    if (type === 'success') {
+      if (msgLower.includes('joined') || msgLower.includes('room')) {
+        title = 'Room Connected';
+      } else if (msgLower.includes('copy') || msgLower.includes('copied')) {
+        title = 'Copied to Clipboard';
+      } else if (msgLower.includes('export')) {
+        title = 'Export Successful';
+      } else if (msgLower.includes('note') || msgLower.includes('sticky')) {
+        title = 'Note Configured';
+      } else if (msgLower.includes('password') || msgLower.includes('protect')) {
+        title = 'Security Updated';
+      } else {
+        title = 'Action Completed';
+      }
+    } else if (type === 'error') {
+      if (msgLower.includes('password') || msgLower.includes('lock')) {
+        title = 'Access Denied';
+      } else if (msgLower.includes('fail') || msgLower.includes('error')) {
+        title = 'System Alert';
+      } else {
+        title = 'Alert';
+      }
+    } else if (type === 'warning') {
+      title = 'Warning';
+    } else {
+      if (msgLower.includes('timer') || msgLower.includes('destruct')) {
+        title = 'Destruct Timer';
+      } else if (msgLower.includes('history')) {
+        title = 'Clipboard History';
+      } else {
+        title = 'Notice';
+      }
+    }
+  }
+
+  // Bug 2 fix: Stack notifications above existing ones
+  const existingNotifications = document.querySelectorAll('.notification');
+  const stackOffset = existingNotifications.length * 88; // ~88px per card height + gap
+
+  // Create notification container
   const notification = document.createElement('div');
-  notification.className = `notification cursor-pointer ${type === 'success' ? 'bg-primary-600' :
-    type === 'error' ? 'bg-red-600' :
-      'bg-secondary-700'
-    }`;
+  notification.className = 'notification hide';
+  notification.style.bottom = `${24 + stackOffset}px`;
 
-  notification.innerHTML = message;
+  // Bug 3 fix: map warning to an accent class, fallback info
+  const accentClass = (type === 'success' || type === 'error' || type === 'info' || type === 'warning') ? type : 'info';
+  
+  // Embed specific status SVGs matching the designs
+  let iconSvg = '';
+  if (type === 'success') {
+    iconSvg = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.25));">
+        <circle cx="12" cy="12" r="10" fill="#10b981" stroke="#10b981"></circle>
+        <polyline points="16 9 11 14 8 11" stroke="#ffffff" stroke-width="2.5"></polyline>
+      </svg>
+    `;
+  } else if (type === 'error') {
+    iconSvg = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.25));">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="#ef4444" stroke="#ef4444"></path>
+        <line x1="12" y1="9" x2="12" y2="13" stroke="#ffffff" stroke-width="2.5"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17" stroke="#ffffff" stroke-width="3"></line>
+      </svg>
+    `;
+  } else if (type === 'warning') {
+    iconSvg = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.25));">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="#f59e0b" stroke="#f59e0b"></path>
+        <line x1="12" y1="9" x2="12" y2="13" stroke="#ffffff" stroke-width="2.5"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17" stroke="#ffffff" stroke-width="3"></line>
+      </svg>
+    `;
+  } else {
+    // Info / Notice
+    iconSvg = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.25));">
+        <circle cx="12" cy="12" r="10" fill="#6366f1" stroke="#6366f1"></circle>
+        <line x1="12" y1="16" x2="12" y2="12" stroke="#ffffff" stroke-width="2.5"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8" stroke="#ffffff" stroke-width="3"></line>
+      </svg>
+    `;
+  }
 
-  // Click to dismiss
-  notification.onclick = () => {
+  notification.innerHTML = `
+    <div class="notification-accent-bg ${accentClass}"></div>
+    <div class="notification-grid"></div>
+    <div class="notification-icon-badge">
+      ${iconSvg}
+    </div>
+    <div class="notification-content">
+      <div class="notification-title">${title}</div>
+      <div class="notification-desc">${message}</div>
+    </div>
+    <button class="notification-close" aria-label="Close notification">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  `;
+
+  // Dismiss animation handler
+  let isDismissed = false;
+  const dismiss = () => {
+    if (isDismissed) return;
+    isDismissed = true;
     notification.classList.add('hide');
     setTimeout(() => {
       if (document.body.contains(notification)) {
         document.body.removeChild(notification);
       }
-    }, 300);
+    }, 450);
+  };
+
+  // Close button click listener
+  const closeBtn = notification.querySelector('.notification-close');
+  if (closeBtn) {
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      dismiss();
+    };
+  }
+
+  // Click card to dismiss
+  notification.onclick = () => {
+    dismiss();
   };
 
   document.body.appendChild(notification);
 
-  // Animate and remove
+  // Trigger visual transition from hide
   setTimeout(() => {
-    // Only remove if still attached (wasn't clicked)
-    if (document.body.contains(notification) && !notification.classList.contains('hide')) {
-      notification.classList.add('hide');
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      }, 300);
+    notification.classList.remove('hide');
+  }, 20);
+
+  // Auto dismiss after duration
+  setTimeout(() => {
+    if (document.body.contains(notification) && !isDismissed) {
+      dismiss();
     }
-  }, 3000);
+  }, 4000);
 }
 
 // Initialize character count
@@ -1895,3 +2055,813 @@ if (stickyColorBtns.length > 0 && stickyNoteCard && stickyNoteTextarea) {
     activeBtn.click();
   }
 }
+
+// ==========================================
+// FLOATING STICKY NOTE SYSTEM LOGIC
+// ==========================================
+
+// Global functions for floating sticky note system (hoisted and globally accessible)
+function loadActiveNoteData() {
+  if (!activeNoteId || !floatingNotes[activeNoteId]) return;
+  const curNote = floatingNotes[activeNoteId];
+  
+  const titleInput = document.getElementById("floatingNoteTitle");
+  const textArea = document.getElementById("floatingNoteTextArea");
+  
+  if (titleInput) titleInput.value = curNote.title || "";
+  if (textArea) textArea.value = curNote.content || "";
+  
+  updateNotePanelColorClass(curNote.color || "babyyellow");
+  updateFloatingNoteCharCount();
+}
+
+function closeFloatingNotePanelDirectly() {
+  const panel = document.getElementById("floatingStickyNote");
+  if (panel) panel.classList.add("closed");
+  const overlay = document.getElementById("floatingNoteOverlay");
+  if (overlay) {
+    overlay.classList.add("opacity-0");
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+    }, 350);
+  }
+}
+
+function updateNotePanelColorClass(color) {
+  const panel = document.getElementById("floatingStickyNote");
+  if (!panel) return;
+  
+  panel.classList.remove(
+    "note-theme-yellow", "note-theme-blue", "note-theme-green", "note-theme-pink", "note-theme-purple",
+    "note-theme-babyblue", "note-theme-babyred", "note-theme-babypink", "note-theme-babypurple", "note-theme-babygreen", "note-theme-babyyellow"
+  );
+  panel.classList.add(`note-theme-${color}`);
+}
+
+function renderPinnedNotes() {
+  const container = document.getElementById("pinnedNotesContainer");
+  const panel = document.getElementById("floatingStickyNote");
+  if (!container || !panel) return;
+  
+  container.innerHTML = "";
+  
+  const isPanelOpen = !panel.classList.contains("closed");
+  
+  Object.values(floatingNotes).forEach(note => {
+    // If the panel is open, do not show the active note as a pinned badge
+    if (isPanelOpen && note.id === activeNoteId) return;
+    
+    const tab = document.createElement("div");
+    tab.className = `pinned-mini-note pointer-events-auto flex items-center justify-center w-12 h-14 rounded-l-2xl border border-r-0 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] cursor-pointer note-theme-${note.color || "babyyellow"}`;
+    tab.dataset.noteId = note.id;
+    tab.title = note.title || "Untitled Note";
+    
+    // Custom content inside side tab (first letter of heading or a note icon)
+    const firstLetter = note.title ? note.title.trim().charAt(0) : "";
+    if (firstLetter) {
+      tab.innerHTML = `<span class="text-sm font-bold uppercase select-none text-current">${firstLetter}</span>`;
+    } else {
+      tab.innerHTML = `<i data-lucide="sticky-note" class="h-4.5 w-4.5 text-current"></i>`;
+    }
+    
+    tab.addEventListener("click", () => {
+      activeNoteId = note.id;
+      loadActiveNoteData();
+      openFloatingNotePanel();
+    });
+    
+    container.appendChild(tab);
+  });
+  
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+function updateFloatingNoteCharCount() {
+  const textArea = document.getElementById("floatingNoteTextArea");
+  const charCountSpan = document.getElementById("floatingNoteCharCount");
+  if (textArea && charCountSpan) {
+    const count = textArea.value.length;
+    charCountSpan.textContent = `${count} character${count !== 1 ? 's' : ''}`;
+  }
+}
+
+// Open the floating note editor panel
+function openFloatingNotePanel() {
+  if (isLocked) {
+    showNotification("Clipboard is locked. Please unlock first.", "error");
+    return;
+  }
+  
+  const floatingStickyNote = document.getElementById("floatingStickyNote");
+  const floatingNoteOverlay = document.getElementById("floatingNoteOverlay");
+  
+  if (!floatingStickyNote || !floatingNoteOverlay) return;
+  
+  // Slide note open
+  floatingStickyNote.classList.remove("closed", "pinning");
+  
+  // Show overlay
+  floatingNoteOverlay.classList.remove("hidden");
+  setTimeout(() => {
+    floatingNoteOverlay.classList.remove("opacity-0");
+    floatingNoteOverlay.style.opacity = "1";
+  }, 10);
+  
+  // Refresh side docked tabs (hiding the current active note tab)
+  renderPinnedNotes();
+  
+  const textArea = document.getElementById("floatingNoteTextArea");
+  if (textArea) {
+    setTimeout(() => textArea.focus(), 100);
+  }
+}
+
+// Done Button click (Pin the current note)
+function pinActiveNote() {
+  if (isLocked) {
+    showNotification("Clipboard is locked. Please unlock first.", "error");
+    return;
+  }
+  
+  const floatingStickyNote = document.getElementById("floatingStickyNote");
+  const floatingNoteOverlay = document.getElementById("floatingNoteOverlay");
+  if (!floatingStickyNote || !floatingNoteOverlay) return;
+  
+  // Trigger fly-away / pinning collapse animation
+  floatingStickyNote.classList.add("pinning");
+  
+  // Fade out backdrop blur overlay
+  floatingNoteOverlay.classList.add("opacity-0");
+  floatingNoteOverlay.style.opacity = "0";
+  
+  // Update state database
+  if (activeNoteId) {
+    const titleInput = document.getElementById("floatingNoteTitle");
+    const textArea = document.getElementById("floatingNoteTextArea");
+    db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
+      title: titleInput ? titleInput.value.trim() : "",
+      content: textArea ? textArea.value : ""
+    });
+  }
+  
+  setTimeout(() => {
+    floatingStickyNote.classList.add("closed");
+    floatingStickyNote.classList.remove("pinning");
+    floatingNoteOverlay.classList.add("hidden");
+    
+    // Re-render sidebar to show all notes as tabs (including this one)
+    renderPinnedNotes();
+  }, 450);
+  
+  showNotification("Note pinned to side edge", "success");
+}
+
+// Controller Initialization
+document.addEventListener("DOMContentLoaded", () => {
+  const dockStickyBtn = document.getElementById("dockStickyBtn");
+  const dockAddStickyBtn = document.getElementById("dockAddStickyBtn");
+  const closeFloatingNoteBtn = document.getElementById("closeFloatingNoteBtn");
+  const doneFloatingNoteBtn = document.getElementById("doneFloatingNoteBtn");
+  const deleteFloatingNoteBtn = document.getElementById("deleteFloatingNoteBtn");
+  const floatingNoteTitle = document.getElementById("floatingNoteTitle");
+  const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+  const colorPresetsDiv = document.getElementById("noteColorPresets");
+  const floatingNoteOverlay = document.getElementById("floatingNoteOverlay");
+
+  if (!dockStickyBtn) return;
+
+  // Toggle notes manager from dock
+  dockStickyBtn.addEventListener("click", () => {
+    if (isLocked) {
+      showNotification("Clipboard is locked. Please unlock first.", "error");
+      return;
+    }
+    
+    // If no notes exist, spin a default one up
+    const noteIds = Object.keys(floatingNotes);
+    if (noteIds.length === 0) {
+      const newId = "note_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+      const defaultNote = {
+        id: newId,
+        title: "Ideas",
+        content: "",
+        color: "babyyellow"
+      };
+      activeNoteId = newId;
+      db.ref(`clipboards/${username}/floatingNotes/${newId}`).set(defaultNote).then(() => {
+        loadActiveNoteData();
+        openFloatingNotePanel();
+      });
+    } else {
+      // Open the first note, or current active one
+      if (!activeNoteId || !floatingNotes[activeNoteId]) {
+        activeNoteId = noteIds[0];
+      }
+      loadActiveNoteData();
+      openFloatingNotePanel();
+    }
+  });
+
+  // "+ Add Sticky Note" click handler directly on the dock button
+  if (dockAddStickyBtn) {
+    dockAddStickyBtn.addEventListener("click", () => {
+      if (isLocked) {
+        showNotification("Clipboard is locked. Please unlock first.", "error");
+        return;
+      }
+      
+      // Save changes of the currently open note if the panel is open
+      const panel = document.getElementById("floatingStickyNote");
+      const isPanelOpen = panel && !panel.classList.contains("closed");
+      if (isPanelOpen && activeNoteId) {
+        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
+          title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
+          content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
+        });
+      }
+
+      // Create new note
+      const newId = "note_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+      const newNote = {
+        id: newId,
+        title: "Heading " + (Object.keys(floatingNotes).length + 1),
+        content: "",
+        color: "babyblue"
+      };
+      
+      activeNoteId = newId;
+      db.ref(`clipboards/${username}/floatingNotes/${newId}`).set(newNote).then(() => {
+        loadActiveNoteData();
+        openFloatingNotePanel();
+        showNotification("New sticky note created", "success");
+      });
+    });
+  }
+
+  // Close floating notes panel
+  if (closeFloatingNoteBtn) {
+    closeFloatingNoteBtn.addEventListener("click", () => {
+      // Save changes before closing
+      if (activeNoteId) {
+        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
+          title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
+          content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
+        });
+      }
+      closeFloatingNotePanelDirectly();
+    });
+  }
+
+  // Done button pins the note
+  if (doneFloatingNoteBtn) {
+    doneFloatingNoteBtn.addEventListener("click", pinActiveNote);
+  }
+
+  // Overlay click closes panel and saves note
+  if (floatingNoteOverlay) {
+    floatingNoteOverlay.addEventListener("click", () => {
+      if (activeNoteId) {
+        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
+          title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
+          content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
+        });
+      }
+      closeFloatingNotePanelDirectly();
+    });
+  }
+
+  // "Delete Note" click
+  if (deleteFloatingNoteBtn) {
+    deleteFloatingNoteBtn.addEventListener("click", () => {
+      if (!activeNoteId) return;
+      if (isLocked) {
+        showNotification("Clipboard is locked. Please unlock first.", "error");
+        return;
+      }
+      
+      const targetId = activeNoteId;
+      db.ref(`clipboards/${username}/floatingNotes/${targetId}`).set(null).then(() => {
+        showNotification("Sticky note deleted", "info");
+      });
+    });
+  }
+
+  // Sync inputs locally in realtime to Firebase
+  let syncNoteDebounce;
+  const syncLocalNoteInputs = () => {
+    if (!activeNoteId || isLocked) return;
+    clearTimeout(syncNoteDebounce);
+    syncNoteDebounce = setTimeout(() => {
+      db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
+        title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
+        content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
+      });
+    }, 400); // 400ms debounce
+    updateFloatingNoteCharCount();
+  };
+
+  if (floatingNoteTitle) {
+    floatingNoteTitle.addEventListener("input", syncLocalNoteInputs);
+  }
+  if (floatingNoteTextArea) {
+    floatingNoteTextArea.addEventListener("input", syncLocalNoteInputs);
+  }
+
+  // Color presets click listener
+  if (colorPresetsDiv) {
+    colorPresetsDiv.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn || !activeNoteId || isLocked) return;
+      
+      const newColor = btn.getAttribute("data-color");
+      if (newColor) {
+        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
+          color: newColor
+        });
+      }
+    });
+  }
+});
+
+// ==========================================================================
+// FLOATING COMMAND PALETTE SYSTEM (Notion & Linear Inspired Glassmorphism)
+// ==========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const backdrop = document.getElementById("commandPaletteBackdrop");
+  const card = document.getElementById("commandPaletteCard");
+  const paletteSearchInput = document.getElementById("paletteSearchInput");
+  const commandsList = document.getElementById("paletteCommandsList");
+  const navBtn = document.getElementById("navCommandPaletteBtn");
+  const mobileNavBtn = document.getElementById("mobileNavCommandPaletteBtn");
+  
+  const calcView = document.getElementById("paletteCalculatorView");
+  const calendarView = document.getElementById("paletteCalendarView");
+  
+  if (!card) return;
+
+  let activeView = 'main'; // 'main' | 'calculator' | 'calendar'
+  let selectedItem = null;
+  
+  // Toggle palette visibility
+  const openCommandPalette = () => {
+    backdrop.classList.add("open");
+    card.classList.add("open");
+    switchView('main');
+    paletteSearchInput.value = "";
+    filterCommands();
+    setTimeout(() => {
+      paletteSearchInput.focus();
+    }, 50);
+  };
+
+  const closeCommandPalette = () => {
+    backdrop.classList.remove("open");
+    card.classList.remove("open");
+    paletteSearchInput.blur();
+  };
+
+  const toggleCommandPalette = () => {
+    if (card.classList.contains("open")) {
+      closeCommandPalette();
+    } else {
+      openCommandPalette();
+    }
+  };
+
+  // Switch Sub-View (Widgets or Commands List)
+  const switchView = (view) => {
+    activeView = view;
+    
+    // Reset displays
+    commandsList.style.display = "block";
+    calcView.classList.remove("open");
+    calendarView.classList.remove("open");
+    
+    const header = card.querySelector(".palette-header");
+    if (header) header.style.display = "flex";
+    
+    if (view === 'calculator') {
+      commandsList.style.display = "none";
+      calcView.classList.add("open");
+      if (header) header.style.display = "none";
+      resetCalculator();
+    } else if (view === 'calendar') {
+      commandsList.style.display = "none";
+      calendarView.classList.add("open");
+      if (header) header.style.display = "none";
+      initCalendar();
+    } else {
+      // Main View
+      paletteSearchInput.value = "";
+      filterCommands();
+      setTimeout(() => {
+        paletteSearchInput.focus();
+      }, 50);
+    }
+  };
+
+  // Keyboard and Button triggers for open/close
+  if (navBtn) navBtn.addEventListener("click", openCommandPalette);
+  if (mobileNavBtn) mobileNavBtn.addEventListener("click", openCommandPalette);
+  if (backdrop) backdrop.addEventListener("click", closeCommandPalette);
+
+  // Global Keydown Listener for Cmd+K / Ctrl+K & Hotkeys
+  document.addEventListener("keydown", (e) => {
+    const isMeta = e.metaKey || e.ctrlKey;
+    const key = e.key.toLowerCase();
+    
+    // Toggle command palette: Cmd/Ctrl + K
+    if (isMeta && key === 'k') {
+      e.preventDefault();
+      toggleCommandPalette();
+      return;
+    }
+    
+    // Global action shortcuts, only if user is not actively typing in an input/textarea
+    const activeEl = document.activeElement;
+    const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+    
+    if (isMeta && !isTyping) {
+      if (key === 'n') {
+        e.preventDefault();
+        executeAction('create-note');
+      } else if (key === 'g') {
+        e.preventDefault();
+        executeAction('switch-room');
+      } else if (key === 'e') {
+        e.preventDefault();
+        executeAction('export');
+      } else if (key === 'f') {
+        e.preventDefault();
+        executeAction('search');
+      } else if (key === 'd') {
+        e.preventDefault();
+        executeAction('theme');
+      } else if (key === 'l') {
+        e.preventDefault();
+        executeAction('lock');
+      }
+    }
+  });
+
+  // Filter commands on search input (Fuzzy Match / Substring Match)
+  const filterCommands = () => {
+    const query = paletteSearchInput.value.toLowerCase().trim();
+    const categories = card.querySelectorAll(".palette-category");
+    let firstVisibleItem = null;
+    
+    categories.forEach(category => {
+      const items = category.querySelectorAll(".command-item");
+      let hasVisible = false;
+      items.forEach(item => {
+        const name = item.querySelector(".command-item-name").textContent.toLowerCase();
+        const desc = item.querySelector(".command-item-desc").textContent.toLowerCase();
+        if (name.includes(query) || desc.includes(query)) {
+          item.style.display = "flex";
+          hasVisible = true;
+          if (!firstVisibleItem) {
+            firstVisibleItem = item;
+          }
+        } else {
+          item.style.display = "none";
+        }
+      });
+      
+      if (hasVisible) {
+        category.style.display = "block";
+      } else {
+        category.style.display = "none";
+      }
+    });
+    
+    updateSelection(firstVisibleItem);
+  };
+
+  paletteSearchInput.addEventListener("input", filterCommands);
+
+  // Keyboard navigation & inputs inside the Command Palette
+  card.addEventListener("keydown", (e) => {
+    if (!card.classList.contains("open")) return;
+    
+    const key = e.key;
+    
+    if (activeView === 'main') {
+      if (key === "ArrowDown") {
+        e.preventDefault();
+        navigateCommands("down");
+      } else if (key === "ArrowUp") {
+        e.preventDefault();
+        navigateCommands("up");
+      } else if (key === "Enter") {
+        e.preventDefault();
+        if (selectedItem) {
+          selectedItem.click();
+        }
+      } else if (key === "Escape") {
+        e.preventDefault();
+        closeCommandPalette();
+      }
+    } else if (activeView === 'calculator') {
+      if (key === "Escape") {
+        e.preventDefault();
+        switchView('main');
+      } else if (key === "Enter") {
+        e.preventDefault();
+        evaluateCalculator();
+      } else if (key === "Backspace") {
+        e.preventDefault();
+        handleCalculatorInput("back");
+      } else if (/^[0-9+\-*/.c=]$/i.test(key)) {
+        e.preventDefault();
+        let val = key;
+        if (val.toLowerCase() === 'c') val = 'C';
+        handleCalculatorInput(val);
+      }
+    } else if (activeView === 'calendar') {
+      if (key === "Escape") {
+        e.preventDefault();
+        switchView('main');
+      } else if (key === "ArrowLeft") {
+        e.preventDefault();
+        changeCalendarMonth(-1);
+      } else if (key === "ArrowRight") {
+        e.preventDefault();
+        changeCalendarMonth(1);
+      }
+    }
+  });
+
+  // Update selection highlight
+  const updateSelection = (item) => {
+    if (selectedItem) {
+      selectedItem.classList.remove("selected");
+    }
+    selectedItem = item;
+    if (selectedItem) {
+      selectedItem.classList.add("selected");
+      selectedItem.scrollIntoView({ block: "nearest" });
+    }
+  };
+
+  const navigateCommands = (direction) => {
+    const items = Array.from(card.querySelectorAll(".command-item"))
+                       .filter(item => item.style.display !== "none");
+    if (items.length === 0) return;
+    
+    let index = items.indexOf(selectedItem);
+    if (direction === "down") {
+      index = (index + 1) % items.length;
+    } else if (direction === "up") {
+      index = (index - 1 + items.length) % items.length;
+    }
+    updateSelection(items[index]);
+  };
+
+  // Command Item Click events
+  card.querySelectorAll(".command-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const action = item.getAttribute("data-action");
+      executeAction(action);
+    });
+  });
+
+  // Execute Action Router
+  const executeAction = (action) => {
+    // Close command palette before running standard actions to prevent overlays/modals overlapping
+    if (action !== 'widget-calculator' && action !== 'widget-calendar') {
+      closeCommandPalette();
+    }
+
+    // Bug 1 fix: wrap each case that declares variables in its own block scope
+    switch (action) {
+      case 'create-note': {
+        const dockAddStickyBtn = document.getElementById("dockAddStickyBtn");
+        if (dockAddStickyBtn) {
+          dockAddStickyBtn.click();
+        } else {
+          showNotification("Could not create sticky note", "error");
+        }
+        break;
+      }
+      case 'switch-room': {
+        setTimeout(() => {
+          const newRoom = prompt("Enter room ID to join or create:", username);
+          if (newRoom && newRoom.trim() && newRoom.trim() !== username) {
+            if (usernameInput && setUsernameBtn) {
+              usernameInput.value = newRoom.trim();
+              setUsernameBtn.click();
+            }
+          }
+        }, 150);
+        break;
+      }
+      case 'export': {
+        const exportBtn = document.getElementById("exportBtn");
+        if (exportBtn) {
+          exportBtn.click();
+        } else {
+          showNotification("Export failed", "error");
+        }
+        break;
+      }
+      case 'search': {
+        if (searchInput) {
+          setTimeout(() => {
+            searchInput.focus();
+            searchInput.select();
+          }, 150);
+        }
+        break;
+      }
+      case 'theme': {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        setTheme(!isDark);
+        showNotification(`Theme switched to ${!isDark ? 'Dark' : 'Light'}`, "success");
+        break;
+      }
+      case 'lock': {
+        const lockToggleBtn = document.getElementById("lockToggleBtn");
+        if (lockToggleBtn) {
+          lockToggleBtn.click();
+        }
+        break;
+      }
+      case 'widget-calculator':
+        switchView('calculator');
+        break;
+      case 'widget-calendar':
+        switchView('calendar');
+        break;
+      default:
+        console.warn("Unknown palette action:", action);
+    }
+  };
+
+  // --- Calculator Logic ---
+  let calcExpression = "";
+  
+  const resetCalculator = () => {
+    calcExpression = "";
+    document.getElementById("calcExpr").textContent = "";
+    document.getElementById("calcResult").textContent = "0";
+  };
+
+  const handleCalculatorInput = (val) => {
+    const exprEl = document.getElementById("calcExpr");
+    const resEl = document.getElementById("calcResult");
+    
+    if (val === "C") {
+      resetCalculator();
+    } else if (val === "back") {
+      calcExpression = calcExpression.slice(0, -1);
+      exprEl.textContent = calcExpression;
+      updateCalcLivePreview();
+    } else if (val === "=") {
+      evaluateCalculator();
+    } else {
+      if (/^[0-9+\-*/.]$/.test(val)) {
+        calcExpression += val;
+        exprEl.textContent = calcExpression;
+        updateCalcLivePreview();
+      }
+    }
+  };
+
+  const updateCalcLivePreview = () => {
+    const resEl = document.getElementById("calcResult");
+    if (!calcExpression) {
+      resEl.textContent = "0";
+      return;
+    }
+    try {
+      const sanitized = calcExpression.replace(/[^0-9+\-*/.]/g, "");
+      if (sanitized) {
+        const res = Function(`"use strict"; return (${sanitized})`)();
+        if (res !== undefined && !isNaN(res) && isFinite(res)) {
+          resEl.textContent = res;
+        }
+      }
+    } catch (err) {}
+  };
+
+  const evaluateCalculator = () => {
+    const resEl = document.getElementById("calcResult");
+    const exprEl = document.getElementById("calcExpr");
+    if (!calcExpression) return;
+    
+    try {
+      const sanitized = calcExpression.replace(/[^0-9+\-*/.]/g, "");
+      const res = Function(`"use strict"; return (${sanitized})`)();
+      if (res !== undefined && !isNaN(res) && isFinite(res)) {
+        resEl.textContent = res;
+        calcExpression = res.toString();
+        exprEl.textContent = "";
+      } else {
+        resEl.textContent = "Error";
+      }
+    } catch (err) {
+      resEl.textContent = "Error";
+    }
+  };
+
+  // Calculator mouse click binds
+  const calcViewEl = document.getElementById("paletteCalculatorView");
+  if (calcViewEl) {
+    calcViewEl.querySelectorAll(".calc-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const val = btn.getAttribute("data-val");
+        handleCalculatorInput(val);
+      });
+    });
+  }
+  
+  const calcBackBtn = document.getElementById("calcBackBtn");
+  if (calcBackBtn) calcBackBtn.addEventListener("click", () => switchView('main'));
+
+  // --- Calendar Logic ---
+  let calendarDate = new Date();
+  
+  const initCalendar = () => {
+    calendarDate = new Date(); // Reset to current month
+    renderCalendar();
+  };
+
+  const renderCalendar = () => {
+    const monthYearEl = document.getElementById("calendarMonthYear");
+    const gridEl = document.getElementById("calendarGrid");
+    if (!monthYearEl || !gridEl) return;
+    
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    monthYearEl.textContent = `${monthNames[month]} ${year}`;
+    
+    gridEl.innerHTML = "";
+    
+    const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    dayNames.forEach(day => {
+      const headerEl = document.createElement("div");
+      headerEl.className = "calendar-day-header";
+      headerEl.textContent = day;
+      gridEl.appendChild(headerEl);
+    });
+    
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const prevMonthTotalDays = new Date(year, month, 0).getDate();
+    
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      const cell = document.createElement("div");
+      cell.className = "calendar-day-cell other-month";
+      cell.textContent = prevMonthTotalDays - i;
+      gridEl.appendChild(cell);
+    }
+    
+    const today = new Date();
+    for (let d = 1; d <= totalDays; d++) {
+      const cell = document.createElement("div");
+      cell.className = "calendar-day-cell";
+      cell.textContent = d;
+      
+      if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+        cell.classList.add("today");
+      }
+      
+      gridEl.appendChild(cell);
+    }
+    
+    // Bug 5 fix: use Math.max to ensure remainingCells is never negative
+    const totalCellsSoFar = firstDayIndex + totalDays;
+    const totalRows = Math.ceil(totalCellsSoFar / 7);
+    const totalCells = totalRows * 7;
+    const remainingCells = Math.max(0, totalCells - totalCellsSoFar);
+    for (let n = 1; n <= remainingCells; n++) {
+      const cell = document.createElement("div");
+      cell.className = "calendar-day-cell other-month";
+      cell.textContent = n;
+      gridEl.appendChild(cell);
+    }
+  };
+
+  const changeCalendarMonth = (offset) => {
+    calendarDate.setMonth(calendarDate.getMonth() + offset);
+    renderCalendar();
+  };
+
+  const prevMonthBtn = document.getElementById("calendarPrevMonthBtn");
+  const nextMonthBtn = document.getElementById("calendarNextMonthBtn");
+  const calendarBackBtn = document.getElementById("calendarBackBtn");
+  
+  if (prevMonthBtn) prevMonthBtn.addEventListener("click", () => changeCalendarMonth(-1));
+  if (nextMonthBtn) nextMonthBtn.addEventListener("click", () => changeCalendarMonth(1));
+  if (calendarBackBtn) calendarBackBtn.addEventListener("click", () => switchView('main'));
+});
+
+
