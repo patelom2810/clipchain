@@ -1219,93 +1219,96 @@ mark {
   color: #34d399;
 }
 
-/* Hover & Active Expanded States */
-.toaster-btn:hover {
-  width: 135px; /* Expanded size */
-  padding: 0 16px;
-  background: #ffffff !important;
-  transform: translateY(-2px);
+/* Hover & Active Expanded States (Only on devices that support hover, e.g. Desktop) */
+@media (hover: hover) {
+  .toaster-btn:hover {
+    width: 135px; /* Expanded size */
+    padding: 0 16px;
+    background: #ffffff !important;
+    transform: translateY(-2px);
+  }
+
+  [data-theme="dark"] .toaster-btn:hover {
+    background: #1e293b !important;
+  }
+
+  .toaster-btn:hover .toaster-text {
+    max-width: 100px;
+    opacity: 1;
+    margin-left: 8px; /* Space between icon and text */
+  }
+
+  .toaster-btn:hover .icon-anim {
+    transform: scale(1.1);
+  }
+
+  /* Color-specific Hover Shadows & Accent Texts */
+  .toaster-btn.btn-timer:hover {
+    border-color: #f59e0b !important;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25) !important;
+  }
+  .toaster-btn.btn-timer:hover .icon-anim,
+  .toaster-btn.btn-timer:hover .toaster-text {
+    color: #d97706 !important;
+  }
+  [data-theme="dark"] .toaster-btn.btn-timer:hover .icon-anim,
+  [data-theme="dark"] .toaster-btn.btn-timer:hover .toaster-text {
+    color: #fbbf24 !important;
+  }
+
+  .toaster-btn.btn-copy:hover {
+    border-color: #2563eb !important;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25) !important;
+  }
+  .toaster-btn.btn-copy:hover .icon-anim,
+  .toaster-btn.btn-copy:hover .toaster-text {
+    color: #2563eb !important;
+  }
+  [data-theme="dark"] .toaster-btn.btn-copy:hover .icon-anim,
+  [data-theme="dark"] .toaster-btn.btn-copy:hover .toaster-text {
+    color: #60a5fa !important;
+  }
+
+  .toaster-btn.btn-export:hover {
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25) !important;
+  }
+  .toaster-btn.btn-export:hover .icon-anim,
+  .toaster-btn.btn-export:hover .toaster-text {
+    color: #7c3aed !important;
+  }
+  [data-theme="dark"] .toaster-btn.btn-export:hover .icon-anim,
+  [data-theme="dark"] .toaster-btn.btn-export:hover .toaster-text {
+    color: #a78bfa !important;
+  }
+
+  .toaster-btn.btn-clear:hover {
+    border-color: #ef4444 !important;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25) !important;
+  }
+  .toaster-btn.btn-clear:hover .icon-anim,
+  .toaster-btn.btn-clear:hover .toaster-text {
+    color: #dc2626 !important;
+  }
+  [data-theme="dark"] .toaster-btn.btn-clear:hover .icon-anim,
+  [data-theme="dark"] .toaster-btn.btn-clear:hover .toaster-text {
+    color: #f87171 !important;
+  }
+
+  .toaster-btn.btn-qr:hover {
+    border-color: #10b981 !important;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25) !important;
+  }
+  .toaster-btn.btn-qr:hover .icon-anim,
+  .toaster-btn.btn-qr:hover .toaster-text {
+    color: #059669 !important;
+  }
+  [data-theme="dark"] .toaster-btn.btn-qr:hover .icon-anim,
+  [data-theme="dark"] .toaster-btn.btn-qr:hover .toaster-text {
+    color: #34d399 !important;
+  }
 }
 
-[data-theme="dark"] .toaster-btn:hover {
-  background: #1e293b !important;
-}
-
-.toaster-btn:hover .toaster-text {
-  max-width: 100px;
-  opacity: 1;
-  margin-left: 8px; /* Space between icon and text */
-}
-
-.toaster-btn:hover .icon-anim {
-  transform: scale(1.1);
-}
-
-/* Color-specific Hover Shadows & Accent Texts */
-.toaster-btn.btn-timer:hover {
-  border-color: #f59e0b !important;
-  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25) !important;
-}
-.toaster-btn.btn-timer:hover .icon-anim,
-.toaster-btn.btn-timer:hover .toaster-text {
-  color: #d97706 !important;
-}
-[data-theme="dark"] .toaster-btn.btn-timer:hover .icon-anim,
-[data-theme="dark"] .toaster-btn.btn-timer:hover .toaster-text {
-  color: #fbbf24 !important;
-}
-
-.toaster-btn.btn-copy:hover {
-  border-color: #2563eb !important;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25) !important;
-}
-.toaster-btn.btn-copy:hover .icon-anim,
-.toaster-btn.btn-copy:hover .toaster-text {
-  color: #2563eb !important;
-}
-[data-theme="dark"] .toaster-btn.btn-copy:hover .icon-anim,
-[data-theme="dark"] .toaster-btn.btn-copy:hover .toaster-text {
-  color: #60a5fa !important;
-}
-
-.toaster-btn.btn-export:hover {
-  border-color: #8b5cf6 !important;
-  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25) !important;
-}
-.toaster-btn.btn-export:hover .icon-anim,
-.toaster-btn.btn-export:hover .toaster-text {
-  color: #7c3aed !important;
-}
-[data-theme="dark"] .toaster-btn.btn-export:hover .icon-anim,
-[data-theme="dark"] .toaster-btn.btn-export:hover .toaster-text {
-  color: #a78bfa !important;
-}
-
-.toaster-btn.btn-clear:hover {
-  border-color: #ef4444 !important;
-  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25) !important;
-}
-.toaster-btn.btn-clear:hover .icon-anim,
-.toaster-btn.btn-clear:hover .toaster-text {
-  color: #dc2626 !important;
-}
-[data-theme="dark"] .toaster-btn.btn-clear:hover .icon-anim,
-[data-theme="dark"] .toaster-btn.btn-clear:hover .toaster-text {
-  color: #f87171 !important;
-}
-
-.toaster-btn.btn-qr:hover {
-  border-color: #10b981 !important;
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25) !important;
-}
-.toaster-btn.btn-qr:hover .icon-anim,
-.toaster-btn.btn-qr:hover .toaster-text {
-  color: #059669 !important;
-}
-[data-theme="dark"] .toaster-btn.btn-qr:hover .icon-anim,
-[data-theme="dark"] .toaster-btn.btn-qr:hover .toaster-text {
-  color: #34d399 !important;
-}
 
 /* --- CLASSIC GLASSY NAVBAR --- */
 .classic-glass-nav {
@@ -1332,3 +1335,260 @@ mark {
 #expiryProgressBar {
   box-shadow: 0 1px 4px rgba(239, 68, 68, 0.4);
 }
+
+
+/* Hide scrollbar utility class */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Premium macOS/iOS Glass Dock Style (Default / Light Theme) */
+.glass-dock {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 115, 255, 0.15), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.glass-dock span {
+  color: var(--text-primary) !important;
+}
+
+.glass-dock #dockCharCount {
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+}
+
+.glass-dock button,
+.glass-dock .relative {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  color: var(--text-secondary) !important;
+}
+
+.glass-dock button:hover,
+.glass-dock .relative:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+.glass-dock #copyAllBtn {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+  color: #2563eb !important;
+}
+.glass-dock #copyAllBtn:hover {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+.glass-dock #exportBtn {
+  background-color: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+  color: #7c3aed !important;
+}
+.glass-dock #exportBtn:hover {
+  background-color: #7c3aed !important;
+  color: white !important;
+}
+
+.glass-dock #clearClipboard {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  color: #dc2626 !important;
+}
+.glass-dock #clearClipboard:hover {
+  background-color: #dc2626 !important;
+  color: white !important;
+}
+
+/* History Drawer Styling (Default / Light Theme) */
+#historyDrawer {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+#historyDrawer span {
+  color: var(--text-primary) !important;
+}
+
+#historyDrawer .history-item {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  border-color: rgba(0, 0, 0, 0.05) !important;
+  color: var(--text-secondary) !important;
+}
+
+#historyDrawer .history-item:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* --- Dark Mode Override Styles --- */
+html.dark .glass-dock {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .glass-dock span {
+  color: white !important;
+}
+
+html.dark .glass-dock #dockCharCount {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+html.dark .glass-dock button,
+html.dark .glass-dock .relative {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .glass-dock button:hover,
+html.dark .glass-dock .relative:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+html.dark .glass-dock #copyAllBtn {
+  background-color: rgba(96, 165, 250, 0.12) !important;
+  border-color: rgba(96, 165, 250, 0.25) !important;
+  color: #60a5fa !important;
+}
+html.dark .glass-dock #copyAllBtn:hover {
+  background-color: #60a5fa !important;
+  color: #0f172a !important;
+}
+
+html.dark .glass-dock #exportBtn {
+  background-color: rgba(167, 139, 250, 0.12) !important;
+  border-color: rgba(167, 139, 250, 0.25) !important;
+  color: #a78bfa !important;
+}
+html.dark .glass-dock #exportBtn:hover {
+  background-color: #a78bfa !important;
+  color: #0f172a !important;
+}
+
+html.dark .glass-dock #clearClipboard {
+  background-color: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.25) !important;
+  color: #f87171 !important;
+}
+html.dark .glass-dock #clearClipboard:hover {
+  background-color: #f87171 !important;
+  color: #0f172a !important;
+}
+
+html.dark #historyDrawer {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark #historyDrawer span {
+  color: white !important;
+}
+
+html.dark #historyDrawer .history-item {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark #historyDrawer .history-item:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* --- RESPONSIVE HISTORY DRAWER TRANSITIONS --- */
+#historyDrawer {
+  position: fixed !important;
+  z-index: 50 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+}
+
+/* History Drawer Light Theme header border & button overrides */
+#historyDrawer .border-b {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+#historyDrawer #clearHistoryBtn {
+  color: #dc2626 !important;
+}
+#historyDrawer #clearHistoryBtn:hover {
+  color: #b91c1c !important;
+}
+
+/* History Drawer Dark Theme header border & button overrides */
+html.dark #historyDrawer .border-b {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+html.dark #historyDrawer #clearHistoryBtn {
+  color: #f87171 !important;
+}
+html.dark #historyDrawer #clearHistoryBtn:hover {
+  color: #fca5a5 !important;
+}
+
+/* History Item text span colors */
+#historyDrawer .history-item span {
+  color: var(--text-secondary) !important;
+}
+html.dark #historyDrawer .history-item span {
+  color: #cbd5e1 !important;
+}
+
+/* Responsive Drawer Positions */
+@media (max-width: 767px) {
+  #historyDrawer {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 85px !important;
+    width: auto !important;
+    max-height: 50vh !important;
+    transform: translateY(120%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  #historyDrawer.open {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+@media (min-width: 768px) {
+  #historyDrawer {
+    right: 24px !important;
+    bottom: 96px !important;
+    width: 320px !important;
+    max-height: 380px !important;
+    transform: translateX(120%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  #historyDrawer.open {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* Sticky Note specific animation & hover scale */
+.hover\:scale-102:hover {
+  transform: scale(1.02) rotate(-0.5deg) !important;
+}
+
+
+

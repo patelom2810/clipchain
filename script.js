@@ -26,8 +26,12 @@ try {
 
 // Initialize Firebase
 try {
-  firebase.initializeApp(firebaseConfig);
-  window.db = firebase.database();
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.database();
+  } else {
+    console.warn("Firebase library not detected. Running in offline/local-only mode.");
+  }
 } catch (error) {
   console.error("Firebase Initialization Error:", error);
   // Ensure icons still load even if Firebase fails
@@ -35,7 +39,36 @@ try {
     window.lucide.createIcons();
   }
 }
-const db = window.db; // Safe reference
+
+// Fallback Mock Database for Offline/Local-only Resiliency
+let db = window.db;
+if (!db) {
+  const mockRef = {
+    on: () => {},
+    off: () => {},
+    once: () => Promise.resolve({ val: () => null }),
+    update: () => Promise.resolve(),
+    set: () => Promise.resolve(),
+    remove: () => Promise.resolve(),
+    push: () => {
+      const ref = {
+        set: () => Promise.resolve(),
+        key: "mock-key",
+        then: (cb) => { cb(); return ref; },
+        catch: () => ref
+      };
+      return ref;
+    },
+    onDisconnect: () => ({
+      remove: () => Promise.resolve(),
+      cancel: () => Promise.resolve()
+    })
+  };
+  db = {
+    ref: () => mockRef
+  };
+}
+
 
 
 // DOM Elements
@@ -83,10 +116,12 @@ const passwordModalDesc = document.getElementById("passwordModalDesc");
 
 // State Variables
 let currentPassword = null;
+let sessionPassword = null; // Verified passcode for this session
 let isLocked = false;
 let isPasswordModalOpen = false;
 let passwordMode = 'unlock'; // 'unlock' | 'set'
 let currentViewMode = 'edit'; // 'edit' | 'preview' | 'split'
+let lastKnownRemoteText = "";
 
 // Mobile Menu Toggle (Removed as per user request)
 if (mobileMenuBtn && mobileMenu) {
@@ -107,7 +142,8 @@ updateURL(username);
 updateLinkDisplay(username);
 localStorage.setItem("clipUsername", username);
 usernameInput.value = username;
-// usernameDisplay DOM element removed or needs update in HTML, checking if exists
+const dockSessionId = document.getElementById("dockSessionId");
+if (dockSessionId) dockSessionId.textContent = "#" + username;
 if (usernameDisplay) usernameDisplay.textContent = username;
 
 // History State
@@ -203,87 +239,126 @@ function stopCountdown() {
 }
 
 // Initialize Clipboard Listener
+let textListenerActive = false;
+
 function initClipboardListener() {
-  clipboardRef.on("value", snapshot => {
-    const data = snapshot.val() || {};
-    const text = typeof data === 'object' ? (data.text || "") : data;
-    const savedPassword = typeof data === 'object' ? data.password : null;
-    const expiresAt = typeof data === 'object' ? data.expiresAt : null;
+  // Clear any existing listeners
+  clipboardRef.off();
+  db.ref(`clipboards/${username}/password`).off();
+  db.ref(`clipboards/${username}/expiresAt`).off();
+  db.ref(`clipboards/${username}/text`).off();
+  db.ref(`clipboards/${username}/stickyText`).off();
 
-    // Check Expiration and manage countdown
-    const selfDestructSelect = document.getElementById("selfDestructTimer");
-    if (expiresAt) {
-      if (Date.now() > expiresAt) {
-        // Expired! Delete it.
-        clipboardRef.set(null);
-        clipboardTextArea.value = "";
-        if (currentViewMode !== 'edit') renderMarkdownPreview();
-        stopCountdown();
-        showNotification("This clip has self-destructed.", "error");
-        return;
-      } else {
-        startCountdown(expiresAt);
-        // Sync self-destruct dropdown selection based on time remaining
-        let remaining = expiresAt - Date.now();
-        let selectedOption = 'never';
-        if (remaining > 60 * 60 * 1000) {
-          selectedOption = '24h';
-        } else if (remaining > 10 * 60 * 1000) {
-          selectedOption = '1h';
-        } else if (remaining > 0) {
-          selectedOption = '10m';
+  let passwordVal = null;
+  let expiresAtVal = null;
+  textListenerActive = false;
+
+  clipboardTextArea.placeholder = "Type or paste your text here... It will sync instantly across all devices.";
+
+  if (!textListenerActive) {
+    textListenerActive = true;
+    db.ref(`clipboards/${username}/text`).on("value", textSnapshot => {
+      const text = textSnapshot.val() || "";
+      
+      // Only update content if unlocked
+      if (!isLocked) {
+        if (clipboardTextArea.value !== text) {
+          applyRemoteChange(text);
+        } else {
+          lastKnownRemoteText = text;
         }
-        if (selfDestructSelect) selfDestructSelect.value = selectedOption;
       }
-    } else {
-      stopCountdown();
-      if (selfDestructSelect) selfDestructSelect.value = 'never';
-    }
+    });
 
-    // Update Timer UI if needed (optional, or just keep user's selection)
-    // Ideally we might want to sync the timer state, but for now we trust the user's local setting or default to 'never'
-    // Let's not overwrite the user's dropdown unless we want to show "Timer Active"
+    db.ref(`clipboards/${username}/stickyText`).on("value", stickySnapshot => {
+      const stickyText = stickySnapshot.val() || "";
+      const stickyTextArea = document.getElementById("stickyTextArea");
+      if (stickyTextArea && !isLocked) {
+        if (stickyTextArea.value !== stickyText) {
+          stickyTextArea.value = stickyText;
+          if (currentViewMode === 'sticky') {
+            updateCharCount();
+          }
+        }
+      }
+    });
+  }
 
-    // Check if password exists
-    if (savedPassword) {
-      currentPassword = savedPassword;
+  db.ref(`clipboards/${username}/password`).on("value", snap => {
+    passwordVal = snap.val();
+    currentPassword = passwordVal;
+    
+    if (passwordVal) {
       lockBtnText.textContent = "Locked";
-      // If we haven't unlocked it locally, show lock screen
-      if (!isLocked && clipboardTextArea.value === "") {
+      // Lock if locally stored password doesn't match database password
+      if (sessionPassword !== passwordVal) {
         isLocked = true;
-        updateLockState();
-      }
-    } else {
-      currentPassword = null;
-      isLocked = false;
-      lockBtnText.textContent = "Set Password";
-      lockBtnText.textContent = "Set Password";
-      updateLockState();
-    }
-
-    // Update Lock Button Text dynamically based on state
-    if (currentPassword) {
-      lockBtnText.textContent = "Locked";
-      // Change icon to unlock?
-    } else {
-      lockBtnText.textContent = "Set Password";
-    }
-
-    // Only update content if unlocked
-    if (!isLocked) {
-      if (clipboardTextArea.value !== text) {
-        clipboardTextArea.value = text;
+        clipboardTextArea.value = "";
+        const stickyTextArea = document.getElementById("stickyTextArea");
+        if (stickyTextArea) stickyTextArea.value = "";
         updateCharCount();
         updateHighlight();
         if (currentViewMode !== 'edit') renderMarkdownPreview();
-      }
-
-      // Add to history if new and not empty
-      if (text && (!clipHistory.length || clipHistory[0].text !== text)) {
-        addToHistory(text);
+        updateLockState();
       }
     } else {
-      // Locked logic...
+      isLocked = false;
+      sessionPassword = null;
+      lockBtnText.textContent = "Set Password";
+      updateLockState();
+      
+      // Fetch text if it was locked before
+      clipboardRef.once('value').then(snap => {
+        const data = snap.val() || {};
+        const text = typeof data === 'object' ? (data.text || "") : data;
+        const stickyText = typeof data === 'object' ? (data.stickyText || "") : "";
+        if (clipboardTextArea.value !== text) {
+          clipboardTextArea.value = text;
+          updateCharCount();
+          updateHighlight();
+          if (currentViewMode !== 'edit') renderMarkdownPreview();
+        }
+        const stickyTextArea = document.getElementById("stickyTextArea");
+        if (stickyTextArea && stickyTextArea.value !== stickyText) {
+          stickyTextArea.value = stickyText;
+          if (currentViewMode === 'sticky') {
+            updateCharCount();
+          }
+        }
+      });
+    }
+  });
+
+  db.ref(`clipboards/${username}/expiresAt`).on("value", snap => {
+    expiresAtVal = snap.val();
+    const selfDestructSelect = document.getElementById("selfDestructTimer");
+    if (expiresAtVal) {
+      if (Date.now() > expiresAtVal) {
+        db.ref(`clipboards/${username}`).set(null);
+        clipboardTextArea.value = "";
+        const stickyTextArea = document.getElementById("stickyTextArea");
+        if (stickyTextArea) stickyTextArea.value = "";
+        if (currentViewMode !== 'edit') renderMarkdownPreview();
+        stopCountdown();
+        showNotification("This clip has self-destructed.", "error");
+      } else {
+        startCountdown(expiresAtVal);
+        let remaining = expiresAtVal - Date.now();
+        let selectedOption = 'never';
+        if (remaining > 60 * 60 * 1000) selectedOption = '24h';
+        else if (remaining > 10 * 60 * 1000) selectedOption = '1h';
+        else if (remaining > 0) selectedOption = '10m';
+        if (selfDestructSelect) {
+          selfDestructSelect.value = selectedOption;
+          selfDestructSelect.dataset.currentValue = selectedOption;
+        }
+      }
+    } else {
+      stopCountdown();
+      if (selfDestructSelect) {
+        selfDestructSelect.value = 'never';
+        selfDestructSelect.dataset.currentValue = 'never';
+      }
     }
   });
 }
@@ -292,14 +367,39 @@ initClipboardListener();
 
 // Update Lock State UI
 function updateLockState() {
+  const selfDestructSelect = document.getElementById("selfDestructTimer");
+  const lockToggleBtn = document.getElementById("lockToggleBtn");
+  
   if (isLocked) {
     lockOverlay.classList.remove("hidden");
     clipboardTextArea.classList.add("blur-sm");
     clipboardTextArea.readOnly = true;
+    if (selfDestructSelect) selfDestructSelect.disabled = true;
+    
+    // Change lock icon to locked red state
+    if (lockToggleBtn) {
+      lockToggleBtn.innerHTML = '<i data-lucide="lock" class="h-4 w-4"></i>';
+      lockToggleBtn.className = "w-8 h-8 rounded-full bg-red-500/10 border border-red-500/30 text-red-500 flex items-center justify-center transition-all tooltip";
+    }
   } else {
     lockOverlay.classList.add("hidden");
     clipboardTextArea.classList.remove("blur-sm");
     clipboardTextArea.readOnly = false;
+    if (selfDestructSelect) selfDestructSelect.disabled = false;
+    
+    // Change lock icon to unlocked emerald state if a password is set, otherwise default
+    if (lockToggleBtn) {
+      if (currentPassword) {
+        lockToggleBtn.innerHTML = '<i data-lucide="unlock" class="h-4 w-4"></i>';
+        lockToggleBtn.className = "w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 flex items-center justify-center transition-all tooltip";
+      } else {
+        lockToggleBtn.innerHTML = '<i data-lucide="lock" class="h-4 w-4"></i>';
+        lockToggleBtn.className = "w-8 h-8 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip";
+      }
+    }
+  }
+  if (window.lucide) {
+    lucide.createIcons();
   }
 }
 
@@ -393,12 +493,14 @@ passwordForm.addEventListener("submit", (e) => {
       showNotification("Password must be at least 4 characters", "error");
       return;
     }
+    sessionPassword = inputVal; // Authorize this local session immediately
     clipboardRef.update({ password: inputVal });
     showNotification("Password set successfully", "success");
     closePasswordModal();
   } else if (passwordMode === 'remove') {
     // Check if password matches before removing
     if (inputVal === currentPassword) {
+      sessionPassword = null;
       clipboardRef.update({ password: null });
       showNotification("Password removed", "success");
       closePasswordModal();
@@ -414,6 +516,7 @@ passwordForm.addEventListener("submit", (e) => {
   } else {
     // Unlock mode
     if (inputVal === currentPassword) {
+      sessionPassword = inputVal; // Authorize local session
       isLocked = false;
       updateLockState();
       closePasswordModal();
@@ -421,9 +524,13 @@ passwordForm.addEventListener("submit", (e) => {
       clipboardRef.once('value').then(snap => {
         const data = snap.val() || {};
         const text = typeof data === 'object' ? (data.text || "") : data;
+        const stickyText = typeof data === 'object' ? (data.stickyText || "") : "";
         clipboardTextArea.value = text;
+        const stickyTextArea = document.getElementById("stickyTextArea");
+        if (stickyTextArea) stickyTextArea.value = stickyText;
         updateCharCount();
         updateHighlight();
+        if (currentViewMode !== 'edit') renderMarkdownPreview();
       });
     } else {
       // Wrong password animation
@@ -458,7 +565,9 @@ clipboardTextArea.addEventListener("input", () => {
 
   // If locked, we shouldn't be able to edit, but double check
   if (!isLocked) {
-    clipboardRef.update({ text: text });
+    // Normal collaborative editing
+    db.ref(`clipboards/${username}`).update({ text: text });
+    lastKnownRemoteText = text;
     updateCharCount();
     updateHighlight();
     if (currentViewMode !== 'edit') renderMarkdownPreview();
@@ -508,9 +617,34 @@ searchInput.addEventListener("input", () => {
     updateHighlight();
   } else {
     searchCountDiv.classList.add("hidden");
-    highlightOverlay.innerHTML = ""; // Clear highlights
+    // Clear highlight overlay but keep it in sync with textarea scroll
+    highlightOverlay.innerHTML = "";
   }
 });
+
+// Search fix: sync overlay styles to textarea so highlights align pixel-perfectly
+function syncOverlayStyles() {
+  const ta = clipboardTextArea;
+  const ov = highlightOverlay;
+  const cs = window.getComputedStyle(ta);
+  ov.style.fontFamily = cs.fontFamily;
+  ov.style.fontSize = cs.fontSize;
+  ov.style.fontWeight = cs.fontWeight;
+  ov.style.lineHeight = cs.lineHeight;
+  ov.style.letterSpacing = cs.letterSpacing;
+  ov.style.padding = cs.padding;
+  ov.style.paddingTop = cs.paddingTop;
+  ov.style.paddingRight = cs.paddingRight;
+  ov.style.paddingBottom = cs.paddingBottom;
+  ov.style.paddingLeft = cs.paddingLeft;
+  ov.style.whiteSpace = 'pre-wrap';
+  ov.style.wordBreak = 'break-word';
+  ov.style.overflowWrap = 'break-word';
+  ov.style.boxSizing = cs.boxSizing;
+}
+// Run once after DOM is ready and again if fonts/size could change
+document.addEventListener('DOMContentLoaded', syncOverlayStyles);
+syncOverlayStyles();
 
 function updateHighlight() {
   const text = clipboardTextArea.value;
@@ -571,8 +705,10 @@ setUsernameBtn.addEventListener("click", () => {
     const hasPass = data && typeof data === 'object' && data.password;
 
     if (data && (typeof data !== 'object' || data.text)) { // if exists
-      const confirmUse = confirm("This clipboard already contains data. Join it?");
-      if (!confirmUse) return;
+      // B6 fix: use a toast notification instead of blocking confirm()
+      // Simply join — the user explicitly typed the ID and pressed Go.
+      // The lock overlay will protect password-protected clipboards automatically.
+      showNotification("Joining existing clipboard: " + newUsername, "info");
     }
 
     if (hasPass) {
@@ -584,7 +720,8 @@ setUsernameBtn.addEventListener("click", () => {
     localStorage.setItem("clipUsername", username);
     updateURL(username);
     updateLinkDisplay(username);
-    // usernameDisplay is removed from new UI, so ignore
+    const dockSessionId = document.getElementById("dockSessionId");
+    if (dockSessionId) dockSessionId.textContent = "#" + username;
 
     clipboardRef.off(); // detach old listener
     clipboardRef = db.ref(`clipboards/${username}`);
@@ -630,8 +767,11 @@ function renderMarkdownPreview() {
 function setViewMode(mode) {
   currentViewMode = mode;
 
+  const btnViewSticky = document.getElementById("btnViewSticky");
+  const stickyPane = document.getElementById("stickyPane");
+
   // Reset tab button styles
-  const tabs = [btnViewEdit, btnViewPreview, btnViewSplit];
+  const tabs = [btnViewEdit, btnViewPreview, btnViewSplit, btnViewSticky];
   tabs.forEach(tab => {
     if (tab) {
       tab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white";
@@ -639,7 +779,7 @@ function setViewMode(mode) {
   });
 
   // Active tab styles
-  const activeTab = mode === 'edit' ? btnViewEdit : mode === 'preview' ? btnViewPreview : btnViewSplit;
+  const activeTab = mode === 'edit' ? btnViewEdit : mode === 'preview' ? btnViewPreview : mode === 'split' ? btnViewSplit : btnViewSticky;
   if (activeTab) {
     activeTab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm";
   }
@@ -654,6 +794,10 @@ function setViewMode(mode) {
       previewPane.classList.add("hidden");
       previewPane.classList.remove("block");
     }
+    if (stickyPane) {
+      stickyPane.classList.add("hidden");
+      stickyPane.classList.remove("flex");
+    }
     if (editorContentGrid) {
       editorContentGrid.classList.remove("grid-cols-2", "md:grid-cols-2");
       editorContentGrid.classList.add("grid-cols-1");
@@ -667,13 +811,16 @@ function setViewMode(mode) {
       previewPane.classList.remove("hidden");
       previewPane.classList.add("block");
     }
+    if (stickyPane) {
+      stickyPane.classList.add("hidden");
+      stickyPane.classList.remove("flex");
+    }
     if (editorContentGrid) {
       editorContentGrid.classList.remove("grid-cols-2", "md:grid-cols-2");
       editorContentGrid.classList.add("grid-cols-1");
     }
     renderMarkdownPreview();
-  } else {
-    // Split mode
+  } else if (mode === 'split') {
     if (editPane) {
       editPane.classList.remove("hidden");
       editPane.classList.add("block");
@@ -682,21 +829,60 @@ function setViewMode(mode) {
       previewPane.classList.remove("hidden");
       previewPane.classList.add("block");
     }
+    if (stickyPane) {
+      stickyPane.classList.add("hidden");
+      stickyPane.classList.remove("flex");
+    }
     if (editorContentGrid) {
+      // B14 fix: on mobile use stacked layout, side-by-side only on md+
       editorContentGrid.classList.remove("grid-cols-1");
-      editorContentGrid.classList.add("grid-cols-2", "md:grid-cols-2");
+      editorContentGrid.classList.add("grid-cols-1", "md:grid-cols-2");
     }
     renderMarkdownPreview();
+  } else if (mode === 'sticky') {
+    if (editPane) {
+      editPane.classList.add("hidden");
+      editPane.classList.remove("block");
+    }
+    if (previewPane) {
+      previewPane.classList.add("hidden");
+      previewPane.classList.remove("block");
+    }
+    if (stickyPane) {
+      stickyPane.classList.remove("hidden");
+      stickyPane.classList.add("flex");
+    }
+    if (editorContentGrid) {
+      editorContentGrid.classList.remove("grid-cols-2", "md:grid-cols-2");
+      editorContentGrid.classList.add("grid-cols-1");
+    }
   }
+
+  // Hide/show formatting toolbar based on mode
+  const formattingToolbar = document.getElementById("formattingToolbar");
+  if (formattingToolbar) {
+    if (mode === 'edit' || mode === 'split') {
+      formattingToolbar.classList.remove("hidden");
+    } else {
+      formattingToolbar.classList.add("hidden");
+    }
+  }
+
+  updateCharCount();
 }
 
 if (btnViewEdit) btnViewEdit.addEventListener("click", () => setViewMode('edit'));
 if (btnViewPreview) btnViewPreview.addEventListener("click", () => setViewMode('preview'));
 if (btnViewSplit) btnViewSplit.addEventListener("click", () => setViewMode('split'));
+if (document.getElementById("btnViewSticky")) {
+  document.getElementById("btnViewSticky").addEventListener("click", () => setViewMode('sticky'));
+}
 
 // Formatting Shortcuts Toolbar Logic
 const fmtBold = document.getElementById("fmtBold");
 const fmtItalic = document.getElementById("fmtItalic");
+const fmtUnderline = document.getElementById("fmtUnderline");
+const fmtStrikethrough = document.getElementById("fmtStrikethrough");
 const fmtHeading = document.getElementById("fmtHeading");
 const fmtListBullet = document.getElementById("fmtListBullet");
 const fmtListCheck = document.getElementById("fmtListCheck");
@@ -709,8 +895,10 @@ const fmtColorDropdown = document.getElementById("fmtColorDropdown");
 const fmtColorPicker = document.getElementById("fmtColorPicker");
 const fmtFont = document.getElementById("fmtFont");
 const fmtFontDropdown = document.getElementById("fmtFontDropdown");
+const fmtRemove = document.getElementById("fmtRemove");
 
 function insertMarkdown(beforeText, afterText = "") {
+  if (isLocked) return;
   const textarea = clipboardTextArea;
   if (!textarea) return;
 
@@ -733,12 +921,57 @@ function insertMarkdown(beforeText, afterText = "") {
 
 if (fmtBold) fmtBold.addEventListener("click", () => insertMarkdown("**", "**"));
 if (fmtItalic) fmtItalic.addEventListener("click", () => insertMarkdown("*", "*"));
+// Underline: uses HTML <u> tag (rendered by marked.js in preview)
+if (fmtUnderline) fmtUnderline.addEventListener("click", () => insertMarkdown("<u>", "</u>"));
+// Strikethrough: standard GFM ~~text~~ syntax
+if (fmtStrikethrough) fmtStrikethrough.addEventListener("click", () => insertMarkdown("~~", "~~"));
 if (fmtHeading) fmtHeading.addEventListener("click", () => insertMarkdown("# "));
 if (fmtListBullet) fmtListBullet.addEventListener("click", () => insertMarkdown("- "));
 if (fmtListCheck) fmtListCheck.addEventListener("click", () => insertMarkdown("- [ ] "));
 if (fmtCode) fmtCode.addEventListener("click", () => insertMarkdown("```\n", "\n```"));
 if (fmtQuote) fmtQuote.addEventListener("click", () => insertMarkdown("> "));
 if (fmtLink) fmtLink.addEventListener("click", () => insertMarkdown("[", "](url)"));
+
+// Remove Formatting: strips common markdown & HTML inline formatting from selected text
+if (fmtRemove) {
+  fmtRemove.addEventListener("click", () => {
+    if (isLocked) return;
+    const textarea = clipboardTextArea;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selected = text.substring(start, end);
+
+    if (!selected) {
+      showNotification("Select text first to remove formatting.", "info");
+      return;
+    }
+
+    // Strip markdown: **bold**, *italic*, ~~strike~~, `code`, # headings, > quotes,
+    // HTML tags like <u>, <span style=...>, <b>, <i>, <em>, <strong>
+    let cleaned = selected
+      .replace(/\*\*(.+?)\*\*/gs, '$1')       // bold
+      .replace(/\*(.+?)\*/gs, '$1')            // italic
+      .replace(/~~(.+?)~~/gs, '$1')            // strikethrough
+      .replace(/`{1,3}([^`]+)`{1,3}/gs, '$1') // inline code / code blocks
+      .replace(/^#{1,6}\s+/gm, '')            // headings
+      .replace(/^>\s+/gm, '')                 // blockquotes
+      .replace(/^-\s+\[[ x]\]\s+/gm, '')     // checklists
+      .replace(/^-\s+/gm, '')                 // bullet lists
+      .replace(/<[^>]+>/g, '');               // all HTML tags
+
+    textarea.value = text.substring(0, start) + cleaned + text.substring(end);
+    textarea.focus();
+    textarea.selectionStart = start;
+    textarea.selectionEnd = start + cleaned.length;
+
+    // Sync to Firebase and update overlay
+    const event = new Event('input', { bubbles: true });
+    textarea.dispatchEvent(event);
+    renderMarkdownPreview();
+    showNotification("Formatting removed.", "success");
+  });
+}
 
 // Table format shortcut
 if (fmtTable) {
@@ -813,6 +1046,22 @@ const confirmClearBtn = document.getElementById("confirmClearBtn");
 const cancelConfirmBtn = document.getElementById("cancelConfirmBtn");
 
 clearClipboardBtn.addEventListener("click", () => {
+  if (isLocked) {
+    showNotification("Clipboard is locked. Please unlock first.", "error");
+    return;
+  }
+  
+  // Dynamically update confirm modal text depending on mode
+  const confirmTitle = document.querySelector("#confirmModal h3");
+  const confirmDesc = document.querySelector("#confirmModal p");
+  if (currentViewMode === 'sticky') {
+    if (confirmTitle) confirmTitle.textContent = "Clear Sticky Note?";
+    if (confirmDesc) confirmDesc.textContent = "This will clear your sticky note content.";
+  } else {
+    if (confirmTitle) confirmTitle.textContent = "Clear Clipboard?";
+    if (confirmDesc) confirmDesc.textContent = "This action cannot be undone.";
+  }
+
   confirmModal.classList.remove("hidden");
   confirmModal.style.display = "flex";
   setTimeout(() => {
@@ -832,12 +1081,19 @@ function closeConfirmModal() {
 
 if (confirmClearBtn) {
   confirmClearBtn.addEventListener("click", () => {
-    clipboardTextArea.value = "";
-    if (typeof currentViewMode !== 'undefined' && currentViewMode !== 'edit' && typeof markdownPreview !== 'undefined' && markdownPreview) {
-      markdownPreview.innerHTML = "";
+    if (currentViewMode === 'sticky') {
+      const stickyTextArea = document.getElementById("stickyTextArea");
+      if (stickyTextArea) stickyTextArea.value = "";
+      clipboardRef.update({ stickyText: "" });
+      showNotification("Sticky note cleared", "success");
+    } else {
+      clipboardTextArea.value = "";
+      if (typeof currentViewMode !== 'undefined' && currentViewMode !== 'edit' && typeof markdownPreview !== 'undefined' && markdownPreview) {
+        markdownPreview.innerHTML = "";
+      }
+      clipboardRef.update({ text: "" });
+      showNotification("Clipboard cleared", "success");
     }
-    clipboardRef.set("");
-    showNotification("Clipboard cleared", "success");
     updateCharCount(); // Fix: Update char count immediately
     closeConfirmModal();
   });
@@ -852,7 +1108,8 @@ if (cancelConfirmBtn) {
 
 // Copy Link with Feedback
 copyLinkBtn.addEventListener("click", () => {
-  const link = clipboardLink.textContent;
+  // B11 fix: use clipboardLink.href instead of .textContent which may be truncated by CSS
+  const link = clipboardLink.href || clipboardLink.textContent;
   navigator.clipboard.writeText(link).then(() => {
     // Show feedback
     const originalIcon = copyLinkBtn.innerHTML;
@@ -862,9 +1119,8 @@ copyLinkBtn.addEventListener("click", () => {
     lucide.createIcons();
     setTimeout(() => {
       copyLinkBtn.innerHTML = originalIcon;
+      lucide.createIcons(); // B11 fix: re-render icon after restoring original HTML
     }, 2000);
-
-
     showNotification("Link copied to clipboard!", "success");
   });
 });
@@ -873,8 +1129,15 @@ copyLinkBtn.addEventListener("click", () => {
 const copyAllBtn = document.getElementById("copyAllBtn");
 if (copyAllBtn) {
   copyAllBtn.addEventListener("click", () => {
-    const text = clipboardTextArea.value;
-    if (!text) return showNotification("Clipboard is empty", "info");
+    if (isLocked) {
+      showNotification("Clipboard is locked. Please unlock first.", "error");
+      return;
+    }
+    const stickyTextArea = document.getElementById("stickyTextArea");
+    const text = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value;
+    if (!text) {
+      return showNotification(currentViewMode === 'sticky' ? "Sticky note is empty" : "Clipboard is empty", "info");
+    }
 
     navigator.clipboard.writeText(text).then(() => {
       // Visual feedback
@@ -882,7 +1145,7 @@ if (copyAllBtn) {
       copyAllBtn.innerHTML = `<i data-lucide="check" class="h-4 w-4 mr-1.5 text-green-600"></i> Copied!`;
       lucide.createIcons();
 
-      showNotification("All content copied to clipboard!", "success");
+      showNotification(currentViewMode === 'sticky' ? "Sticky note copied!" : "All content copied to clipboard!", "success");
 
       setTimeout(() => {
         copyAllBtn.innerHTML = originalHtml;
@@ -899,7 +1162,12 @@ if (copyAllBtn) {
 const exportBtn = document.getElementById("exportBtn");
 if (exportBtn) {
   exportBtn.addEventListener("click", () => {
-    const text = clipboardTextArea.value;
+    if (isLocked) {
+      showNotification("Clipboard is locked. Please unlock first.", "error");
+      return;
+    }
+    const stickyTextArea = document.getElementById("stickyTextArea");
+    const text = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value;
     if (!text) return showNotification("Nothing to export!", "info");
 
     const blob = new Blob([text], { type: "text/plain" });
@@ -911,7 +1179,7 @@ if (exportBtn) {
     const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
     a.href = url;
-    a.download = `clipchain-export-${timestamp}.md`;
+    a.download = currentViewMode === 'sticky' ? `clipchain-sticky-${timestamp}.txt` : `clipchain-export-${timestamp}.md`;
     document.body.appendChild(a);
     a.click();
 
@@ -974,6 +1242,7 @@ closeQrModalBtn.addEventListener("click", () => {
 const selfDestructSelect = document.getElementById("selfDestructTimer");
 
 selfDestructSelect.addEventListener("change", () => {
+
   const value = selfDestructSelect.value;
   let expiresAt = null;
 
@@ -984,25 +1253,19 @@ selfDestructSelect.addEventListener("change", () => {
     if (value === '24h') expiresAt = now + 24 * 60 * 60 * 1000;
   }
 
-  // Update Firebase with new expiry
-  // Note: We need to preserve existing data (text, password)
-  clipboardRef.once('value').then(snapshot => {
-    const data = snapshot.val() || {};
-    // If it's a string, convert to object
-    const text = typeof data === 'object' ? (data.text || "") : data;
-    const password = typeof data === 'object' ? data.password : null;
+  // Preserve the last known good value for reverting on unauthorised attempts
+  selfDestructSelect.dataset.currentValue = value;
 
-    clipboardRef.set({
-      text: text,
-      password: password,
-      expiresAt: expiresAt
-    });
-
+  // Update Firebase with new expiry, preserving all other fields
+  clipboardRef.update({ expiresAt: expiresAt }).then(() => {
     if (expiresAt) {
       showNotification(`Timer set: Destructs in ${value}`, "success");
     } else {
       showNotification("Timer disabled", "info");
     }
+  }).catch(err => {
+    console.error("Error setting timer:", err);
+    showNotification("Failed to update timer.", "error");
   });
 });
 
@@ -1023,7 +1286,7 @@ const shareButtons = document.querySelectorAll(".share-button, #shareLinkInlineB
 shareButtons.forEach(btn => {
   if (btn) {
     btn.addEventListener("click", () => {
-      const link = clipboardLink.textContent;
+      const link = clipboardLink.href || clipboardLink.textContent;
 
       if (navigator.share) {
         navigator.share({
@@ -1067,6 +1330,17 @@ function setTheme(isDark) {
     if (hljsDark) hljsDark.disabled = true;
     localStorage.setItem("theme", "light");
   }
+
+  // Sync mobile toggle button icon
+  const mobileThemeBtn = document.getElementById("mobileThemeToggleBtn");
+  if (mobileThemeBtn) {
+    mobileThemeBtn.innerHTML = isDark
+      ? '<i data-lucide="sun" class="h-5 w-5"></i>'
+      : '<i data-lucide="moon" class="h-5 w-5"></i>';
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  }
 }
 
 if (themeToggle) {
@@ -1077,19 +1351,8 @@ if (themeToggle) {
 
 if (mobileThemeToggleBtn) {
   mobileThemeToggleBtn.addEventListener("click", () => {
-    // Current state check
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
     setTheme(!isDark);
-
-    // Update icon
-    const icon = mobileThemeToggleBtn.querySelector('i');
-    if (icon) {
-      // lucide icons are svg, so we replace content or toggle classes?
-      // Lucide replaces the <i> tag. We need to check the SVG.
-      // Easiest is to just re-render or let setTheme handle it if we had a unified render function.
-      // But here we just toggle theme. Ideally we update the icon too.
-      // Let's just rely on global theme set.
-    }
   });
 }
 
@@ -1165,6 +1428,10 @@ function addToHistory(text) {
     clipHistory.pop();
   }
 
+  saveHistory();
+}
+
+function saveHistory() {
   localStorage.setItem("clipHistory", JSON.stringify(clipHistory));
   renderHistory();
 }
@@ -1214,10 +1481,16 @@ function renderHistory() {
     div.appendChild(actionsDelay);
 
     div.onclick = () => {
-      clipboardTextArea.value = item.text; // Corrected variable name
-      clipboardRef.set(item.text); // Added to update Firebase
+      if (isLocked) {
+        showNotification("Clipboard is locked. Please unlock first.", "error");
+        return;
+      }
+      clipboardTextArea.value = item.text;
+      clipboardRef.update({ text: item.text });
       updateCharCount();
-      showNotification('Restored from history', 'success'); // Corrected type
+      updateHighlight();
+      if (currentViewMode !== 'edit') renderMarkdownPreview();
+      showNotification('Restored from history', 'success');
     };
 
     historyList.appendChild(div);
@@ -1226,9 +1499,9 @@ function renderHistory() {
 }
 
 function escapeHtml(text) {
+  // B1 fix: removed duplicate return statement
   const div = document.createElement('div');
   div.textContent = text;
-  return div.innerHTML;
   return div.innerHTML;
 }
 
@@ -1255,8 +1528,7 @@ if (clearHistoryBtn && historyClearOverlay) {
   // Confirm Handler
   confirmHistoryClearBtn.addEventListener("click", () => {
     clipHistory = [];
-    localStorage.setItem("clipHistory", JSON.stringify(clipHistory));
-    renderHistory();
+    saveHistory();
     showNotification("History cleared", "success");
 
     // Hide Overlay
@@ -1272,7 +1544,13 @@ if (feedbackForm) {
 
     const name = document.getElementById("feedbackName").value;
     const email = document.getElementById("feedbackEmail").value;
-    const rating = document.querySelector('input[name="rating"]:checked').value;
+    // B9 fix: null-check before accessing .value to prevent TypeError crash
+    const ratingEl = document.querySelector('input[name="rating"]:checked');
+    if (!ratingEl) {
+      showNotification("Please select a star rating before submitting.", "error");
+      return;
+    }
+    const rating = ratingEl.value;
     const message = document.getElementById("feedbackMessage").value;
 
     // Save feedback to Firebase
@@ -1388,8 +1666,13 @@ function generateRandomID() {
 }
 
 function updateCharCount() {
-  const count = clipboardTextArea.value.length;
+  const stickyTextArea = document.getElementById("stickyTextArea");
+  const count = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value.length : clipboardTextArea.value.length;
   charCountEl.textContent = `${count} character${count !== 1 ? 's' : ''}`;
+  const dockCharCount = document.getElementById("dockCharCount");
+  if (dockCharCount) {
+    dockCharCount.textContent = `${count} character${count !== 1 ? 's' : ''}`;
+  }
 }
 
 function showNotification(message, type = 'info') {
@@ -1432,20 +1715,23 @@ function showNotification(message, type = 'info') {
 updateCharCount();
 
 // Handle smooth scrolling for anchor links
+// B5 fix: only intercept links whose target hash maps to a real DOM element.
+// Clipboard IDs (e.g. /#myid) would have no matching element so they are
+// now left alone and the browser handles normal navigation.
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-
     const targetId = this.getAttribute('href');
-    if (targetId === '#') return;
+    if (!targetId || targetId === '#') return;
 
     const targetElement = document.querySelector(targetId);
     if (targetElement) {
+      e.preventDefault(); // Only prevent default when there IS a matching element
       window.scrollTo({
         top: targetElement.offsetTop - 80, // Offset for header
         behavior: 'smooth'
       });
     }
+    // If no matching element found, let the browser handle the hash change naturally
   });
 });
 
@@ -1456,3 +1742,156 @@ window.addEventListener('resize', () => {
     document.body.style.overflow = '';
   }
 });
+
+// Auth presence and multiplayer collaboration disabled.
+
+// Diff-Match concurrent merging implementation
+function findDiff(oldStr, newStr) {
+  let start = 0;
+  while (start < oldStr.length && start < newStr.length && oldStr[start] === newStr[start]) {
+    start++;
+  }
+  
+  let oldEnd = oldStr.length;
+  let newEnd = newStr.length;
+  while (oldEnd > start && newEnd > start && oldStr[oldEnd - 1] === newStr[newEnd - 1]) {
+    oldEnd--;
+    newEnd--;
+  }
+  
+  return {
+    start: start,
+    removed: oldStr.slice(start, oldEnd),
+    added: newStr.slice(start, newEnd),
+    oldEnd: oldEnd,
+    newEnd: newEnd
+  };
+}
+
+function applyRemoteChange(remoteText) {
+  const textarea = clipboardTextArea;
+  if (!textarea) return;
+  
+  const localText = textarea.value;
+  if (localText === remoteText) {
+    lastKnownRemoteText = remoteText;
+    return;
+  }
+  
+  const diff = findDiff(lastKnownRemoteText, remoteText);
+  
+  // Apply diff to local text
+  let cursorStart = textarea.selectionStart;
+  let cursorEnd = textarea.selectionEnd;
+  
+  const localBefore = localText.slice(0, diff.start);
+  const localAfter = localText.slice(diff.start + diff.removed.length);
+  
+  const newLocalText = localBefore + diff.added + localAfter;
+  
+  // Adjust cursor positions
+  const addedLen = diff.added.length;
+  const removedLen = diff.removed.length;
+  const netShift = addedLen - removedLen;
+  
+  if (cursorStart >= diff.start + removedLen) {
+    cursorStart += netShift;
+  } else if (cursorStart > diff.start) {
+    cursorStart = diff.start;
+  }
+  
+  if (cursorEnd >= diff.start + removedLen) {
+    cursorEnd += netShift;
+  } else if (cursorEnd > diff.start) {
+    cursorEnd = diff.start;
+  }
+  
+  textarea.value = newLocalText;
+  textarea.setSelectionRange(cursorStart, cursorEnd);
+  
+
+  
+  lastKnownRemoteText = remoteText;
+  updateCharCount();
+  updateHighlight();
+  if (currentViewMode !== 'edit') renderMarkdownPreview();
+}
+
+// Premium History Drawer toggle handler (with responsive slide open support)
+const toggleHistoryBtn = document.getElementById("toggleHistoryBtn");
+const historyDrawer = document.getElementById("historyDrawer");
+
+if (toggleHistoryBtn && historyDrawer) {
+  toggleHistoryBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    historyDrawer.classList.toggle("open");
+  });
+}
+
+// Close history drawer when clicking outside
+document.addEventListener("click", (e) => {
+  if (historyDrawer && historyDrawer.classList.contains("open") && !historyDrawer.contains(e.target)) {
+    if (e.target !== toggleHistoryBtn) {
+      historyDrawer.classList.remove("open");
+    }
+  }
+});
+
+// Sticky Note Text Input Listener (Syncs back to database)
+const stickyNoteTextarea = document.getElementById("stickyTextArea");
+if (stickyNoteTextarea) {
+  stickyNoteTextarea.addEventListener("input", () => {
+    if (isLocked) {
+      showNotification("Clipboard is locked. Please unlock first.", "error");
+      return;
+    }
+    
+    // Trigger database update for stickyText
+    clipboardRef.update({ stickyText: stickyNoteTextarea.value });
+    updateCharCount();
+  });
+}
+
+// Sticky Note Color Picker & localStorage persistence
+const stickyColorBtns = document.querySelectorAll(".sticky-color-btn");
+const stickyNoteCard = document.getElementById("stickyNoteCard");
+
+if (stickyColorBtns.length > 0 && stickyNoteCard && stickyNoteTextarea) {
+  stickyColorBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // Remove previous color gradients and border classes
+      stickyNoteCard.className = stickyNoteCard.className.replace(/from-\S+ to-\S+/g, "");
+      stickyNoteCard.className = stickyNoteCard.className.replace(/dark:from-\S+ dark:to-\S+/g, "");
+      stickyNoteCard.className = stickyNoteCard.className.replace(/border-\S+/g, "");
+      stickyNoteCard.className = stickyNoteCard.className.replace(/dark:border-\S+/g, "");
+      
+      stickyNoteTextarea.className = stickyNoteTextarea.className.replace(/text-\S+/g, "");
+      stickyNoteTextarea.className = stickyNoteTextarea.className.replace(/dark:text-\S+/g, "");
+      
+      // Get config from button attributes
+      const lightFrom = btn.getAttribute("data-light-from");
+      const lightTo = btn.getAttribute("data-light-to");
+      const darkFrom = btn.getAttribute("data-dark-from");
+      const darkTo = btn.getAttribute("data-dark-to");
+      const textLight = btn.getAttribute("data-text-light");
+      const textDark = btn.getAttribute("data-text-dark");
+      const borderLight = btn.getAttribute("data-border-light");
+      const borderDark = btn.getAttribute("data-border-dark");
+      const colorName = btn.getAttribute("data-color");
+      
+      // Apply new styling classes
+      stickyNoteCard.classList.add(lightFrom, lightTo, `dark:${darkFrom}`, `dark:${darkTo}`, borderLight, `dark:${borderDark}`);
+      stickyNoteTextarea.classList.add(textLight, `dark:${textDark}`);
+      
+      // Persist choice
+      localStorage.setItem("stickyColor", colorName);
+    });
+  });
+  
+  // Apply saved sticky color choice
+  const savedColor = localStorage.getItem("stickyColor") || "yellow";
+  const activeBtn = Array.from(stickyColorBtns).find(btn => btn.getAttribute("data-color") === savedColor);
+  if (activeBtn) {
+    activeBtn.click();
+  }
+}
