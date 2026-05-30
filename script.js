@@ -674,11 +674,13 @@ function updateSyncedTimeText() {
   }
 
   statusIndicator.innerHTML = `
-    <span class="relative flex h-2 w-2">
-      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-    </span>
-    Synced ${timeStr}
+    <div class="flex items-center gap-1.5 status-pop">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+      </span>
+      <span>Saved ${timeStr}</span>
+    </div>
   `;
 }
 
@@ -697,11 +699,13 @@ clipboardTextArea.addEventListener("input", () => {
   if (statusIndicator) {
     statusIndicator.dataset.syncing = "true";
     statusIndicator.innerHTML = `
-      <span class="relative flex h-2 w-2">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-      </span>
-      Syncing...
+      <div class="flex items-center gap-1.5 status-pop">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+        </span>
+        <span>Saving...</span>
+      </div>
     `;
   }
 
@@ -715,7 +719,7 @@ clipboardTextArea.addEventListener("input", () => {
     if (currentViewMode !== 'edit') renderMarkdownPreview();
   }
 
-  // Debounce status change back to Synced
+  // Debounce status change back to Saved
   clearTimeout(syncTimeout);
   syncTimeout = setTimeout(() => {
     lastSyncedTime = Date.now();
