@@ -85,7 +85,7 @@
 
     <!-- LEFT: Hamburger + Room Name -->
     <div class="navbar-left">
-      <button id="navMenuBtn" class="navbar-icon-btn hidden md:flex" title="Menu">
+      <button id="navMenuBtn" class="navbar-icon-btn hidden md:flex tooltip tooltip-bottom" title="Menu">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
       </button>
 
@@ -97,51 +97,42 @@
         </div>
         
         <!-- Workspace Switcher Button (Brand text) -->
-        <button id="workspaceSwitcherBtn" class="hidden md:flex items-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 px-2 py-1 rounded-lg transition-all ml-1.5" title="Switch Workspace / Room">
+        <button id="workspaceSwitcherBtn" class="hidden md:flex items-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 px-2 py-1 rounded-lg transition-all ml-1.5 tooltip tooltip-bottom" title="Switch Workspace / Room">
           <span class="font-bold text-xl tracking-tight text-secondary-900 dark:text-white font-cursive text-gradient-animate">Clip<span class="text-primary-600 hidden sm:inline">Chain</span></span>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity: 0.5;"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
 
         <!-- Switcher Dropdown -->
-        <div id="workspaceSwitcherDropdown" class="absolute left-0 top-full mt-2 w-48 bg-white dark:bg-slate-850 border border-secondary-200/60 dark:border-slate-800 rounded-xl shadow-xl p-2 hidden z-50">
+        <div id="workspaceSwitcherDropdown" class="absolute left-0 top-full mt-2 w-48 bg-white dark:bg-slate-855 border border-secondary-200/60 dark:border-slate-800 rounded-xl shadow-xl p-2 hidden z-50">
           <div class="text-[10px] font-bold text-secondary-400 dark:text-slate-500 px-2 py-1 uppercase tracking-wider">Switch Room</div>
           <div class="flex items-center gap-1.5 px-2 py-1">
-            <input type="text" id="quickRoomSwitcherInput" class="w-full bg-slate-100 dark:bg-slate-850 border-none outline-none font-mono text-xs rounded px-2 py-1 text-secondary-900 dark:text-white" placeholder="Room ID..." autocomplete="off">
+            <input type="text" id="quickRoomSwitcherInput" class="w-full bg-slate-100 dark:bg-slate-855 border-none outline-none font-mono text-xs rounded px-2 py-1 text-secondary-900 dark:text-white" placeholder="Room ID..." autocomplete="off">
             <button id="quickRoomSwitcherGo" class="p-1 bg-primary-600 hover:bg-primary-700 text-white rounded"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Divider -->
-      <div class="navbar-divider-v"></div>
-
+    <!-- CENTER: Cleaner Room Name/ID Display -->
+    <div class="navbar-center">
       <!-- Breadcrumbs & Live Sync Pulse -->
       <div class="flex items-center gap-1 text-xs text-secondary-500 dark:text-slate-400 select-none">
-        <span class="hidden md:inline">Rooms</span>
+        <span class="hidden md:inline font-semibold">Rooms</span>
         <span class="hidden md:inline text-secondary-300 dark:text-slate-600">/</span>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
           <input type="text" id="documentTitleInput" 
-                 class="bg-transparent border-none outline-none font-semibold text-sm text-secondary-800 dark:text-gray-200 focus:bg-white/50 dark:focus:bg-slate-800/50 rounded px-1.5 py-0.5 w-24 sm:w-32 md:w-36 transition-all"
+                 class="bg-transparent border-none outline-none font-semibold text-sm text-secondary-800 dark:text-gray-200 focus:bg-white/50 dark:focus:bg-slate-800/50 rounded px-1.5 py-0.5 w-32 sm:w-44 md:w-56 text-center transition-all"
                  value="Untitled Clipboard"
                  placeholder="Untitled Clipboard"
                  autocomplete="off" spellcheck="false" title="Click to rename document">
           
           <!-- Live Sync Pulse -->
-          <span class="relative flex h-2 w-2 ml-1" title="Live Synced to Cloud">
+          <span class="relative flex h-2 w-2" title="Live Synced to Cloud">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
         </div>
       </div>
-    </div>
-
-    <!-- CENTER: Search everywhere (Notion/Linear style) -->
-    <div class="navbar-center">
-      <button id="navSearchEverywhereBtn" class="flex items-center gap-2 px-3 py-1.5 bg-secondary-100/80 dark:bg-slate-800/60 hover:bg-secondary-200/60 dark:hover:bg-slate-700/60 text-secondary-400 dark:text-slate-500 hover:text-secondary-600 dark:hover:text-slate-350 border border-secondary-200/30 dark:border-slate-800 rounded-xl transition-all w-48 md:w-60 text-left select-none shadow-inner">
-        <i data-lucide="search" class="w-3.5 h-3.5"></i>
-        <span class="text-xs font-medium flex-1">Search everywhere...</span>
-        <kbd class="text-[9px] font-semibold bg-white/80 dark:bg-slate-900/80 border border-secondary-200 dark:border-slate-700 rounded px-1 shadow-sm text-secondary-500">⌘K</kbd>
-      </button>
 
       <!-- Hidden compatibility elements to keep old room switching events functioning -->
       <div class="hidden">
@@ -154,12 +145,12 @@
     <div class="navbar-right">
 
       <!-- Command Palette Button -->
-      <button id="navCommandPaletteBtn" class="navbar-icon-btn" title="Command Palette (⌘K)">
+      <button id="navCommandPaletteBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Command Palette (⌘K)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
       </button>
 
       <!-- User Avatar with online dot -->
-      <div class="navbar-avatar" id="navUserAvatar" title="Your room ID">
+      <div class="navbar-avatar tooltip tooltip-bottom" id="navUserAvatar" title="Your room ID">
         <span id="navAvatarInitial">?</span>
         <span class="navbar-avatar-dot"></span>
       </div>
@@ -170,7 +161,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           <span>Share</span>
         </button>
-        <button id="navShareDropdownBtn" class="navbar-share-dropdown-btn" title="More share options">
+        <button id="navShareDropdownBtn" class="navbar-share-dropdown-btn tooltip tooltip-bottom" title="More share options">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
       </div>
@@ -200,18 +191,18 @@
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;flex-shrink:0;"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
         <input type="text" id="mobileNavbarUsername" placeholder="Room ID"
           class="navbar-id-input" autocomplete="off">
-        <button id="mobileNavShareBtn" class="navbar-go-btn share-button" title="Share">
+        <button id="mobileNavShareBtn" class="navbar-go-btn share-button tooltip tooltip-bottom" title="Share">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         </button>
       </div>
 
       <!-- Mobile Command Palette -->
-      <button id="mobileNavCommandPaletteBtn" class="navbar-icon-btn" title="Command Palette">
+      <button id="mobileNavCommandPaletteBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Command Palette">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
       </button>
 
       <!-- Mobile Theme Toggle -->
-      <button id="mobileThemeToggleBtn" class="navbar-icon-btn">
+      <button id="mobileThemeToggleBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Toggle Theme">
         <i data-lucide="moon" class="h-5 w-5"></i>
       </button>
     </div>
@@ -297,101 +288,115 @@
       </div>
 
       <!-- Formatting Toolbar -->
-      <div id="formattingToolbar" class="flex flex-wrap items-center gap-1 px-4 py-2 bg-white/20 dark:bg-slate-800/20 border-b border-white/20 dark:border-slate-800/50">
-        <button id="fmtBold" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Bold">
-          <i data-lucide="bold" class="h-4 w-4"></i>
-        </button>
-        <button id="fmtItalic" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Italic">
-          <i data-lucide="italic" class="h-4 w-4"></i>
-        </button>
-        <button id="fmtUnderline" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Underline">
-          <i data-lucide="underline" class="h-4 w-4"></i>
-        </button>
-        <button id="fmtStrikethrough" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Strikethrough">
-          <i data-lucide="strikethrough" class="h-4 w-4"></i>
-        </button>
-        <button id="fmtHeading" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Heading">
-          <i data-lucide="heading" class="h-4 w-4"></i>
-        </button>
-        <div class="h-4 w-px bg-white/20 dark:bg-slate-800/50 mx-1"></div>
-        <button id="fmtListBullet" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Bullet List">
-          <i data-lucide="list" class="h-4 w-4"></i>
-        </button>
-        <button id="fmtListCheck" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Checklist">
-          <i data-lucide="check-square" class="h-4 w-4"></i>
-        </button>
-        <div class="h-4 w-px bg-white/20 dark:bg-slate-800/50 mx-1"></div>
-        <button id="fmtCode" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Code Block">
-          <i data-lucide="code" class="h-4 w-4"></i>
-        </button>
-        <button id="fmtQuote" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Blockquote">
-          <i data-lucide="quote" class="h-4 w-4"></i>
-        </button>
-        <button id="fmtLink" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Insert Link">
-          <i data-lucide="link" class="h-4 w-4"></i>
-        </button>
-        <div class="h-4 w-px bg-white/20 dark:bg-slate-800/50 mx-1"></div>
-        <button id="fmtTable" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Table">
-          <i data-lucide="table" class="h-4 w-4"></i>
-        </button>
+      <div id="formattingToolbar" class="flex flex-wrap items-center gap-2 px-4 py-2 bg-white/20 dark:bg-slate-880/20 border-b border-white/20 dark:border-slate-800/50">
         
-        <!-- Text Color Dropdown -->
-        <div class="relative inline-block">
-          <button id="fmtColor" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Color">
-            <i data-lucide="palette" class="h-4 w-4"></i>
+        <!-- Group 1: Text Styles -->
+        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
+          <button id="fmtBold" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Bold (Ctrl+B)">
+            <i data-lucide="bold" class="h-4 w-4"></i>
           </button>
-          <div id="fmtColorDropdown" class="hidden absolute right-0 mt-1 p-2 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-40">
-            <div class="grid grid-cols-5 gap-1.5">
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ef4444;" data-color="#ef4444" title="Red"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #f97316;" data-color="#f97316" title="Orange"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #eab308;" data-color="#eab308" title="Yellow"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #22c55e;" data-color="#22c55e" title="Green"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #3b82f6;" data-color="#3b82f6" title="Blue"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #6366f1;" data-color="#6366f1" title="Indigo"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #a855f7;" data-color="#a855f7" title="Purple"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ec4899;" data-color="#ec4899" title="Pink"></button>
-              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform bg-black dark:bg-white" data-color="currentColor" title="Default"></button>
-              <div class="relative w-5 h-5 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden cursor-pointer hover:scale-110 transition-transform" title="Custom Color">
-                <i data-lucide="plus" class="w-3.5 h-3.5 absolute text-gray-500 pointer-events-none"></i>
-                <input type="color" id="fmtColorPicker" class="opacity-0 w-full h-full cursor-pointer absolute inset-0">
+          <button id="fmtItalic" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Italic (Ctrl+I)">
+            <i data-lucide="italic" class="h-4 w-4"></i>
+          </button>
+          <button id="fmtUnderline" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Underline (Ctrl+U)">
+            <i data-lucide="underline" class="h-4 w-4"></i>
+          </button>
+          <button id="fmtStrikethrough" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Strikethrough">
+            <i data-lucide="strikethrough" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <!-- Group 2: Lists & Headings -->
+        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
+          <button id="fmtHeading" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Heading">
+            <i data-lucide="heading" class="h-4 w-4"></i>
+          </button>
+          <button id="fmtListBullet" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Bullet List">
+            <i data-lucide="list" class="h-4 w-4"></i>
+          </button>
+          <button id="fmtListCheck" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Checklist">
+            <i data-lucide="check-square" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <!-- Group 3: Advanced inserts (with labels) -->
+        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
+          <button id="fmtCode" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip flex items-center gap-1.5" title="Code Block">
+            <i data-lucide="code" class="h-4 w-4"></i>
+            <span class="text-xs font-semibold hidden sm:inline">Code</span>
+          </button>
+          <button id="fmtQuote" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip flex items-center gap-1.5" title="Blockquote">
+            <i data-lucide="quote" class="h-4 w-4"></i>
+            <span class="text-xs font-semibold hidden sm:inline">Quote</span>
+          </button>
+          <button id="fmtLink" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Insert Link">
+            <i data-lucide="link" class="h-4 w-4"></i>
+          </button>
+          <button id="fmtTable" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip flex items-center gap-1.5" title="Table">
+            <i data-lucide="table" class="h-4 w-4"></i>
+            <span class="text-xs font-semibold hidden sm:inline">Table</span>
+          </button>
+        </div>
+
+        <!-- Group 4: Style Customization & Clear -->
+        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
+          
+          <!-- Text Color Dropdown -->
+          <div class="relative inline-block border-r border-secondary-200/60 dark:border-slate-800/80">
+            <button id="fmtColor" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Color">
+              <i data-lucide="palette" class="h-4 w-4"></i>
+            </button>
+            <div id="fmtColorDropdown" class="hidden absolute right-0 mt-1 p-2 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-40">
+              <div class="grid grid-cols-5 gap-1.5">
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ef4444;" data-color="#ef4444" title="Red"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #f97316;" data-color="#f97316" title="Orange"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #eab308;" data-color="#eab308" title="Yellow"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #22c55e;" data-color="#22c55e" title="Green"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #3b82f6;" data-color="#3b82f6" title="Blue"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #6366f1;" data-color="#6366f1" title="Indigo"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #a855f7;" data-color="#a855f7" title="Purple"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ec4899;" data-color="#ec4899" title="Pink"></button>
+                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform bg-black dark:bg-white" data-color="currentColor" title="Default"></button>
+                <div class="relative w-5 h-5 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden cursor-pointer hover:scale-110 transition-transform" title="Custom Color">
+                  <i data-lucide="plus" class="w-3.5 h-3.5 absolute text-gray-500 pointer-events-none"></i>
+                  <input type="color" id="fmtColorPicker" class="opacity-0 w-full h-full cursor-pointer absolute inset-0">
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Font Family Dropdown -->
-        <div class="relative inline-block">
-          <button id="fmtFont" class="p-1.5 rounded hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Font">
-            <i data-lucide="type" class="h-4 w-4"></i>
-          </button>
-          <div id="fmtFontDropdown" class="hidden absolute right-0 mt-1 py-1 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-44">
-            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: inherit;" data-font="inherit">
-              Default Font
+          <!-- Font Family Dropdown -->
+          <div class="relative inline-block border-r border-secondary-200/60 dark:border-slate-800/80">
+            <button id="fmtFont" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Font">
+              <i data-lucide="type" class="h-4 w-4"></i>
             </button>
-            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: sans-serif;" data-font="sans-serif">
-              Sans-Serif
-            </button>
-            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: serif;" data-font="serif">
-              Serif
-            </button>
-            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: monospace;" data-font="monospace">
-              Monospace
-            </button>
-            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Dancing Script', cursive;" data-font="'Dancing Script', cursive">
-              Cursive (Script)
-            </button>
-            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Outfit', sans-serif;" data-font="'Outfit', sans-serif">
-              Outfit (Modern)
-            </button>
+            <div id="fmtFontDropdown" class="hidden absolute right-0 mt-1 py-1 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-44">
+              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: inherit;" data-font="inherit">
+                Default Font
+              </button>
+              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: sans-serif;" data-font="sans-serif">
+                Sans-Serif
+              </button>
+              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: serif;" data-font="serif">
+                Serif
+              </button>
+              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: monospace;" data-font="monospace">
+                Monospace
+              </button>
+              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Dancing Script', cursive;" data-font="'Dancing Script', cursive">
+                Cursive (Script)
+              </button>
+              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Outfit', sans-serif;" data-font="'Outfit', sans-serif">
+                Outfit (Modern)
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Remove Formatting Button -->
-        <div class="h-4 w-px bg-white/20 dark:bg-slate-800/50 mx-1"></div>
-        <button id="fmtRemove" class="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950/30 text-secondary-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors focus:outline-none tooltip" title="Remove Formatting">
-          <i data-lucide="remove-formatting" class="h-4 w-4"></i>
-        </button>
-      </div>
+          <!-- Remove Formatting Button -->
+          <button id="fmtRemove" class="px-2.5 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-secondary-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors focus:outline-none tooltip" title="Remove Formatting">
+            <i data-lucide="remove-formatting" class="h-4 w-4"></i>
+          </button>
+        </div>
 
       <!-- Expiry Progress Bar -->
       <div id="expiryProgressBar" class="h-0.5 w-full bg-gradient-to-r from-red-500 via-amber-500 to-primary-500 transition-all duration-1000 hidden"></div>

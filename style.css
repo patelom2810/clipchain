@@ -1912,25 +1912,33 @@ mark {
 }
 
 .glass-dock #copyAllBtn {
-  background-color: rgba(37, 99, 235, 0.08) !important;
-  border-color: rgba(37, 99, 235, 0.2) !important;
-  color: #1d4ed8 !important;
+  background-color: #0073ff !important;
+  border-color: #0073ff !important;
+  color: #ffffff !important;
   border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 115, 255, 0.3) !important;
 }
 .glass-dock #copyAllBtn:hover {
-  background-color: #1d4ed8 !important;
-  color: white !important;
+  background-color: #005ecf !important;
+  border-color: #005ecf !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px rgba(0, 115, 255, 0.45) !important;
 }
 
 .glass-dock #exportBtn {
-  background-color: rgba(139, 92, 246, 0.08) !important;
-  border-color: rgba(139, 92, 246, 0.2) !important;
-  color: #6d28d9 !important;
+  background-color: #8b5cf6 !important;
+  border-color: #8b5cf6 !important;
+  color: #ffffff !important;
   border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
 }
 .glass-dock #exportBtn:hover {
-  background-color: #6d28d9 !important;
-  color: white !important;
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45) !important;
 }
 
 .glass-dock #clearClipboard {
@@ -2016,33 +2024,39 @@ html.dark .glass-dock .dock-btn:hover {
 }
 
 html.dark .glass-dock #copyAllBtn {
-  background-color: rgba(59, 130, 246, 0.15) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
-  color: #60a5fa !important;
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4) !important;
 }
 html.dark .glass-dock #copyAllBtn:hover {
-  background-color: #3b82f6 !important;
-  color: white !important;
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
 html.dark .glass-dock #exportBtn {
-  background-color: rgba(167, 139, 250, 0.15) !important;
-  border-color: rgba(167, 139, 250, 0.3) !important;
-  color: #a78bfa !important;
+  background-color: #8b5cf6 !important;
+  border-color: #8b5cf6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4) !important;
 }
 html.dark .glass-dock #exportBtn:hover {
-  background-color: #8b5cf6 !important;
-  color: white !important;
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #ffffff !important;
 }
 
 html.dark .glass-dock #clearClipboard {
-  background-color: rgba(239, 68, 68, 0.15) !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
-  color: #f87171 !important;
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
 }
 html.dark .glass-dock #clearClipboard:hover {
-  background-color: #ef4444 !important;
-  color: white !important;
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 html.dark #historyDrawer {
@@ -3124,4 +3138,71 @@ main.pt-24 {
 }
 .animate-bounce-slow {
   animation: bounce-slow 3s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   CUSTOM TOOLTIPS (Notion / Linear Style)
+   ========================================================================== */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translate(-50%, 6px);
+  background-color: rgba(15, 23, 42, 0.95);
+  color: #f8fafc;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s cubic-bezier(0.4, 0, 0.2, 1), transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 9999;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translate(-50%, 6px);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s cubic-bezier(0.4, 0, 0.2, 1), transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 9999;
+}
+
+.tooltip:hover::after,
+.tooltip:hover::before {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Bottom tooltips positioning for elements near the top of the viewport */
+.tooltip-bottom::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+  transform: translate(-50%, -6px);
+}
+.tooltip-bottom::before {
+  bottom: auto;
+  top: calc(100% + 3px);
+  transform: translate(-50%, -6px);
+  border-color: transparent transparent rgba(15, 23, 42, 0.95) transparent;
+}
+.tooltip-bottom:hover::after,
+.tooltip-bottom:hover::before {
+  transform: translate(-50%, 0);
 }

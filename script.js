@@ -485,6 +485,7 @@ function updateLockState() {
     if (lockToggleBtn) {
       lockToggleBtn.innerHTML = '<i data-lucide="lock"></i>';
       lockToggleBtn.className = "dock-btn tooltip locked";
+      lockToggleBtn.setAttribute('data-tooltip', 'Unlock Clipboard');
     }
   } else {
     lockOverlay.classList.add("hidden");
@@ -497,9 +498,11 @@ function updateLockState() {
       if (currentPassword) {
         lockToggleBtn.innerHTML = '<i data-lucide="unlock"></i>';
         lockToggleBtn.className = "dock-btn tooltip unlocked";
+        lockToggleBtn.setAttribute('data-tooltip', 'Change/Remove Passcode');
       } else {
         lockToggleBtn.innerHTML = '<i data-lucide="lock"></i>';
         lockToggleBtn.className = "dock-btn tooltip";
+        lockToggleBtn.setAttribute('data-tooltip', 'Set Passcode');
       }
     }
   }
@@ -1832,13 +1835,22 @@ function updateLinkDisplay(user) {
   clipboardLink.href = fullLink;
 }
 
-// Initialize Icons
+// Initialize Icons and Tooltips
 document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) {
     lucide.createIcons();
   } else {
     console.error("Lucide library not loaded!");
   }
+
+  // Convert browser title attributes on elements with .tooltip class to data-tooltip
+  document.querySelectorAll('.tooltip').forEach(el => {
+    const title = el.getAttribute('title');
+    if (title) {
+      el.setAttribute('data-tooltip', title);
+      el.removeAttribute('title');
+    }
+  });
 });
 
 function generateRandomID() {
@@ -2262,9 +2274,9 @@ function renderPinnedNotes() {
     if (isPanelOpen && note.id === activeNoteId) return;
     
     const tab = document.createElement("div");
-    tab.className = `pinned-mini-note pointer-events-auto flex items-center justify-center w-12 h-14 rounded-l-2xl border border-r-0 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] cursor-pointer note-theme-${note.color || "babyyellow"}`;
+    tab.className = `pinned-mini-note pointer-events-auto flex items-center justify-center w-12 h-14 rounded-l-2xl border border-r-0 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] cursor-pointer tooltip note-theme-${note.color || "babyyellow"}`;
     tab.dataset.noteId = note.id;
-    tab.title = note.title || "Untitled Note";
+    tab.setAttribute('data-tooltip', note.title || "Untitled Note");
     
     // Custom content inside side tab (first letter of heading or a note icon)
     const firstLetter = note.title ? note.title.trim().charAt(0) : "";
