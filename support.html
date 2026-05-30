@@ -61,38 +61,42 @@
     .field-wrap input,
     .field-wrap textarea {
       width: 100%;
-      padding: 22px 14px 8px 14px;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
+      padding: 24px 16px 8px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
       font-size: 14px;
       font-family: 'Outfit', sans-serif;
-      background: #fff;
+      background: rgba(255, 255, 255, 0.7);
       color: #0f172a;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     html.dark .field-wrap input,
     html.dark .field-wrap textarea {
-      background: #1e293b;
-      border-color: #334155;
-      color: #f1f5f9;
+      background: rgba(15, 23, 42, 0.65);
+      border-color: rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
     }
     .field-wrap input:focus,
     .field-wrap textarea:focus {
-      border-color: #005ccc;
-      box-shadow: 0 0 0 3px rgba(0,92,204,0.1);
+      background: #ffffff;
+      border-color: #0073ff;
+      box-shadow: 0 0 0 4px rgba(0, 115, 255, 0.15);
     }
     html.dark .field-wrap input:focus,
     html.dark .field-wrap textarea:focus {
-      border-color: #338fff;
-      box-shadow: 0 0 0 3px rgba(51,143,255,0.12);
+      background: rgba(15, 23, 42, 0.85);
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
     }
     .field-wrap label {
       position: absolute;
-      left: 14px;
+      left: 16px;
       top: 8px;
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 10px;
+      font-weight: 700;
       color: #64748b;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -102,32 +106,42 @@
 
     /* Contact card */
     .contact-card {
-      background: rgba(255,255,255,0.9);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(226,232,240,0.8);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.07);
+      box-shadow: 0 20px 48px rgba(15, 23, 42, 0.05);
     }
     html.dark .contact-card {
-      background: rgba(30,41,59,0.85);
-      border-color: rgba(51,65,85,0.8);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      background: rgba(15, 23, 42, 0.75);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
     }
 
     /* Info cards */
     .info-card {
-      background: rgba(255,255,255,0.8);
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      transition: box-shadow 0.2s, transform 0.2s;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.03);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     html.dark .info-card {
-      background: rgba(30,41,59,0.6);
-      border-color: rgba(51,65,85,0.7);
+      background: rgba(15, 23, 42, 0.5);
+      border-color: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
     }
     .info-card:hover {
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+      border-color: rgba(0, 115, 255, 0.15);
       transform: translateY(-2px);
+    }
+    html.dark .info-card:hover {
+      border-color: rgba(96, 165, 250, 0.25);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
     }
 
     /* Send button */
@@ -467,15 +481,169 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="max-w-6xl mx-auto px-4 pb-10 border-t border-secondary-200 dark:border-slate-800/80 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-secondary-500">
-    <p class="mb-4 md:mb-0">
-      &copy; 2026 ClipChain. Made with <span class="text-red-500">&hearts;</span> by Om Patel.
-    </p>
-    <div class="flex gap-5">
-      <a href="index.html" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home Editor</a>
-      <a href="support.html" class="font-bold text-primary-600 dark:text-primary-400">Help &amp; Support</a>
+  <!-- Premium Footer (from main page) -->
+  <footer class="site-footer">
+
+    <!-- ── TOP CTA CARD ───────────────────────────────────────────────── -->
+    <div class="footer-cta-section">
+      <div class="footer-cta-card">
+        <!-- Left text -->
+        <div class="footer-cta-left">
+          <span class="footer-cta-eyebrow">Share ClipChain</span>
+          <h2 class="footer-cta-heading">Invite your team<br>to ClipChain</h2>
+          <p class="footer-cta-desc">
+            Share your clipboard room with teammates and sync content
+            <strong>instantly</strong> across all devices, anywhere in the world.
+          </p>
+          <a href="#" id="footerCopyLinkBtn" class="footer-cta-btn">
+            Copy invite link
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+          </a>
+        </div>
+
+        <!-- Right orbital animation -->
+        <div class="footer-cta-right" aria-hidden="true">
+          <!-- Central hub -->
+          <div class="orbital-hub">
+            <i data-lucide="clipboard-check" style="width:22px;height:22px;color:#005ccc;"></i>
+          </div>
+          <!-- Orbit rings -->
+          <div class="orbital-ring orbital-ring-1"></div>
+          <div class="orbital-ring orbital-ring-2"></div>
+          <!-- Avatar dots orbiting -->
+          <div class="orbital-dot od-1">
+            <span>📋</span>
+          </div>
+          <div class="orbital-dot od-2">
+            <span>📝</span>
+          </div>
+          <div class="orbital-dot od-3">
+            <span>🔗</span>
+          </div>
+          <div class="orbital-dot od-4">
+            <span>🖼️</span>
+          </div>
+          <div class="orbital-dot od-5">
+            <span>⚡</span>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- ── MAIN FOOTER GRID ───────────────────────────────────────────── -->
+    <div class="footer-main">
+
+      <!-- Brand column -->
+      <div class="footer-col footer-col-brand">
+        <div class="footer-logo">
+          <div class="footer-logo-icon">
+            <i data-lucide="clipboard-check" style="width:18px;height:18px;color:#005ccc;"></i>
+          </div>
+          <span class="footer-logo-text">Clip<span style="color:#005ccc;">Chain</span></span>
+        </div>
+        <p class="footer-brand-desc">
+          The fastest real-time clipboard sync tool for developers, students, and teams.
+          No accounts, no installs — just paste and go.
+        </p>
+        <!-- Social Icons -->
+        <div class="footer-socials">
+          <a href="https://github.com" target="_blank" rel="noopener" class="footer-social-btn" title="GitHub">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener" class="footer-social-btn" title="Twitter/X">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="support.html" class="footer-social-btn" title="Help & Support">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Company column -->
+      <div class="footer-col">
+        <h4 class="footer-col-heading">Company</h4>
+        <ul class="footer-links">
+          <li>
+            <a href="support.html" class="footer-link">
+              Help &amp; Support
+              <svg class="footer-link-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="support.html#faqSection" class="footer-link">
+              Documentation
+              <svg class="footer-link-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com" target="_blank" rel="noopener" class="footer-link">
+              Open Source
+              <svg class="footer-link-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="support.html" class="footer-link">
+              Report a Bug
+              <svg class="footer-link-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Features column -->
+      <div class="footer-col">
+        <h4 class="footer-col-heading">Features</h4>
+        <ul class="footer-links">
+          <li><a href="index.html" class="footer-link">Real-time Sync</a></li>
+          <li><a href="index.html" class="footer-link">Sticky Notes</a></li>
+          <li><a href="index.html" class="footer-link">Snippet Manager</a></li>
+          <li><a href="index.html" class="footer-link">Focus Mode</a></li>
+          <li><a href="index.html" class="footer-link">Command Palette</a></li>
+          <li><a href="index.html" class="footer-link">Screenshot Tool</a></li>
+        </ul>
+      </div>
+
+      <!-- Newsletter column -->
+      <div class="footer-col">
+        <h4 class="footer-col-heading">Newsletter</h4>
+        <p class="footer-newsletter-desc">
+          Receive product updates, new features, and tips directly in your inbox.
+        </p>
+        <form class="footer-newsletter-form" id="footerNewsletterForm" onsubmit="handleFooterNewsletter(event)">
+          <div class="footer-newsletter-input-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;flex-shrink:0;"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <input type="email" id="footerEmailInput" placeholder="Enter your email..." class="footer-newsletter-input" required>
+          </div>
+          <button type="submit" class="footer-newsletter-btn" title="Subscribe">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </form>
+        <p id="footerNewsletterSuccess" class="footer-newsletter-success hidden">
+          ✓ You're subscribed! Thanks for joining.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ── BOTTOM BAR ─────────────────────────────────────────────────── -->
+    <div class="footer-bottom">
+      <p class="footer-copyright">
+        © 2026 ClipChain · All rights reserved · Made with <span style="color:#ef4444;">♥</span> by Om Patel
+      </p>
+      <div class="footer-bottom-right">
+        <span class="footer-built-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Built with Firebase
+        </span>
+        <a href="https://github.com" target="_blank" rel="noopener" class="footer-bottom-icon" title="GitHub">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        </a>
+        <a href="https://twitter.com" target="_blank" rel="noopener" class="footer-bottom-icon" title="Twitter/X">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+      </div>
+    </div>
+
   </footer>
 
   <!-- Lucide Icons -->
@@ -567,6 +735,29 @@
       }
       if (formSuccess) formSuccess.classList.add("hidden");
     }
+
+    // Premium Footer Interactive Logic
+    const footerCopyLinkBtn = document.getElementById("footerCopyLinkBtn");
+    if (footerCopyLinkBtn) {
+      footerCopyLinkBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const link = window.location.origin + window.location.pathname.replace("support.html", "index.html");
+        navigator.clipboard.writeText(link).then(() => {
+          footerCopyLinkBtn.textContent = "✓ Copied!";
+          setTimeout(() => {
+            footerCopyLinkBtn.innerHTML = 'Copy invite link <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>';
+          }, 2000);
+        });
+      });
+    }
+
+    window.handleFooterNewsletter = function(e) {
+      e.preventDefault();
+      const form = document.getElementById("footerNewsletterForm");
+      const success = document.getElementById("footerNewsletterSuccess");
+      if (form) form.style.display = "none";
+      if (success) success.classList.remove("hidden");
+    };
   </script>
 </body>
 

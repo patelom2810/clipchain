@@ -69,7 +69,38 @@ if (!db) {
   };
 }
 
+// Safe localStorage wrappers to handle Private Browsing / Safari ITP issues
+function safeLocalStorageGet(key, fallback = null) {
+  try {
+    const value = localStorage.getItem(key);
+    return value !== null ? value : fallback;
+  } catch (e) {
+    console.warn(`localStorage.getItem failed for key "${key}":`, e);
+    return fallback;
+  }
+}
 
+function safeLocalStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.warn(`localStorage.setItem failed for key "${key}":`, e);
+    return false;
+  }
+}
+
+function safeLocalStorageRemove(key) {
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch (e) {
+    console.warn(`localStorage.removeItem failed for key "${key}":`, e);
+    return false;
+  }
+}
+
+let openCommandPalette;
 
 // DOM Elements
 const usernameInput = document.getElementById("username");
@@ -139,17 +170,22 @@ if (closeMenuBtn && mobileMenu) {
 }
 
 // Initialize username from URL or localStorage
-let username = getUsernameFromURL() || localStorage.getItem("clipUsername") || generateRandomID();
+let username = getUsernameFromURL() || safeLocalStorageGet("clipUsername") || generateRandomID();
 updateURL(username);
 updateLinkDisplay(username);
-localStorage.setItem("clipUsername", username);
+safeLocalStorageSet("clipUsername", username);
 usernameInput.value = username;
 const dockSessionId = document.getElementById("dockSessionId");
 if (dockSessionId) dockSessionId.textContent = "#" + username;
 if (usernameDisplay) usernameDisplay.textContent = username;
 
 // History State
-let clipHistory = JSON.parse(localStorage.getItem("clipHistory") || "[]");
+let clipHistory = [];
+try {
+  clipHistory = JSON.parse(safeLocalStorageGet("clipHistory") || "[]");
+} catch (e) {
+  console.error("Failed to parse clipHistory:", e);
+}
 renderHistory();
 
 // Set up Firebase reference and listener
@@ -251,12 +287,26 @@ function initClipboardListener() {
   db.ref(`clipboards/${username}/text`).off();
   db.ref(`clipboards/${username}/stickyText`).off();
   db.ref(`clipboards/${username}/floatingNotes`).off();
+  db.ref(`clipboards/${username}/title`).off();
 
   let passwordVal = null;
   let expiresAtVal = null;
   textListenerActive = false;
 
   clipboardTextArea.placeholder = "Type or paste your text here... It will sync instantly across all devices.";
+
+  // Sync title locally on input/change
+  const docTitleInput = document.getElementById("documentTitleInput");
+  if (docTitleInput) {
+    // Remove existing event listener if any (by replacing the node or simply re-binding a single handler)
+    const newDocTitleInput = docTitleInput.cloneNode(true);
+    docTitleInput.parentNode.replaceChild(newDocTitleInput, docTitleInput);
+    
+    newDocTitleInput.addEventListener("change", () => {
+      const newTitle = newDocTitleInput.value.trim();
+      db.ref(`clipboards/${username}/title`).set(newTitle || "");
+    });
+  }
 
   if (!textListenerActive) {
     textListenerActive = true;
@@ -271,6 +321,15 @@ function initClipboardListener() {
           lastKnownRemoteText = text;
         }
       }
+    });
+
+    db.ref(`clipboards/${username}/title`).on("value", titleSnapshot => {
+      const title = titleSnapshot.val() || "";
+      const input = document.getElementById("documentTitleInput");
+      if (input && document.activeElement !== input) {
+        input.value = title || username;
+      }
+      document.title = (title || username) + " - ClipChain";
     });
 
     db.ref(`clipboards/${username}/stickyText`).on("value", stickySnapshot => {
@@ -424,8 +483,8 @@ function updateLockState() {
     
     // Change lock icon to locked red state
     if (lockToggleBtn) {
-      lockToggleBtn.innerHTML = '<i data-lucide="lock" class="h-4 w-4"></i>';
-      lockToggleBtn.className = "w-8 h-8 rounded-full bg-red-500/10 border border-red-500/30 text-red-500 flex items-center justify-center transition-all tooltip";
+      lockToggleBtn.innerHTML = '<i data-lucide="lock"></i>';
+      lockToggleBtn.className = "dock-btn tooltip locked";
     }
   } else {
     lockOverlay.classList.add("hidden");
@@ -436,11 +495,11 @@ function updateLockState() {
     // Change lock icon to unlocked emerald state if a password is set, otherwise default
     if (lockToggleBtn) {
       if (currentPassword) {
-        lockToggleBtn.innerHTML = '<i data-lucide="unlock" class="h-4 w-4"></i>';
-        lockToggleBtn.className = "w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 flex items-center justify-center transition-all tooltip";
+        lockToggleBtn.innerHTML = '<i data-lucide="unlock"></i>';
+        lockToggleBtn.className = "dock-btn tooltip unlocked";
       } else {
-        lockToggleBtn.innerHTML = '<i data-lucide="lock" class="h-4 w-4"></i>';
-        lockToggleBtn.className = "w-8 h-8 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip";
+        lockToggleBtn.innerHTML = '<i data-lucide="lock"></i>';
+        lockToggleBtn.className = "dock-btn tooltip";
       }
     }
   }
@@ -594,6 +653,37 @@ passwordForm.addEventListener("submit", (e) => {
 });
 
 
+// Sync status indicator and last sync tracking
+let lastSyncedTime = Date.now();
+let syncedInterval = null;
+
+function updateSyncedTimeText() {
+  const statusIndicator = document.getElementById("statusIndicator");
+  if (!statusIndicator || statusIndicator.dataset.syncing === "true") return;
+
+  const seconds = Math.floor((Date.now() - lastSyncedTime) / 1000);
+  let timeStr = "just now";
+  if (seconds >= 60) {
+    const mins = Math.floor(seconds / 60);
+    timeStr = `${mins}m ago`;
+  } else if (seconds >= 5) {
+    timeStr = `${seconds}s ago`;
+  }
+
+  statusIndicator.innerHTML = `
+    <span class="relative flex h-2 w-2">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+    </span>
+    Synced ${timeStr}
+  `;
+}
+
+// Start interval for synced text
+if (!syncedInterval) {
+  syncedInterval = setInterval(updateSyncedTimeText, 5000);
+}
+
 // Event Listeners for Clipboard Input
 let syncTimeout;
 clipboardTextArea.addEventListener("input", () => {
@@ -602,6 +692,7 @@ clipboardTextArea.addEventListener("input", () => {
   // Dynamic sync status indicator feedback
   const statusIndicator = document.getElementById("statusIndicator");
   if (statusIndicator) {
+    statusIndicator.dataset.syncing = "true";
     statusIndicator.innerHTML = `
       <span class="relative flex h-2 w-2">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
@@ -624,14 +715,10 @@ clipboardTextArea.addEventListener("input", () => {
   // Debounce status change back to Synced
   clearTimeout(syncTimeout);
   syncTimeout = setTimeout(() => {
+    lastSyncedTime = Date.now();
     if (statusIndicator) {
-      statusIndicator.innerHTML = `
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-        </span>
-        Synced
-      `;
+      statusIndicator.dataset.syncing = "false";
+      updateSyncedTimeText();
     }
   }, 600);
 });
@@ -765,7 +852,7 @@ setUsernameBtn.addEventListener("click", () => {
     }
 
     username = newUsername;
-    localStorage.setItem("clipUsername", username);
+    safeLocalStorageSet("clipUsername", username);
     updateURL(username);
     updateLinkDisplay(username);
     const dockSessionId = document.getElementById("dockSessionId");
@@ -815,11 +902,10 @@ function renderMarkdownPreview() {
 function setViewMode(mode) {
   currentViewMode = mode;
 
-  const btnViewSticky = document.getElementById("btnViewSticky");
   const stickyPane = document.getElementById("stickyPane");
 
   // Reset tab button styles
-  const tabs = [btnViewEdit, btnViewPreview, btnViewSplit, btnViewSticky];
+  const tabs = [btnViewEdit, btnViewPreview, btnViewSplit];
   tabs.forEach(tab => {
     if (tab) {
       tab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white";
@@ -827,7 +913,7 @@ function setViewMode(mode) {
   });
 
   // Active tab styles
-  const activeTab = mode === 'edit' ? btnViewEdit : mode === 'preview' ? btnViewPreview : mode === 'split' ? btnViewSplit : btnViewSticky;
+  const activeTab = mode === 'edit' ? btnViewEdit : mode === 'preview' ? btnViewPreview : btnViewSplit;
   if (activeTab) {
     activeTab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm";
   }
@@ -922,9 +1008,7 @@ function setViewMode(mode) {
 if (btnViewEdit) btnViewEdit.addEventListener("click", () => setViewMode('edit'));
 if (btnViewPreview) btnViewPreview.addEventListener("click", () => setViewMode('preview'));
 if (btnViewSplit) btnViewSplit.addEventListener("click", () => setViewMode('split'));
-if (document.getElementById("btnViewSticky")) {
-  document.getElementById("btnViewSticky").addEventListener("click", () => setViewMode('sticky'));
-}
+
 
 // Formatting Shortcuts Toolbar Logic
 const fmtBold = document.getElementById("fmtBold");
@@ -1278,7 +1362,6 @@ showQrBtn.addEventListener("click", () => {
     qrModal.style.opacity = "1";
   }, 10);
 });
-
 closeQrModalBtn.addEventListener("click", () => {
   qrModal.classList.add("opacity-0");
   qrModal.style.opacity = "0";
@@ -1287,6 +1370,53 @@ closeQrModalBtn.addEventListener("click", () => {
     qrModal.style.display = "none";
   }, 300);
 });
+
+// Keyboard Shortcuts Modal Logic
+const shortcutsModal = document.getElementById("shortcutsModal");
+const closeShortcutsModalBtn = document.getElementById("closeShortcutsModal");
+
+function openShortcutsModal() {
+  if (shortcutsModal) {
+    shortcutsModal.classList.remove("hidden");
+    shortcutsModal.style.display = "flex";
+    setTimeout(() => {
+      shortcutsModal.classList.remove("opacity-0");
+      shortcutsModal.style.opacity = "1";
+    }, 10);
+  }
+}
+
+function closeShortcutsModal() {
+  if (shortcutsModal) {
+    shortcutsModal.classList.add("opacity-0");
+    shortcutsModal.style.opacity = "0";
+    setTimeout(() => {
+      shortcutsModal.classList.add("hidden");
+      shortcutsModal.style.display = "none";
+    }, 300);
+  }
+}
+
+function toggleShortcutsModal() {
+  if (shortcutsModal) {
+    if (shortcutsModal.classList.contains("hidden")) {
+      openShortcutsModal();
+    } else {
+      closeShortcutsModal();
+    }
+  }
+}
+
+if (closeShortcutsModalBtn) {
+  closeShortcutsModalBtn.addEventListener("click", closeShortcutsModal);
+}
+if (shortcutsModal) {
+  shortcutsModal.addEventListener("click", (e) => {
+    if (e.target === shortcutsModal) {
+      closeShortcutsModal();
+    }
+  });
+}
 
 // Self-Destruct Timer Logic
 const selfDestructSelect = document.getElementById("selfDestructTimer");
@@ -1370,7 +1500,7 @@ function setTheme(isDark) {
     if (mobileThemeToggle) mobileThemeToggle.checked = true;
     if (hljsLight) hljsLight.disabled = true;
     if (hljsDark) hljsDark.disabled = false;
-    localStorage.setItem("theme", "dark");
+    safeLocalStorageSet("theme", "dark");
   } else {
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.classList.remove("dark");
@@ -1378,7 +1508,7 @@ function setTheme(isDark) {
     if (mobileThemeToggle) mobileThemeToggle.checked = false;
     if (hljsLight) hljsLight.disabled = false;
     if (hljsDark) hljsDark.disabled = true;
-    localStorage.setItem("theme", "light");
+    safeLocalStorageSet("theme", "light");
   }
 
   // Sync mobile toggle button icon
@@ -1407,7 +1537,7 @@ if (mobileThemeToggleBtn) {
 }
 
 // Init Theme
-const savedTheme = localStorage.getItem("theme");
+const savedTheme = safeLocalStorageGet("theme");
 if (savedTheme === "dark") {
   setTheme(true);
 } else {
@@ -1482,7 +1612,7 @@ function addToHistory(text) {
 }
 
 function saveHistory() {
-  localStorage.setItem("clipHistory", JSON.stringify(clipHistory));
+  safeLocalStorageSet("clipHistory", JSON.stringify(clipHistory));
   renderHistory();
 }
 
@@ -1717,11 +1847,18 @@ function generateRandomID() {
 
 function updateCharCount() {
   const stickyTextArea = document.getElementById("stickyTextArea");
-  const count = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value.length : clipboardTextArea.value.length;
-  charCountEl.textContent = `${count} character${count !== 1 ? 's' : ''}`;
+  const text = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value;
+  const count = text.length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const readTime = Math.max(1, Math.ceil(words / 200));
+  const displayText = `${count} char${count !== 1 ? 's' : ''} · ${words} word${words !== 1 ? 's' : ''} · ${readTime} min read`;
+  
+  if (charCountEl) {
+    charCountEl.textContent = displayText;
+  }
   const dockCharCount = document.getElementById("dockCharCount");
   if (dockCharCount) {
-    dockCharCount.textContent = `${count} character${count !== 1 ? 's' : ''}`;
+    dockCharCount.textContent = displayText;
   }
 }
 
@@ -1975,23 +2112,35 @@ function applyRemoteChange(remoteText) {
   updateCharCount();
   updateHighlight();
   if (currentViewMode !== 'edit') renderMarkdownPreview();
+  
+  lastSyncedTime = Date.now();
+  updateSyncedTimeText();
 }
 
 // Premium History Drawer toggle handler (with responsive slide open support)
 const toggleHistoryBtn = document.getElementById("toggleHistoryBtn");
+const navMenuBtn = document.getElementById("navMenuBtn");
 const historyDrawer = document.getElementById("historyDrawer");
 
-if (toggleHistoryBtn && historyDrawer) {
-  toggleHistoryBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    historyDrawer.classList.toggle("open");
-  });
+if (historyDrawer) {
+  if (toggleHistoryBtn) {
+    toggleHistoryBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      historyDrawer.classList.toggle("open");
+    });
+  }
+  if (navMenuBtn) {
+    navMenuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      historyDrawer.classList.toggle("open");
+    });
+  }
 }
 
 // Close history drawer when clicking outside
 document.addEventListener("click", (e) => {
   if (historyDrawer && historyDrawer.classList.contains("open") && !historyDrawer.contains(e.target)) {
-    if (e.target !== toggleHistoryBtn) {
+    if (e.target !== toggleHistoryBtn && (!navMenuBtn || e.target !== navMenuBtn) && !navMenuBtn.contains(e.target)) {
       historyDrawer.classList.remove("open");
     }
   }
@@ -2044,12 +2193,12 @@ if (stickyColorBtns.length > 0 && stickyNoteCard && stickyNoteTextarea) {
       stickyNoteTextarea.classList.add(textLight, `dark:${textDark}`);
       
       // Persist choice
-      localStorage.setItem("stickyColor", colorName);
+      safeLocalStorageSet("stickyColor", colorName);
     });
   });
   
   // Apply saved sticky color choice
-  const savedColor = localStorage.getItem("stickyColor") || "yellow";
+  const savedColor = safeLocalStorageGet("stickyColor") || "yellow";
   const activeBtn = Array.from(stickyColorBtns).find(btn => btn.getAttribute("data-color") === savedColor);
   if (activeBtn) {
     activeBtn.click();
@@ -2143,8 +2292,11 @@ function updateFloatingNoteCharCount() {
   const textArea = document.getElementById("floatingNoteTextArea");
   const charCountSpan = document.getElementById("floatingNoteCharCount");
   if (textArea && charCountSpan) {
-    const count = textArea.value.length;
-    charCountSpan.textContent = `${count} character${count !== 1 ? 's' : ''}`;
+    const text = textArea.value;
+    const count = text.length;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const readTime = Math.max(1, Math.ceil(words / 200));
+    charCountSpan.textContent = `${count} char${count !== 1 ? 's' : ''} · ${words} word${words !== 1 ? 's' : ''} · ${readTime}m read`;
   }
 }
 
@@ -2389,7 +2541,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================================================
 // FLOATING COMMAND PALETTE SYSTEM (Notion & Linear Inspired Glassmorphism)
 // ==========================================================================
-document.addEventListener("DOMContentLoaded", () => {
+const initCommandPaletteSystem = () => {
   const backdrop = document.getElementById("commandPaletteBackdrop");
   const card = document.getElementById("commandPaletteCard");
   const paletteSearchInput = document.getElementById("paletteSearchInput");
@@ -2484,6 +2636,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeEl = document.activeElement;
     const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
     
+    if (e.key === '?' && !isTyping) {
+      e.preventDefault();
+      toggleShortcutsModal();
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      const shortcutsModal = document.getElementById("shortcutsModal");
+      if (shortcutsModal && !shortcutsModal.classList.contains("hidden")) {
+        closeShortcutsModal();
+        return;
+      }
+    }
+
     if (isMeta && !isTyping) {
       if (key === 'n') {
         e.preventDefault();
@@ -2646,6 +2812,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       }
+      case 'shortcuts': {
+        openShortcutsModal();
+        break;
+      }
       case 'switch-room': {
         setTimeout(() => {
           const newRoom = prompt("Enter room ID to join or create:", username);
@@ -2689,6 +2859,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       }
+
       case 'widget-calculator':
         switchView('calculator');
         break;
@@ -2862,6 +3033,194 @@ document.addEventListener("DOMContentLoaded", () => {
   if (prevMonthBtn) prevMonthBtn.addEventListener("click", () => changeCalendarMonth(-1));
   if (nextMonthBtn) nextMonthBtn.addEventListener("click", () => changeCalendarMonth(1));
   if (calendarBackBtn) calendarBackBtn.addEventListener("click", () => switchView('main'));
-});
+};
 
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCommandPaletteSystem);
+} else {
+  initCommandPaletteSystem();
+}
 
+// ==========================================================================
+// NEW NAVBAR — Avatar, Room Label, Share Dropdown, Footer wiring
+// ==========================================================================
+(function initNewNavbar() {
+  // ── Sync room label + avatar initial whenever username changes ──────────
+  function syncNavbarMeta(id) {
+    const navRoomLabel   = document.getElementById("navRoomLabel");
+    const navAvatarInitial = document.getElementById("navAvatarInitial");
+    const navUserAvatar  = document.getElementById("navUserAvatar");
+    const workspaceAvatar = document.getElementById("workspaceAvatar");
+
+    if (navRoomLabel) navRoomLabel.textContent = "#" + id;
+    if (navAvatarInitial) navAvatarInitial.textContent = id.charAt(0).toUpperCase();
+
+    // Assign a stable gradient color based on the first char of ID
+    const colors = [
+      ["#005ccc","#6366f1"], ["#0891b2","#06b6d4"], ["#059669","#34d399"],
+      ["#d97706","#fbbf24"], ["#dc2626","#f87171"], ["#7c3aed","#a78bfa"],
+      ["#db2777","#f472b6"], ["#0284c7","#38bdf8"],
+    ];
+    const idx = id.charCodeAt(0) % colors.length;
+    if (navUserAvatar) {
+      navUserAvatar.style.background = `linear-gradient(135deg, ${colors[idx][0]} 0%, ${colors[idx][1]} 100%)`;
+    }
+
+  }
+
+  // Run on load
+  const currentId = typeof username !== "undefined" ? username : (safeLocalStorageGet("clipUsername") || "?");
+  syncNavbarMeta(currentId);
+
+  // Watch for username changes (patch setUsername click)
+  const setUsernameBtn = document.getElementById("setUsername");
+  const usernameInputEl = document.getElementById("username");
+  if (setUsernameBtn && usernameInputEl) {
+    setUsernameBtn.addEventListener("click", () => {
+      const newId = usernameInputEl.value.trim();
+      if (newId) syncNavbarMeta(newId);
+    });
+    usernameInputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const newId = usernameInputEl.value.trim();
+        if (newId) syncNavbarMeta(newId);
+      }
+    });
+  }
+
+  // Workspace Switcher Dropdown logic
+  const switcherBtn = document.getElementById("workspaceSwitcherBtn");
+  const switcherDropdown = document.getElementById("workspaceSwitcherDropdown");
+  const quickInput = document.getElementById("quickRoomSwitcherInput");
+  const quickGo = document.getElementById("quickRoomSwitcherGo");
+  const avatar = document.getElementById("workspaceAvatar");
+
+  if (switcherBtn && switcherDropdown) {
+    const toggleSwitcher = (e) => {
+      e.stopPropagation();
+      switcherDropdown.classList.toggle("hidden");
+      if (!switcherDropdown.classList.contains("hidden") && quickInput) {
+        quickInput.value = username;
+        quickInput.focus();
+        quickInput.select();
+      }
+    };
+    switcherBtn.addEventListener("click", toggleSwitcher);
+    if (avatar) avatar.addEventListener("click", toggleSwitcher);
+
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+      if (!switcherDropdown.contains(e.target) && e.target !== switcherBtn && e.target !== avatar) {
+        switcherDropdown.classList.add("hidden");
+      }
+    });
+  }
+
+  if (quickInput && quickGo) {
+    const handleSwitch = () => {
+      const targetRoom = quickInput.value.trim();
+      if (targetRoom && targetRoom !== username) {
+        if (usernameInputEl && setUsernameBtn) {
+          usernameInputEl.value = targetRoom;
+          // Trigger the standard room change procedure
+          setUsernameBtn.click();
+        }
+        switcherDropdown.classList.add("hidden");
+      }
+    };
+    quickGo.addEventListener("click", handleSwitch);
+    quickInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleSwitch();
+    });
+  }
+
+  // Search Everywhere button opens command palette
+  const searchEverywhereBtn = document.getElementById("navSearchEverywhereBtn");
+  if (searchEverywhereBtn) {
+    searchEverywhereBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (typeof openCommandPalette === "function") {
+        openCommandPalette();
+      }
+    });
+  }
+
+  // ── Share dropdown toggle ───────────────────────────────────────────────
+  const shareDropdownBtn = document.getElementById("navShareDropdownBtn");
+  const shareDropdown    = document.getElementById("navShareDropdown");
+  const shareWrap        = shareDropdownBtn ? shareDropdownBtn.closest(".navbar-share-wrap") : null;
+
+  if (shareDropdownBtn && shareDropdown) {
+    shareDropdownBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      shareDropdown.classList.toggle("hidden");
+    });
+
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+      if (shareWrap && !shareWrap.contains(e.target)) {
+        shareDropdown.classList.add("hidden");
+      }
+    });
+
+    // QR from dropdown
+    const navDropQR = document.getElementById("navDropdownQR");
+    if (navDropQR) {
+      navDropQR.addEventListener("click", () => {
+        shareDropdown.classList.add("hidden");
+        const showQrBtn = document.getElementById("showQrBtn");
+        if (showQrBtn) showQrBtn.click();
+      });
+    }
+
+    // Export from dropdown
+    const navDropExport = document.getElementById("navDropdownExport");
+    if (navDropExport) {
+      navDropExport.addEventListener("click", () => {
+        shareDropdown.classList.add("hidden");
+        const exportBtn = document.getElementById("exportBtn");
+        if (exportBtn) exportBtn.click();
+      });
+    }
+  }
+
+  // ── Footer invite link button ───────────────────────────────────────────
+  const footerCopyLinkBtn = document.getElementById("footerCopyLinkBtn");
+  if (footerCopyLinkBtn) {
+    footerCopyLinkBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const link = window.location.href;
+      navigator.clipboard.writeText(link).then(() => {
+        showNotification("Invite link copied to clipboard!", "success");
+        footerCopyLinkBtn.textContent = "✓ Copied!";
+        setTimeout(() => {
+          footerCopyLinkBtn.innerHTML = 'Copy invite link <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>';
+        }, 2000);
+      });
+    });
+  }
+
+  // ── Footer newsletter form ──────────────────────────────────────────────
+  window.handleFooterNewsletter = function(e) {
+    e.preventDefault();
+    const form = document.getElementById("footerNewsletterForm");
+    const success = document.getElementById("footerNewsletterSuccess");
+    if (form) form.style.display = "none";
+    if (success) success.classList.remove("hidden");
+    showNotification("You're subscribed! Thanks for joining.", "success");
+  };
+
+  // ── Notification dot: show briefly on clipboard sync ──────────────────
+  const navNotifDot = document.getElementById("navNotifDot");
+  if (navNotifDot) {
+    let notifTimer = null;
+    window.showNavNotif = function() {
+      navNotifDot.classList.add("visible");
+      clearTimeout(notifTimer);
+      notifTimer = setTimeout(() => navNotifDot.classList.remove("visible"), 5000);
+    };
+    // Show dot on initial load
+    setTimeout(() => { if (window.showNavNotif) window.showNavNotif(); }, 2000);
+  }
+
+})();
