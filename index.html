@@ -76,7 +76,7 @@
 </head>
 
 <body
-  class="bg-secondary-50 dark:bg-slate-900 text-secondary-900 dark:text-gray-100 font-sans transition-colors duration-300 antialiased overflow-x-hidden">
+  class="bg-secondary-50 dark:bg-slate-900 text-secondary-900 dark:text-gray-100 font-sans transition-colors duration-300 antialiased overflow-x-hidden app-layout">
 <!-- ============================================================ -->
 <!-- NAVBAR — Minimal Modern App Style (Notion / Linear inspired) -->
 <!-- ============================================================ -->
@@ -210,8 +210,9 @@
   </div>
 </nav>
 
-  <main class="pt-24 pb-24 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto animate-enter delay-200">
-    <div class="space-y-6">
+<div class="app-content-area">
+  <main class="py-6 px-4 sm:px-6 lg:px-8 max-w-5xl w-full mx-auto animate-enter delay-200 flex-grow flex flex-col flex-shrink-0 min-h-0">
+    <div class="space-y-6 flex-grow flex flex-col flex-shrink-0 min-h-0">
 
     <!-- URL/Link Display Section -->
     <div class="mb-6">
@@ -241,7 +242,7 @@
 
     <!-- Web Editor Container -->
     <div
-      class="relative glass-panel rounded-2xl shadow-2xl border border-white/50 overflow-hidden transition-all duration-300">
+      class="relative glass-panel rounded-2xl shadow-2xl border border-white/50 overflow-hidden transition-all duration-300 flex-grow flex flex-col min-h-0">
 
       <!-- Toolbar / Header of Editor -->
       <div class="bg-white/40 border-b border-white/30 px-4 py-3 flex items-center justify-between">
@@ -287,124 +288,113 @@
         </div>
       </div>
 
-      <!-- Formatting Toolbar -->
-      <div id="formattingToolbar" class="flex flex-wrap items-center gap-2 px-4 py-2 bg-white/20 dark:bg-slate-880/20 border-b border-white/20 dark:border-slate-800/50">
-        
+      <!-- Formatting Toolbar — single clean row with group separators -->
+      <div id="formattingToolbar" class="flex items-center gap-0.5 px-3 py-1.5 bg-white/20 dark:bg-slate-800/20 border-b border-white/20 dark:border-slate-800/50">
+
         <!-- Group 1: Text Styles -->
-        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
-          <button id="fmtBold" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Bold (Ctrl+B)">
-            <i data-lucide="bold" class="h-4 w-4"></i>
-          </button>
-          <button id="fmtItalic" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Italic (Ctrl+I)">
-            <i data-lucide="italic" class="h-4 w-4"></i>
-          </button>
-          <button id="fmtUnderline" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Underline (Ctrl+U)">
-            <i data-lucide="underline" class="h-4 w-4"></i>
-          </button>
-          <button id="fmtStrikethrough" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Strikethrough">
-            <i data-lucide="strikethrough" class="h-4 w-4"></i>
-          </button>
-        </div>
+        <button id="fmtBold" class="fmt-btn tooltip" title="Bold (Ctrl+B)">
+          <i data-lucide="bold" class="h-3.5 w-3.5"></i>
+        </button>
+        <button id="fmtItalic" class="fmt-btn tooltip" title="Italic (Ctrl+I)">
+          <i data-lucide="italic" class="h-3.5 w-3.5"></i>
+        </button>
+        <button id="fmtUnderline" class="fmt-btn tooltip" title="Underline (Ctrl+U)">
+          <i data-lucide="underline" class="h-3.5 w-3.5"></i>
+        </button>
+        <button id="fmtStrikethrough" class="fmt-btn tooltip" title="Strikethrough">
+          <i data-lucide="strikethrough" class="h-3.5 w-3.5"></i>
+        </button>
 
-        <!-- Group 2: Lists & Headings -->
-        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
-          <button id="fmtHeading" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Heading">
-            <i data-lucide="heading" class="h-4 w-4"></i>
-          </button>
-          <button id="fmtListBullet" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Bullet List">
-            <i data-lucide="list" class="h-4 w-4"></i>
-          </button>
-          <button id="fmtListCheck" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Checklist">
-            <i data-lucide="check-square" class="h-4 w-4"></i>
-          </button>
-        </div>
+        <div class="fmt-sep"></div>
 
-        <!-- Group 3: Advanced inserts (with labels) -->
-        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
-          <button id="fmtCode" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip flex items-center gap-1.5" title="Code Block">
-            <i data-lucide="code" class="h-4 w-4"></i>
-            <span class="text-xs font-semibold hidden sm:inline">Code</span>
-          </button>
-          <button id="fmtQuote" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip flex items-center gap-1.5" title="Blockquote">
-            <i data-lucide="quote" class="h-4 w-4"></i>
-            <span class="text-xs font-semibold hidden sm:inline">Quote</span>
-          </button>
-          <button id="fmtLink" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none border-r border-secondary-200/60 dark:border-slate-800/80 tooltip" title="Insert Link">
-            <i data-lucide="link" class="h-4 w-4"></i>
-          </button>
-          <button id="fmtTable" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip flex items-center gap-1.5" title="Table">
-            <i data-lucide="table" class="h-4 w-4"></i>
-            <span class="text-xs font-semibold hidden sm:inline">Table</span>
-          </button>
-        </div>
+        <!-- Group 2: Structure -->
+        <button id="fmtHeading" class="fmt-btn tooltip" title="Heading">
+          <i data-lucide="heading" class="h-3.5 w-3.5"></i>
+        </button>
+        <button id="fmtListBullet" class="fmt-btn tooltip" title="Bullet List">
+          <i data-lucide="list" class="h-3.5 w-3.5"></i>
+        </button>
+        <button id="fmtListCheck" class="fmt-btn tooltip" title="Checklist">
+          <i data-lucide="check-square" class="h-3.5 w-3.5"></i>
+        </button>
 
-        <!-- Group 4: Style Customization & Clear -->
-        <div class="flex items-center rounded-lg border border-secondary-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 overflow-hidden">
-          
-          <!-- Text Color Dropdown -->
-          <div class="relative inline-block border-r border-secondary-200/60 dark:border-slate-800/80">
-            <button id="fmtColor" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Color">
-              <i data-lucide="palette" class="h-4 w-4"></i>
-            </button>
-            <div id="fmtColorDropdown" class="hidden absolute right-0 mt-1 p-2 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-40">
-              <div class="grid grid-cols-5 gap-1.5">
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ef4444;" data-color="#ef4444" title="Red"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #f97316;" data-color="#f97316" title="Orange"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #eab308;" data-color="#eab308" title="Yellow"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #22c55e;" data-color="#22c55e" title="Green"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #3b82f6;" data-color="#3b82f6" title="Blue"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #6366f1;" data-color="#6366f1" title="Indigo"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #a855f7;" data-color="#a855f7" title="Purple"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ec4899;" data-color="#ec4899" title="Pink"></button>
-                <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform bg-black dark:bg-white" data-color="currentColor" title="Default"></button>
-                <div class="relative w-5 h-5 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden cursor-pointer hover:scale-110 transition-transform" title="Custom Color">
-                  <i data-lucide="plus" class="w-3.5 h-3.5 absolute text-gray-500 pointer-events-none"></i>
-                  <input type="color" id="fmtColorPicker" class="opacity-0 w-full h-full cursor-pointer absolute inset-0">
-                </div>
+        <div class="fmt-sep"></div>
+
+        <!-- Group 3: Advanced Inserts (labeled for clarity) -->
+        <button id="fmtCode" class="fmt-btn tooltip" title="Code Block">
+          <i data-lucide="code" class="h-3.5 w-3.5"></i>
+          <span class="fmt-label hidden sm:inline">Code</span>
+        </button>
+        <button id="fmtQuote" class="fmt-btn tooltip" title="Blockquote">
+          <i data-lucide="quote" class="h-3.5 w-3.5"></i>
+          <span class="fmt-label hidden sm:inline">Quote</span>
+        </button>
+        <button id="fmtLink" class="fmt-btn tooltip" title="Insert Link">
+          <i data-lucide="link" class="h-3.5 w-3.5"></i>
+        </button>
+        <button id="fmtTable" class="fmt-btn tooltip" title="Table">
+          <i data-lucide="table" class="h-3.5 w-3.5"></i>
+          <span class="fmt-label hidden sm:inline">Table</span>
+        </button>
+
+        <div class="fmt-sep"></div>
+
+        <!-- Group 4: Style & Clear -->
+        <!-- Text Color Dropdown -->
+        <div class="relative inline-block">
+          <button id="fmtColor" class="fmt-btn tooltip" title="Text Color">
+            <i data-lucide="palette" class="h-3.5 w-3.5"></i>
+          </button>
+          <div id="fmtColorDropdown" class="hidden absolute left-0 mt-1 p-2 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-40">
+            <div class="grid grid-cols-5 gap-1.5">
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ef4444;" data-color="#ef4444" title="Red"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #f97316;" data-color="#f97316" title="Orange"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #eab308;" data-color="#eab308" title="Yellow"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #22c55e;" data-color="#22c55e" title="Green"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #3b82f6;" data-color="#3b82f6" title="Blue"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #6366f1;" data-color="#6366f1" title="Indigo"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #a855f7;" data-color="#a855f7" title="Purple"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform" style="background-color: #ec4899;" data-color="#ec4899" title="Pink"></button>
+              <button class="color-preset w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform bg-black dark:bg-white" data-color="currentColor" title="Default"></button>
+              <div class="relative w-5 h-5 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden cursor-pointer hover:scale-110 transition-transform" title="Custom Color">
+                <i data-lucide="plus" class="w-3.5 h-3.5 absolute text-gray-500 pointer-events-none"></i>
+                <input type="color" id="fmtColorPicker" class="opacity-0 w-full h-full cursor-pointer absolute inset-0">
               </div>
             </div>
           </div>
-
-          <!-- Font Family Dropdown -->
-          <div class="relative inline-block border-r border-secondary-200/60 dark:border-slate-800/80">
-            <button id="fmtFont" class="px-2.5 py-1.5 hover:bg-white/60 dark:hover:bg-slate-700/60 text-secondary-600 dark:text-gray-300 transition-colors focus:outline-none tooltip" title="Text Font">
-              <i data-lucide="type" class="h-4 w-4"></i>
-            </button>
-            <div id="fmtFontDropdown" class="hidden absolute right-0 mt-1 py-1 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-44">
-              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: inherit;" data-font="inherit">
-                Default Font
-              </button>
-              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: sans-serif;" data-font="sans-serif">
-                Sans-Serif
-              </button>
-              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: serif;" data-font="serif">
-                Serif
-              </button>
-              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: monospace;" data-font="monospace">
-                Monospace
-              </button>
-              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Dancing Script', cursive;" data-font="'Dancing Script', cursive">
-                Cursive (Script)
-              </button>
-              <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Outfit', sans-serif;" data-font="'Outfit', sans-serif">
-                Outfit (Modern)
-              </button>
-            </div>
-          </div>
-
-          <!-- Remove Formatting Button -->
-          <button id="fmtRemove" class="px-2.5 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-secondary-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors focus:outline-none tooltip" title="Remove Formatting">
-            <i data-lucide="remove-formatting" class="h-4 w-4"></i>
-          </button>
         </div>
+
+        <!-- Font Family Dropdown -->
+        <div class="relative inline-block">
+          <button id="fmtFont" class="fmt-btn tooltip" title="Text Font">
+            <i data-lucide="type" class="h-3.5 w-3.5"></i>
+          </button>
+          <div id="fmtFontDropdown" class="hidden absolute left-0 mt-1 py-1 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded-lg shadow-lg z-50 w-44">
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: inherit;" data-font="inherit">Default Font</button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: sans-serif;" data-font="sans-serif">Sans-Serif</button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: serif;" data-font="serif">Serif</button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: monospace;" data-font="monospace">Monospace</button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Dancing Script', cursive;" data-font="'Dancing Script', cursive">Cursive (Script)</button>
+            <button class="font-preset w-full text-left px-3 py-1.5 hover:bg-secondary-100 dark:hover:bg-slate-700 text-xs text-secondary-700 dark:text-gray-200 font-bold" style="font-family: 'Outfit', sans-serif;" data-font="'Outfit', sans-serif">Outfit (Modern)</button>
+          </div>
+        </div>
+
+        <!-- Remove Formatting -->
+        <button id="fmtRemove" class="fmt-btn tooltip" title="Remove Formatting">
+          <i data-lucide="remove-formatting" class="h-3.5 w-3.5"></i>
+        </button>
+
+      </div>
+
 
       <!-- Expiry Progress Bar -->
       <div id="expiryProgressBar" class="h-0.5 w-full bg-gradient-to-r from-red-500 via-amber-500 to-primary-500 transition-all duration-1000 hidden"></div>
 
 
 
+
       <!-- Editor Viewport Grid -->
-      <div id="editorContentGrid" class="grid grid-cols-1 w-full h-[50vh] min-h-[300px] sm:min-h-[400px] relative">
+      <div id="editorContentGrid" class="grid grid-cols-1 grid-rows-1 w-full flex-1 min-h-0 relative">
         
         <!-- Lock Overlay -->
         <div id="lockOverlay"
@@ -589,7 +579,7 @@
           </div>
           <!-- Main Text Area -->
           <textarea id="clipboard"
-            class="w-full h-full p-6 bg-transparent border-none outline-none resize-none font-mono text-lg leading-relaxed text-secondary-800 dark:text-gray-200 placeholder-secondary-400 focus:ring-0 z-0 relative"
+            class="bg-transparent border-none outline-none resize-none text-secondary-800 dark:text-gray-200 placeholder-secondary-400 focus:ring-0"
             placeholder="Type or paste your text here... It will sync instantly across all devices."></textarea>
         </div>
 
@@ -623,7 +613,7 @@
 
       <!-- Footer of Editor -->
       <div
-        class="bg-white/40 border-t border-white/30 px-4 py-2 flex items-center justify-between text-xs font-medium text-secondary-500">
+        class="editor-card-footer bg-white/40 dark:bg-slate-800/30 border-t border-white/30 dark:border-slate-700/30 px-4 py-2 flex items-center justify-between text-xs font-medium text-secondary-500">
         <div class="flex items-center gap-3">
           <span id="statusIndicator" class="flex items-center gap-1.5">
             <div class="flex items-center gap-1.5 status-pop">
@@ -640,135 +630,156 @@
             <span id="expiryTimeText">00:00</span>
           </span>
         </div>
-      </div>
-    </div>
-    <!-- Premium macOS/iOS Style Glass Dock -->
-    <div class="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4 pointer-events-none animate-enter delay-300">
-      <div class="glass-dock flex items-center justify-center p-2 px-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all w-fit mx-auto select-none gap-2 sm:gap-3">
-        
-        <!-- Section 1: Session Info & Room Settings -->
-        <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-          <!-- Session Branding Square -->
-          <div class="hidden sm:flex w-10 h-10 rounded-xl bg-gradient-to-tr from-primary-500 to-indigo-600 items-center justify-center shadow-lg shadow-primary-500/20 flex-shrink-0">
-            <i data-lucide="clipboard" class="h-5 w-5 text-white"></i>
-          </div>
-          
-          <!-- Session Text Details -->
-          <div class="hidden sm:flex flex-col min-w-0 pr-1 select-text">
-            <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-white truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
-            <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-slate-400 font-medium whitespace-nowrap">0 characters</span>
-          </div>
-          
-          <!-- Lock -->
-          <button id="lockToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Set Passcode">
-            <i data-lucide="lock" class="h-4.5 w-4.5"></i>
-            <span id="lockBtnText" class="hidden">Set Password</span>
-          </button>
-          
-          <!-- Self-Destruct Timer -->
-          <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Self-Destruct Timer">
-            <select id="selfDestructTimer" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
-              <option value="never" selected>No Timer</option>
-              <option value="10m">10 Mins</option>
-              <option value="1h">1 Hour</option>
-              <option value="24h">24 Hours</option>
-            </select>
-            <i data-lucide="timer" class="h-4.5 w-4.5"></i>
-          </div>
-          
-          <!-- QR Code Button -->
-          <button id="showQrBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Scan QR Code">
-            <i data-lucide="qr-code" class="h-4.5 w-4.5"></i>
-          </button>
-        </div>
-        
-        <!-- Group Separator 1 -->
-        <div class="w-px h-8 bg-slate-200/10 dark:bg-slate-700/50 mx-2 sm:mx-3"></div>
-        
-        <!-- Section 2: Editor Actions -->
-        <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-          <!-- Copy All -->
-          <button id="copyAllBtn" class="dock-btn w-11 h-11 rounded-xl bg-primary-500/10 hover:bg-primary-600 text-primary-400 hover:text-white border border-primary-500/20 hover:border-primary-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Copy All">
-            <i data-lucide="copy" class="h-4.5 w-4.5"></i>
-          </button>
-          
-          <!-- Export -->
-          <button id="exportBtn" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Export File">
-            <i data-lucide="download" class="h-4.5 w-4.5"></i>
-          </button>
-          
-          <!-- Clear -->
-          <button id="clearClipboard" class="dock-btn w-11 h-11 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 hover:border-red-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Clear Clipboard">
-            <i data-lucide="trash" class="h-4.5 w-4.5"></i>
-          </button>
-        </div>
-        
-        <!-- Group Separator 2 -->
-        <div class="w-px h-8 bg-slate-200/10 dark:bg-slate-700/50 mx-2 sm:mx-3"></div>
-        
-        <!-- Section 3: Additional Tools -->
-        <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-          <!-- Screenshot Capture -->
-          <button id="dockScreenshotBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Capture Screenshot">
-            <i data-lucide="camera" class="h-4.5 w-4.5"></i>
-          </button>
-          
-          <!-- History Drawer Toggle -->
-          <button id="toggleHistoryBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Clipboard History">
-            <i data-lucide="layout-grid" class="h-4.5 w-4.5"></i>
-          </button>
-          
-          <!-- Sticky Notes Toggle -->
-          <button id="dockStickyBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Sticky Notes">
-            <i data-lucide="sticky-note" class="h-4.5 w-4.5"></i>
-          </button>
-          
-          <!-- Focus Mode Button -->
-          <button id="dockFocusModeBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/20 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Focus Mode (⌘.)">
-            <i data-lucide="focus" class="h-4.5 w-4.5"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Premium History Drawer -->
-    <div id="historyDrawer" class="z-50 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-4 flex flex-col transition-all duration-300">
-      
-      <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
-        <div class="flex items-center space-x-2">
-          <i data-lucide="history" class="h-4 w-4 text-primary-400"></i>
-          <span class="font-bold text-sm text-white">Clip History</span>
-        </div>
-        <button id="clearHistoryBtn" class="text-[11px] font-bold text-red-400 hover:text-red-300 transition-colors">
-          Clear All
-        </button>
-      </div>
-      
-      <!-- History List (Scrollable) -->
-      <div id="historyList" class="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar min-h-[100px]">
-        <!-- Dynamic Items will be rendered here -->
-      </div>
-    </div>
-
-    <!-- History Clear Confirmation Overlay (Used by script.js) -->
-    <div id="historyClearOverlay" class="fixed inset-0 z-50 bg-slate-950/40 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-all duration-300">
-      <div class="bg-white dark:bg-slate-900 border border-secondary-100 dark:border-white/10 rounded-2xl p-6 max-w-xs mx-4 text-center shadow-2xl">
-        <div class="w-10 h-10 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-          <i data-lucide="alert-triangle" class="h-5 w-5 text-red-500 dark:text-red-400"></i>
-        </div>
-        <h3 class="text-base font-bold text-secondary-900 dark:text-white mb-1">Clear history?</h3>
-        <p class="text-xs text-secondary-600 dark:text-slate-400 mb-5">This will clear your local history entries permanently.</p>
-        <div class="flex gap-3">
-          <button id="cancelHistoryClearBtn" class="flex-1 py-2 bg-secondary-100 hover:bg-secondary-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-secondary-700 dark:text-slate-200 text-xs font-bold rounded-xl transition-colors">
-            Cancel
-          </button>
-          <button id="confirmHistoryClearBtn" class="flex-1 py-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors shadow-lg shadow-red-500/20">
-            Clear
-          </button>
-        </div>
+        <span id="charCount" class="text-xs text-secondary-400 dark:text-slate-500 tabular-nums">0 chars</span>
       </div>
     </div>
   </main>
+
+  <!-- Mini Footer — Centered, transparent with subtle grid pattern background -->
+  <footer class="w-full py-6 footer-diagonal-grid border-t border-secondary-200/10 dark:border-slate-800/10">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-secondary-500 dark:text-slate-400">
+      <div class="flex items-center gap-1.5">
+        <span>Made with</span>
+        <svg class="w-3.5 h-3.5 text-red-500 animate-pulse fill-red-500 inline" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <span>by <span class="font-medium text-secondary-800 dark:text-slate-200">Om Patel</span></span>
+      </div>
+      <span class="hidden sm:inline text-secondary-300 dark:text-slate-700">•</span>
+      <a href="support.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-secondary-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-800/50 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-500 dark:hover:text-primary-400 transition-all shadow-sm" title="Help & Support">
+        <i data-lucide="help-circle" style="width:14px;height:14px;"></i>
+        <span class="font-medium">Help &amp; Support</span>
+      </a>
+    </div>
+  </footer>
+</div>
+
+  <!-- Premium macOS/iOS Style Glass Dock Toolbar -->
+  <div class="app-bottom-toolbar animate-enter delay-300">
+    <div class="glass-dock flex items-center justify-center p-2 px-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all w-fit mx-auto select-none gap-2 sm:gap-3">
+      
+      <!-- Section 1: Session Info & Room Settings -->
+      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+        <!-- Session Branding Square -->
+        <div class="hidden sm:flex w-10 h-10 rounded-xl bg-gradient-to-tr from-primary-500 to-indigo-600 items-center justify-center shadow-lg shadow-primary-500/20 flex-shrink-0">
+          <i data-lucide="clipboard" class="h-5 w-5 text-white"></i>
+        </div>
+        
+        <!-- Session Text Details -->
+        <div class="hidden sm:flex flex-col min-w-0 pr-1 select-text">
+          <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-white truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
+          <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-slate-400 font-medium whitespace-nowrap">0 characters</span>
+        </div>
+        
+        <!-- Lock -->
+        <button id="lockToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Set Passcode">
+          <i data-lucide="lock" class="h-4.5 w-4.5"></i>
+          <span id="lockBtnText" class="hidden">Set Password</span>
+        </button>
+        
+        <!-- Self-Destruct Timer -->
+        <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Self-Destruct Timer">
+          <select id="selfDestructTimer" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
+            <option value="never" selected>No Timer</option>
+            <option value="10m">10 Mins</option>
+            <option value="1h">1 Hour</option>
+            <option value="24h">24 Hours</option>
+          </select>
+          <i data-lucide="timer" class="h-4.5 w-4.5"></i>
+        </div>
+        
+        <!-- QR Code Button -->
+        <button id="showQrBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Scan QR Code">
+          <i data-lucide="qr-code" class="h-4.5 w-4.5"></i>
+        </button>
+      </div>
+      
+      <!-- Group Separator 1 -->
+      <div class="dock-separator"></div>
+      
+      <!-- Section 2: Editor Actions -->
+      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+        <!-- Copy All -->
+        <button id="copyAllBtn" class="dock-btn w-11 h-11 rounded-xl bg-primary-500/10 hover:bg-primary-600 text-primary-400 hover:text-white border border-primary-500/20 hover:border-primary-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Copy All">
+          <i data-lucide="copy" class="h-4.5 w-4.5"></i>
+        </button>
+        
+        <!-- Export -->
+        <button id="exportBtn" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Export File">
+          <i data-lucide="download" class="h-4.5 w-4.5"></i>
+        </button>
+        
+        <!-- Clear -->
+        <button id="clearClipboard" class="dock-btn w-11 h-11 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 hover:border-red-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Clear Clipboard">
+          <i data-lucide="trash" class="h-4.5 w-4.5"></i>
+        </button>
+      </div>
+      
+      <!-- Group Separator 2 -->
+      <div class="dock-separator"></div>
+      
+      <!-- Section 3: Additional Tools -->
+      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+        <!-- Screenshot Capture -->
+        <button id="dockScreenshotBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Capture Screenshot">
+          <i data-lucide="camera" class="h-4.5 w-4.5"></i>
+        </button>
+        
+        <!-- History Drawer Toggle -->
+        <button id="toggleHistoryBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Clipboard History">
+          <i data-lucide="layout-grid" class="h-4.5 w-4.5"></i>
+        </button>
+        
+        <!-- Sticky Notes Toggle -->
+        <button id="dockStickyBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Sticky Notes">
+          <i data-lucide="sticky-note" class="h-4.5 w-4.5"></i>
+        </button>
+        
+        <!-- Focus Mode Button -->
+        <button id="dockFocusModeBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/20 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Focus Mode (⌘.)">
+          <i data-lucide="focus" class="h-4.5 w-4.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium History Drawer -->
+  <div id="historyDrawer" class="z-50 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-4 flex flex-col transition-all duration-300">
+    
+    <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="history" class="h-4 w-4 text-primary-400"></i>
+        <span class="font-bold text-sm text-white">Clip History</span>
+      </div>
+      <button id="clearHistoryBtn" class="text-[11px] font-bold text-red-400 hover:text-red-300 transition-colors">
+        Clear All
+      </button>
+    </div>
+    
+    <!-- History List (Scrollable) -->
+    <div id="historyList" class="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar min-h-[100px]">
+      <!-- Dynamic Items will be rendered here -->
+    </div>
+  </div>
+
+  <!-- History Clear Confirmation Overlay (Used by script.js) -->
+  <div id="historyClearOverlay" class="fixed inset-0 z-50 bg-slate-950/40 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-all duration-300">
+    <div class="bg-white dark:bg-slate-900 border border-secondary-100 dark:border-white/10 rounded-2xl p-6 max-w-xs mx-4 text-center shadow-2xl">
+      <div class="w-10 h-10 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="alert-triangle" class="h-5 w-5 text-red-500 dark:text-red-400"></i>
+      </div>
+      <h3 class="text-base font-bold text-secondary-900 dark:text-white mb-1">Clear history?</h3>
+      <p class="text-xs text-secondary-600 dark:text-slate-400 mb-5">This will clear your local history entries permanently.</p>
+      <div class="flex gap-3">
+        <button id="cancelHistoryClearBtn" class="flex-1 py-2 bg-secondary-100 hover:bg-secondary-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-secondary-700 dark:text-slate-200 text-xs font-bold rounded-xl transition-colors">
+          Cancel
+        </button>
+        <button id="confirmHistoryClearBtn" class="flex-1 py-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors shadow-lg shadow-red-500/20">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Floating Note Background Blur Overlay -->
   <div id="floatingNoteOverlay" class="fixed inset-0 z-40 bg-slate-950/25 dark:bg-slate-950/50 backdrop-blur-md hidden opacity-0 transition-all duration-300"></div>
@@ -1137,23 +1148,7 @@
     </div>
   </div>
 
-  <!-- Mini Footer — Centered, transparent with subtle grid pattern background -->
-  <footer class="w-full py-6 footer-diagonal-grid border-t border-secondary-200/10 dark:border-slate-800/10">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-secondary-500 dark:text-slate-400">
-      <div class="flex items-center gap-1.5">
-        <span>Made with</span>
-        <svg class="w-3.5 h-3.5 text-red-500 animate-pulse fill-red-500 inline" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
-        <span>by <span class="font-medium text-secondary-800 dark:text-slate-200">Om Patel</span></span>
-      </div>
-      <span class="hidden sm:inline text-secondary-300 dark:text-slate-700">•</span>
-      <a href="support.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-secondary-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-800/50 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-500 dark:hover:text-primary-400 transition-all shadow-sm" title="Help & Support">
-        <i data-lucide="help-circle" style="width:14px;height:14px;"></i>
-        <span class="font-medium">Help &amp; Support</span>
-      </a>
-    </div>
-  </footer>
+  <!-- Footnotes or extra widgets can go here -->
 
 
 

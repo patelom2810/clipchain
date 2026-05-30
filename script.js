@@ -1876,6 +1876,10 @@ function updateCharCount() {
   if (dockCharCount) {
     dockCharCount.textContent = displayText;
   }
+  const focusWordCount = document.getElementById("focusWordCount");
+  if (focusWordCount) {
+    focusWordCount.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+  }
 }
 
 function showNotification(message, type = 'info', title = null) {
@@ -3238,5 +3242,59 @@ if (document.readyState === 'loading') {
     // Show dot on initial load
     setTimeout(() => { if (window.showNavNotif) window.showNavNotif(); }, 2000);
   }
+
+  // ── Focus Mode Implementation ──
+  const dockFocusModeBtn = document.getElementById("dockFocusModeBtn");
+  const focusExitBtnInner = document.getElementById("focusExitBtnInner");
+
+  function toggleFocusMode() {
+    const isFocus = document.body.classList.toggle("focus-mode");
+    if (dockFocusModeBtn) {
+      if (isFocus) {
+        dockFocusModeBtn.classList.add("active");
+        showNotification("Focus Mode enabled. Press Esc to exit.", "success");
+      } else {
+        dockFocusModeBtn.classList.remove("active");
+        showNotification("Focus Mode disabled", "info");
+      }
+    }
+    updateCharCount(); // refresh focus word count
+  }
+
+  if (dockFocusModeBtn) {
+    dockFocusModeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFocusMode();
+    });
+  }
+
+  if (focusExitBtnInner) {
+    focusExitBtnInner.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (document.body.classList.contains("focus-mode")) {
+        toggleFocusMode();
+      }
+    });
+  }
+
+  // Add Cmd+. / Ctrl+. and Esc keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    const isMeta = e.metaKey || e.ctrlKey;
+    const key = e.key.toLowerCase();
+
+    // Cmd+. or Ctrl+. to toggle focus mode
+    if (isMeta && key === '.') {
+      e.preventDefault();
+      toggleFocusMode();
+      return;
+    }
+
+    // Escape to exit focus mode if active
+    if (e.key === 'Escape' && document.body.classList.contains("focus-mode")) {
+      e.preventDefault();
+      toggleFocusMode();
+      return;
+    }
+  });
 
 })();

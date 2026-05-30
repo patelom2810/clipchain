@@ -586,11 +586,10 @@ input {
 }
 
 textarea {
-  font-family: var(--font-mono);
+  font-family: inherit;
 }
 
-.glass-input,
-textarea#clipboard {
+.glass-input {
   background: rgba(255, 255, 255, 0.7);
   /* Whiter inputs */
   border: 1px solid rgba(203, 213, 225, 0.6);
@@ -599,23 +598,46 @@ textarea#clipboard {
   transition: all 0.3s ease;
 }
 
-[data-theme="dark"] .glass-input,
-[data-theme="dark"] textarea#clipboard {
+[data-theme="dark"] .glass-input {
   background: rgba(0, 0, 0, 0.2);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-.glass-input:focus,
-textarea#clipboard:focus {
+.glass-input:focus {
   background: #ffffff;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 4px var(--primary-glow);
   outline: none;
 }
 
-[data-theme="dark"] .glass-input:focus,
-[data-theme="dark"] textarea#clipboard:focus {
+[data-theme="dark"] .glass-input:focus {
   background: rgba(0, 0, 0, 0.4);
+}
+
+/* Clipboard textarea fills the editor card completely - no width/height (inset handles it) */
+textarea#clipboard {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  padding: 1.5rem !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--text-primary) !important;
+  resize: none !important;
+  font-family: var(--font-main) !important;
+  font-size: 1rem !important;
+  line-height: 1.75 !important;
+  z-index: 1 !important;
+  overflow-y: auto !important;
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
+}
+[data-theme="dark"] textarea#clipboard {
+  color: #f1f5f9 !important;
 }
 
 /* --- TYPOGRAPHY UTILS --- */
@@ -3212,4 +3234,286 @@ main.pt-24 {
   animation: statusPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   display: inline-flex;
   align-items: center;
+}
+
+/* ==========================================================================
+   FULL-SCREEN FLEXBOX RESPONSIVE LAYOUT
+   ========================================================================== */
+body.app-layout {
+  height: 100vh !important;
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+body.app-layout .app-navbar {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.app-content-area {
+  flex: 1 1 0% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+}
+
+/* ==========================================================================
+   FORMATTING TOOLBAR — Clean single-row design
+   ========================================================================== */
+#formattingToolbar {
+  flex-shrink: 0 !important;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+#formattingToolbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Individual formatting button */
+.fmt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.13s ease, color 0.13s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  font-family: var(--font-main);
+}
+.fmt-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-primary);
+}
+.fmt-btn:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+[data-theme="dark"] .fmt-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}
+[data-theme="dark"] .fmt-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Labeled variant — icon + text label */
+.fmt-btn .fmt-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Thin vertical separator between groups */
+.fmt-sep {
+  width: 1px;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+[data-theme="dark"] .fmt-sep {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
+/* Editor card grid fills the space between toolbars and footer */
+#editorContentGrid {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Each pane inside the grid fills its cell */
+#editPane,
+#previewPane,
+#stickyPane {
+  overflow: hidden;
+  position: relative;
+}
+
+#editPane {
+  height: 100%;
+  width: 100%;
+}
+
+/* Ensure editor footer (status bar) is always visible at the bottom of card */
+.editor-card-footer {
+  flex-shrink: 0;
+  z-index: 10;
+  position: relative;
+}
+
+/* Let the bottom toolbar sit fixed at bottom in flex terms, not overlapping */
+.app-bottom-toolbar {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  padding: 12px 0 16px 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 40 !important;
+  background: transparent !important;
+}
+
+/* Adjust general glass dock styling for flex alignment & premium aesthetics */
+body.app-layout .glass-dock {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  margin: 0 auto !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), 
+              0 2px 8px rgba(0, 0, 0, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+}
+
+html.dark body.app-layout .glass-dock {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4),
+              0 2px 8px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Premium dock separators */
+.dock-separator {
+  width: 1px !important;
+  height: 24px !important;
+  background-color: rgba(0, 0, 0, 0.12) !important;
+  margin: 0 4px !important;
+  flex-shrink: 0 !important;
+}
+html.dark .dock-separator {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Standardize circular dock buttons styling */
+body.app-layout .glass-dock .dock-btn {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  color: #475569 !important;
+}
+body.app-layout .glass-dock .dock-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: #0f172a !important;
+  transform: scale(1.08) !important;
+}
+html.dark body.app-layout .glass-dock .dock-btn {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+}
+html.dark body.app-layout .glass-dock .dock-btn:hover {
+  background-color: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
+}
+
+/* Style primary and destructive dock actions consistently as rounded squares */
+body.app-layout .glass-dock #copyAllBtn {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}
+body.app-layout .glass-dock #copyAllBtn:hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45) !important;
+}
+
+body.app-layout .glass-dock #exportBtn {
+  background-color: #8b5cf6 !important;
+  border-color: #8b5cf6 !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+}
+body.app-layout .glass-dock #exportBtn:hover {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45) !important;
+}
+
+body.app-layout .glass-dock #clearClipboard {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+body.app-layout .glass-dock #clearClipboard:hover {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45) !important;
+}
+
+/* Mobile responsive layout overrides for navbar and dock */
+@media (max-width: 767px) {
+  /* Push mobile navbar controls to the right edge */
+  .navbar-mobile-right {
+    margin-left: auto !important;
+    gap: 8px !important;
+  }
+  .app-navbar-inner {
+    padding: 0 16px !important;
+    gap: 8px !important;
+  }
+
+  /* Make bottom dock swipe-able/scrollable horizontally on mobile */
+  body.app-layout .glass-dock {
+    max-width: calc(100% - 32px) !important;
+    width: auto !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    justify-content: flex-start !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important;  /* IE 10+ */
+    -webkit-overflow-scrolling: touch !important;
+  }
+  body.app-layout .glass-dock::-webkit-scrollbar {
+    display: none !important; /* Safari and Chrome */
+  }
+  
+  /* Prevent dock buttons and dividers from shrinking inside the scrollable view */
+  body.app-layout .glass-dock > * {
+    flex-shrink: 0 !important;
+  }
 }
