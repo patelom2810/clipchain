@@ -97,7 +97,7 @@
         </div>
         
         <!-- Workspace Switcher Button (Brand text) -->
-        <button id="workspaceSwitcherBtn" class="hidden md:flex items-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 px-2 py-1 rounded-lg transition-all ml-1.5 tooltip tooltip-bottom" title="Switch Workspace / Room">
+        <button id="workspaceSwitcherBtn" class="flex items-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 px-2 py-1 rounded-lg transition-all ml-1.5 tooltip tooltip-bottom" title="Switch Workspace / Room">
           <span class="font-bold text-xl tracking-tight text-secondary-900 dark:text-white font-cursive text-gradient-animate">Clip<span class="text-primary-600 hidden sm:inline">Chain</span></span>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity: 0.5;"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -187,7 +187,7 @@
     <!-- MOBILE RIGHT -->
     <div class="navbar-mobile-right">
       <!-- Mobile ID input compact -->
-      <div class="navbar-id-pill" style="max-width:130px;">
+      <div class="navbar-id-pill" style="max-width:150px;">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;flex-shrink:0;"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
         <input type="text" id="mobileNavbarUsername" placeholder="Room ID"
           class="navbar-id-input" autocomplete="off">
@@ -1161,13 +1161,7 @@
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        if (typeof lucide !== "undefined") {
-          lucide.createIcons();
-        }
-      });
-    </script>
+
     <!-- html2canvas -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="script.js"></script>

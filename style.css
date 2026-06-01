@@ -17,9 +17,20 @@
   /* Crisper, almost solid white borders */
   --glass-blur: blur(30px) saturate(180%);
 
-  --primary-color: #2563eb;
-  /* Bright Blue (Blue-500) */
-  --primary-glow: rgba(37, 99, 235, 0.25);
+  --primary-color: #0073ff;
+  --primary-hover: #005ccc;
+  --primary-active: #004599;
+  --primary-glow: rgba(0, 115, 255, 0.25);
+  --primary-light: rgba(0, 115, 255, 0.08);
+  --primary-light-border: rgba(0, 115, 255, 0.2);
+  
+  --export-color: #8b5cf6;
+  --export-hover: #7c3aed;
+  --export-glow: rgba(139, 92, 246, 0.3);
+
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-glow: rgba(239, 68, 68, 0.3);
 
   /* TEXT COLORS: High Contrast */
   --text-primary: #0f172a;
@@ -45,8 +56,20 @@
   --surface-color: rgba(15, 23, 42, 0.65);
   --surface-border: rgba(255, 255, 255, 0.08);
 
-  --primary-color: #60a5fa;
-  --primary-glow: rgba(96, 165, 250, 0.35);
+  --primary-color: #338fff;
+  --primary-hover: #66abff;
+  --primary-active: #0073ff;
+  --primary-glow: rgba(51, 143, 255, 0.35);
+  --primary-light: rgba(51, 143, 255, 0.12);
+  --primary-light-border: rgba(51, 143, 255, 0.25);
+  
+  --export-color: #a78bfa;
+  --export-hover: #c084fc;
+  --export-glow: rgba(167, 139, 250, 0.45);
+
+  --danger-color: #f87171;
+  --danger-hover: #fca5a5;
+  --danger-glow: rgba(248, 113, 113, 0.45);
 
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
@@ -67,16 +90,16 @@
 ::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.3);
   border-radius: 10px;
-  transition: background 0.2s;
+  transition: background 0.3s;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: var(--primary-color);
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--primary-color);
 }
 
 /* Hide standard scrollbars where requested for visual neatness */
@@ -723,26 +746,7 @@ textarea#clipboard {
 /* --- ANIMATIONS & DECORATION --- */
 
 
-/* --- ANIMATED SCROLLBAR (Sleek) --- */
-::-webkit-scrollbar {
-  width: 6px;
-  /* Thinner */
-  height: 6px;
-}
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.5);
-  border-radius: 10px;
-  transition: background 0.3s;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-color);
-}
 
 /* --- ENTRANCE ANIMATIONS --- */
 @keyframes fade-up {
@@ -807,21 +811,14 @@ textarea#clipboard {
   box-shadow: 0 0 20px var(--primary-color), 0 0 40px var(--primary-glow);
 }
 
-/* --- GRADIENT TEXT ANIMATION --- */
-.text-gradient-animate {
-  background: linear-gradient(270deg, #2563eb, #9333ea, #db2777, #2563eb);
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-shift 8s ease infinite;
-}
-
-[data-theme="dark"] .text-gradient-animate {
-  background: linear-gradient(270deg, #60a5fa, #c084fc, #f472b6, #60a5fa);
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  background-clip: text;
+/* --- BRAND TEXT COLOR --- */
+.text-gradient-animate,
+.text-gradient-animate span {
+  color: var(--primary-color) !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  animation: none !important;
 }
 
 @keyframes gradient-shift {
@@ -1878,10 +1875,7 @@ mark {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-.no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
+
 
 /* Premium macOS/iOS Glass Dock Style (Default / Light Theme) */
 .glass-dock {
@@ -1934,44 +1928,48 @@ mark {
 }
 
 .glass-dock #copyAllBtn {
-  background-color: #0073ff !important;
-  border-color: #0073ff !important;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
   color: #ffffff !important;
   border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 115, 255, 0.3) !important;
+  box-shadow: 0 4px 12px var(--primary-glow) !important;
 }
 .glass-dock #copyAllBtn:hover {
-  background-color: #005ecf !important;
-  border-color: #005ecf !important;
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
   color: #ffffff !important;
   transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px rgba(0, 115, 255, 0.45) !important;
+  box-shadow: 0 6px 18px var(--primary-glow) !important;
 }
 
 .glass-dock #exportBtn {
-  background-color: #8b5cf6 !important;
-  border-color: #8b5cf6 !important;
+  background-color: var(--export-color) !important;
+  border-color: var(--export-color) !important;
   color: #ffffff !important;
   border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+  box-shadow: 0 4px 12px var(--export-glow) !important;
 }
 .glass-dock #exportBtn:hover {
-  background-color: #7c3aed !important;
-  border-color: #7c3aed !important;
+  background-color: var(--export-hover) !important;
+  border-color: var(--export-hover) !important;
   color: #ffffff !important;
   transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45) !important;
+  box-shadow: 0 6px 18px var(--export-glow) !important;
 }
 
 .glass-dock #clearClipboard {
-  background-color: rgba(239, 68, 68, 0.08) !important;
-  border-color: rgba(239, 68, 68, 0.2) !important;
-  color: #b91c1c !important;
+  background-color: var(--danger-color) !important;
+  border-color: var(--danger-color) !important;
+  color: #ffffff !important;
   border-radius: 12px !important;
+  box-shadow: 0 4px 12px var(--danger-glow) !important;
 }
 .glass-dock #clearClipboard:hover {
-  background-color: #b91c1c !important;
-  color: white !important;
+  background-color: var(--danger-hover) !important;
+  border-color: var(--danger-hover) !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px var(--danger-glow) !important;
 }
 
 /* Specific lock state classes */
@@ -2045,41 +2043,7 @@ html.dark .glass-dock .dock-btn:hover {
   color: white !important;
 }
 
-html.dark .glass-dock #copyAllBtn {
-  background-color: #3b82f6 !important;
-  border-color: #3b82f6 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4) !important;
-}
-html.dark .glass-dock #copyAllBtn:hover {
-  background-color: #2563eb !important;
-  border-color: #2563eb !important;
-  color: #ffffff !important;
-}
 
-html.dark .glass-dock #exportBtn {
-  background-color: #8b5cf6 !important;
-  border-color: #8b5cf6 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4) !important;
-}
-html.dark .glass-dock #exportBtn:hover {
-  background-color: #7c3aed !important;
-  border-color: #7c3aed !important;
-  color: #ffffff !important;
-}
-
-html.dark .glass-dock #clearClipboard {
-  background-color: #ef4444 !important;
-  border-color: #ef4444 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
-}
-html.dark .glass-dock #clearClipboard:hover {
-  background-color: #dc2626 !important;
-  border-color: #dc2626 !important;
-  color: #ffffff !important;
-}
 
 html.dark #historyDrawer {
   background-color: rgba(15, 23, 42, 0.9) !important;
@@ -3438,50 +3402,7 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
 }
 
 /* Style primary and destructive dock actions consistently as rounded squares */
-body.app-layout .glass-dock #copyAllBtn {
-  background-color: #3b82f6 !important;
-  border-color: #3b82f6 !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
-}
-body.app-layout .glass-dock #copyAllBtn:hover {
-  background-color: #2563eb !important;
-  border-color: #2563eb !important;
-  color: #ffffff !important;
-  transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45) !important;
-}
 
-body.app-layout .glass-dock #exportBtn {
-  background-color: #8b5cf6 !important;
-  border-color: #8b5cf6 !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-}
-body.app-layout .glass-dock #exportBtn:hover {
-  background-color: #7c3aed !important;
-  border-color: #7c3aed !important;
-  color: #ffffff !important;
-  transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45) !important;
-}
-
-body.app-layout .glass-dock #clearClipboard {
-  background-color: #ef4444 !important;
-  border-color: #ef4444 !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
-}
-body.app-layout .glass-dock #clearClipboard:hover {
-  background-color: #dc2626 !important;
-  border-color: #dc2626 !important;
-  color: #ffffff !important;
-  transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45) !important;
-}
 
 /* Mobile responsive layout overrides for navbar and dock */
 @media (max-width: 767px) {

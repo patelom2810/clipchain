@@ -1870,7 +1870,7 @@ function updateCharCount() {
   const displayText = `${count} char${count !== 1 ? 's' : ''} · ${words} word${words !== 1 ? 's' : ''} · ${readTime} min read`;
   
   if (charCountEl) {
-    charCountEl.textContent = displayText;
+    charCountEl.textContent = `${count} char${count !== 1 ? 's' : ''}`;
   }
   const dockCharCount = document.getElementById("dockCharCount");
   if (dockCharCount) {
