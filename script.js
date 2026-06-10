@@ -1135,19 +1135,6 @@ if (btnViewEdit) btnViewEdit.addEventListener("click", () => setViewMode('edit')
 if (btnViewPreview) btnViewPreview.addEventListener("click", () => setViewMode('preview'));
 if (document.getElementById("btnViewSplit")) document.getElementById("btnViewSplit").addEventListener("click", () => setViewMode('split'));
 
-  // Bind Mobile Custom Dock Buttons
-  const mobileFabCopyBtn = document.getElementById("mobileFabCopyBtn");
-  if (mobileFabCopyBtn) mobileFabCopyBtn.addEventListener("click", () => document.getElementById("copyAllBtn")?.click());
-  
-  const mobileFabHistoryBtn = document.getElementById("mobileFabHistoryBtn");
-  if (mobileFabHistoryBtn) mobileFabHistoryBtn.addEventListener("click", () => document.getElementById("toggleHistoryBtn")?.click());
-  
-  const mobileFabNotesBtn = document.getElementById("mobileFabNotesBtn");
-  if (mobileFabNotesBtn) mobileFabNotesBtn.addEventListener("click", () => document.getElementById("showQrBtn")?.click());
-  
-  const mobileFabMoreBtn = document.getElementById("mobileFabMoreBtn");
-  if (mobileFabMoreBtn) mobileFabMoreBtn.addEventListener("click", () => document.getElementById("lockToggleBtn")?.click());
-
   // Listeners for typing
 
 

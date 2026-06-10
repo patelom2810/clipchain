@@ -553,9 +553,9 @@
   </div>
 </div>
 
-  <!-- Premium macOS/iOS Style Glass Dock Toolbar -->
+  <!-- Premium macOS/iOS Style Glass Dock Toolbar (Unified for all screens) -->
   <div class="app-bottom-toolbar animate-enter delay-300">
-    <div class="glass-dock relative flex items-center justify-center p-2 px-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-secondary-200 dark:border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all w-fit mx-auto select-none gap-2 sm:gap-3 max-[480px]:hidden">
+    <div class="glass-dock relative flex items-center justify-center p-2 px-2 sm:px-3 bg-white/90 backdrop-blur-xl border border-secondary-200 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] pointer-events-auto transition-all w-fit mx-auto select-none gap-1 sm:gap-2">
       
       <!-- Section 1: Session Info & Room Settings -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
@@ -566,12 +566,12 @@
         
         <!-- Session Text Details -->
         <div class="hidden sm:flex flex-col min-w-0 pr-1 select-text">
-          <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-secondary-900 dark:text-white truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
-          <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-secondary-500 dark:text-slate-400 font-medium whitespace-nowrap">0 characters</span>
+          <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-secondary-900 truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
+          <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-secondary-500 font-medium whitespace-nowrap">0 characters</span>
         </div>
         
         <!-- Lock (Collapsible) -->
-        <button id="lockToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Set Passcode">
+        <button id="lockToggleBtn" class="dock-btn w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white hover:bg-secondary-50 text-secondary-600 hover:text-secondary-900 border border-secondary-200 flex items-center justify-center transition-all tooltip" title="Set Passcode">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
             <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0110 0v4"></path>
@@ -584,7 +584,7 @@
         </button>
         
         <!-- Self-Destruct Timer (Collapsible) -->
-        <div class="relative dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Self-Destruct Timer">
+        <div class="relative dock-btn w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white hover:bg-secondary-50 text-secondary-600 hover:text-secondary-900 border border-secondary-200 flex items-center justify-center transition-all tooltip" title="Self-Destruct Timer">
           <select id="selfDestructTimer" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
             <option value="never" selected>No Timer</option>
             <option value="10m">10 Mins</option>
@@ -603,7 +603,7 @@
         </div>
         
         <!-- QR Code Button (Collapsible) -->
-        <button id="showQrBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Scan QR Code">
+        <button id="showQrBtn" class="dock-btn w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white hover:bg-secondary-50 text-secondary-600 hover:text-secondary-900 border border-secondary-200 flex items-center justify-center transition-all tooltip" title="Scan QR Code">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
             <path d="M3 7V5a2 2 0 012-2h2"></path>
             <path d="M17 3h2a2 2 0 012 2v2"></path>
@@ -621,12 +621,12 @@
       </div>
       
       <!-- Group Separator 1 -->
-      <div class="dock-separator max-[480px]:hidden"></div>
+      <div class="dock-separator"></div>
       
       <!-- Section 2: Editor Actions -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
         <!-- Copy All (Top 3 - Always Visible) -->
-        <button id="copyAllBtn" class="dock-btn w-11 h-11 rounded-xl bg-primary-500 hover:bg-primary-600 text-white border border-primary-600 flex items-center justify-center transition-all hover:scale-105 tooltip shadow-md shadow-primary-500/20" title="Copy All">
+        <button id="copyAllBtn" class="dock-btn w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center transition-all hover:scale-105 tooltip shadow-md shadow-primary-500/20" title="Copy All">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -638,7 +638,7 @@
         </button>
         
         <!-- Export (Collapsible) -->
-        <button id="exportBtn" class="dock-btn w-11 h-11 rounded-xl bg-violet-500 hover:bg-violet-600 text-white border border-violet-600 flex items-center justify-center transition-all hover:scale-105 tooltip max-[480px]:hidden shadow-md shadow-violet-500/20" title="Export File">
+        <button id="exportBtn" class="dock-btn w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center transition-all hover:scale-105 tooltip shadow-md shadow-violet-500/20" title="Export File">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
@@ -648,7 +648,7 @@
         </button>
         
         <!-- Clear (Top 3 - Always Visible) -->
-        <button id="clearClipboard" class="dock-btn w-11 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white border border-red-600 flex items-center justify-center transition-all hover:scale-105 tooltip shadow-md shadow-red-500/20" title="Clear Clipboard">
+        <button id="clearClipboard" class="dock-btn w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all hover:scale-105 tooltip shadow-md shadow-red-500/20" title="Clear Clipboard">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
             <path d="M3 6h18"></path>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -659,13 +659,13 @@
       </div>
       
       <!-- Group Separator 2 -->
-      <div class="dock-separator max-[480px]:hidden"></div>
+      <div class="dock-separator"></div>
       
       <!-- Section 3: Additional Tools -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
         
         <!-- History Drawer Toggle (Top 3 - Always Visible) -->
-        <button id="toggleHistoryBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Clipboard History">
+        <button id="toggleHistoryBtn" class="dock-btn w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white hover:bg-secondary-50 text-secondary-600 hover:text-secondary-900 border border-secondary-200 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Clipboard History">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
             <rect x="3" y="3" width="7" height="7" rx="1"></rect>
             <rect x="14" y="3" width="7" height="7" rx="1"></rect>
@@ -674,106 +674,8 @@
           </svg>
         </button>
 
-        <!-- Mobile More Menu Toggle (Only on <480px) -->
-        <div class="relative hidden max-[480px]:block">
-          <button id="mobileMoreToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="More Options" onclick="document.getElementById('mobileMoreDropdown').classList.toggle('hidden')">
-            <i data-lucide="more-horizontal" class="h-4.5 w-4.5"></i>
-          </button>
-          
-          <!-- Dropdown Popup -->
-          <div id="mobileMoreDropdown" class="absolute bottom-full right-0 mb-3 p-2 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col gap-2 hidden z-50">
-            <!-- Lock -->
-            <button onclick="document.getElementById('lockToggleBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Set Passcode">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
-            <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0110 0v4"></path>
-            <g transform="translate(12,16) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </g>
-          </svg>
-            </button>
-            <!-- Timer -->
-            <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Self-Destruct Timer">
-              <select class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" onchange="let orig=document.getElementById('selfDestructTimer'); orig.value=this.value; orig.dispatchEvent(new Event('change')); this.parentElement.parentElement.classList.add('hidden');">
-                <option value="never" selected>No Timer</option>
-                <option value="10m">10 Mins</option>
-                <option value="1h">1 Hour</option>
-                <option value="24h">24 Hours</option>
-              </select>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
-            <circle cx="12" cy="13" r="8"></circle>
-            <polyline points="12 9 12 13 14 15"></polyline>
-            <line x1="12" y1="2" x2="12" y2="4"></line>
-            <g transform="translate(18,18) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </g>
-          </svg>
-            </div>
-            <!-- QR -->
-            <button onclick="document.getElementById('showQrBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Scan QR Code">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
-            <path d="M3 7V5a2 2 0 012-2h2"></path>
-            <path d="M17 3h2a2 2 0 012 2v2"></path>
-            <path d="M21 17v2a2 2 0 01-2 2h-2"></path>
-            <path d="M7 21H5a2 2 0 01-2-2v-2"></path>
-            <rect x="6" y="6" width="3" height="3"></rect>
-            <rect x="15" y="6" width="3" height="3"></rect>
-            <rect x="6" y="15" width="3" height="3"></rect>
-            <g transform="translate(12,12) scale(0.4) translate(-12,-12)" stroke="#7BC143" stroke-width="3.5">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </g>
-          </svg>
-            </button>
-            <!-- Export -->
-            <button onclick="document.getElementById('exportBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all tooltip" title="Export File">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-            <path d="M7 19h10" stroke="#7BC143" stroke-width="2"></path>
-          </svg>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Custom Mobile Curved Dock (Screens < 480px) -->
-  <div class="fixed bottom-6 left-4 right-4 h-[72px] hidden max-[480px]:flex z-[60] pointer-events-none animate-enter delay-300 drop-shadow-[0_15px_25px_rgba(0,0,0,0.35)]">
-    
-    <!-- Left Solid Area -->
-    <div class="h-full bg-[#4a5142] rounded-l-[26px] pointer-events-auto" style="width: 24px;"></div>
-
-    <!-- The Smooth SVG Notch -->
-    <div class="h-full w-[100px] pointer-events-auto relative flex-shrink-0">
-      <svg width="100" height="72" viewBox="0 0 100 72" fill="none" class="absolute inset-0">
-        <path d="M 0 0 C 10 0 12 5 15 15 C 25 45 75 45 85 15 C 88 5 90 0 100 0 L 100 72 L 0 72 Z" fill="#4a5142" />
-      </svg>
-      <!-- Glowing FAB (Orb) -->
-      <button id="mobileFabCopyBtn" class="absolute flex items-center justify-center transition-all pointer-events-auto active:scale-95 cursor-pointer" 
-              style="top: -18px; left: 24px; width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #a4e05b, #629c1e); box-shadow: 0 0 25px rgba(132,204,22,0.6), inset 0 2px 5px rgba(255,255,255,0.4);">
-        <!-- Subtle highlight dot for the glass orb effect -->
-        <div class="absolute w-1.5 h-1.5 bg-white/70 rounded-full" style="top: 14px; left: 20px; filter: blur(0.5px);"></div>
-      </button>
-    </div>
-
-    <!-- Right Solid Area -->
-    <div class="h-full flex-1 bg-[#4a5142] rounded-r-[26px] pointer-events-auto flex items-center justify-end pr-8 gap-8">
-      <button id="mobileFabHistoryBtn" class="text-white/60 hover:text-[#92d04a] transition-colors pointer-events-auto flex items-center justify-center" title="Actions">
-        <i data-lucide="cloud-lightning" class="h-[28px] w-[28px] stroke-[1.5]"></i>
-      </button>
-      <button id="mobileFabMoreBtn" class="text-white/60 hover:text-[#92d04a] transition-colors pointer-events-auto flex items-center justify-center" title="Settings">
-        <i data-lucide="settings" class="h-[28px] w-[28px] stroke-[1.5]"></i>
-      </button>
-      <button id="mobileFabNotesBtn" class="text-white/60 hover:text-[#92d04a] transition-colors pointer-events-auto flex items-center justify-center" title="Media">
-        <i data-lucide="image" class="h-[28px] w-[28px] stroke-[1.5]"></i>
-      </button>
-    </div>
-
   </div>
 
   <!-- Premium History Drawer -->
