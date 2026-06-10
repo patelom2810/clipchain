@@ -2557,129 +2557,7 @@ html.dark .usearch-highlight {
   color: #fbbf24;
 }
 
-/* ==========================================================================
-   FOCUS / ZEN MODE
-   ========================================================================== */
 
-/* Dark overlay behind editor while in focus mode */
-.focus-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 45;
-  background: rgba(2, 6, 23, 0.92);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-body.focus-mode .focus-overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Focus exit pill */
-.focus-exit-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-body.focus-mode .focus-exit-btn {
-  pointer-events: auto;
-}
-body.focus-mode .focus-exit-btn.visible {
-  opacity: 1;
-}
-.focus-exit-btn button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  font-family: inherit;
-}
-.focus-exit-btn button:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-}
-.focus-word-count-wrap {
-  font-size: 10px;
-  color: rgba(255,255,255,0.35);
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-align: right;
-  padding-right: 4px;
-}
-
-/* Editor elevated to top when focus mode is on */
-body.focus-mode #main-editor-wrapper,
-body.focus-mode .editor-section {
-  position: relative;
-  z-index: 46;
-}
-
-/* Completely hide nav + dock in focus mode */
-body.focus-mode nav,
-body.focus-mode .glass-dock,
-body.focus-mode #historyDrawer,
-body.focus-mode #pinnedNotesContainer,
-body.focus-mode footer,
-body.focus-mode #searchCount,
-body.focus-mode .view-controls,
-body.focus-mode #editorTabBar {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.4s ease;
-}
-
-/* Expand editor area in focus mode */
-body.focus-mode #editorContentGrid {
-  height: 100vh !important;
-  min-height: 100vh !important;
-}
-
-/* Typing area becomes crisp and immersive */
-body.focus-mode #clipboard {
-  font-size: 18px;
-  line-height: 1.85;
-  caret-color: #60a5fa;
-  color: #f8fafc;
-  background: transparent;
-  padding: 6vh 8vw;
-}
-body.focus-mode #highlightOverlay {
-  padding: 6vh 8vw;
-  font-size: 18px;
-  line-height: 1.85;
-}
-
-/* Smooth transition for editor body bg */
-body.focus-mode {
-  background-color: #020617 !important;
-  transition: background-color 0.5s ease;
-}
-
-/* Focus mode active glow on dock button */
-#dockFocusModeBtn.active {
-  background: rgba(16, 185, 129, 0.2) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
-  color: #34d399 !important;
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
-}
 #dockUniversalSearchBtn.active {
   background: rgba(245, 158, 11, 0.2) !important;
   border-color: rgba(245, 158, 11, 0.4) !important;
@@ -3120,65 +2998,7 @@ main.pt-24 {
   position: relative;
 }
 
-.tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translate(-50%, 6px);
-  background-color: rgba(15, 23, 42, 0.95);
-  color: #f8fafc;
-  padding: 5px 9px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  font-family: 'Outfit', sans-serif;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s cubic-bezier(0.4, 0, 0.2, 1), transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: 9999;
-}
 
-.tooltip::before {
-  content: '';
-  position: absolute;
-  bottom: calc(100% + 3px);
-  left: 50%;
-  transform: translate(-50%, 6px);
-  border-width: 5px;
-  border-style: solid;
-  border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s cubic-bezier(0.4, 0, 0.2, 1), transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 9999;
-}
-
-.tooltip:hover::after,
-.tooltip:hover::before {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
-/* Bottom tooltips positioning for elements near the top of the viewport */
-.tooltip-bottom::after {
-  bottom: auto;
-  top: calc(100% + 8px);
-  transform: translate(-50%, -6px);
-}
-.tooltip-bottom::before {
-  bottom: auto;
-  top: calc(100% + 3px);
-  transform: translate(-50%, -6px);
-  border-color: transparent transparent rgba(15, 23, 42, 0.95) transparent;
-}
-.tooltip-bottom:hover::after,
-.tooltip-bottom:hover::before {
-  transform: translate(-50%, 0);
-}
 
 /* Sync Status Indicator Animation */
 @keyframes statusPop {
@@ -3233,12 +3053,7 @@ body.app-layout .app-navbar {
    ========================================================================== */
 #formattingToolbar {
   flex-shrink: 0 !important;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-#formattingToolbar::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
 }
 
 /* Individual formatting button */
@@ -3418,7 +3233,8 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
 
   /* Make bottom dock swipe-able/scrollable horizontally on mobile */
   body.app-layout .glass-dock {
-    max-width: calc(100% - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    min-width: 0 !important;
     width: auto !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
@@ -3436,5 +3252,72 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
   /* Prevent dock buttons and dividers from shrinking inside the scrollable view */
   body.app-layout .glass-dock > * {
     flex-shrink: 0 !important;
+  }
+}
+
+/* Floating Selection Bubble Toolbar Styles */
+.selection-bubble {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 16px -6px rgba(0, 0, 0, 0.3);
+  transform-origin: bottom center;
+  animation: spring-up 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  pointer-events: auto;
+}
+
+[data-theme="dark"] .selection-bubble {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.selection-bubble-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.selection-bubble-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.selection-bubble-btn:active {
+  transform: scale(0.95);
+}
+
+.selection-bubble-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 2px;
+}
+
+/* Spring up animation */
+@keyframes spring-up {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }

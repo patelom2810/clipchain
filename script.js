@@ -809,7 +809,10 @@ function updateHighlight() {
   // Note: This simple regex replaces in the HTML string, might break if query contains special chars
   // Ideally use a more robust way, but for "Find in Text", this works for demo
   try {
-    const regex = new RegExp(`(${escapeRegExp(query)})`, "gi");
+    const escapedQuery = query.replace(/[&<>"']/g, function (m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+    });
+    const regex = new RegExp(`(${escapeRegExp(escapedQuery)})`, "gi");
     let matchCount = 0;
 
     const highlighted = escapedText.replace(regex, (match) => {
@@ -1018,6 +1021,8 @@ if (btnViewSplit) btnViewSplit.addEventListener("click", () => setViewMode('spli
 
 
 // Formatting Shortcuts Toolbar Logic
+const fmtUndo = document.getElementById("fmtUndo");
+const fmtRedo = document.getElementById("fmtRedo");
 const fmtBold = document.getElementById("fmtBold");
 const fmtItalic = document.getElementById("fmtItalic");
 const fmtUnderline = document.getElementById("fmtUnderline");
@@ -1056,6 +1061,19 @@ function insertMarkdown(beforeText, afterText = "") {
   const event = new Event('input', { bubbles: true });
   textarea.dispatchEvent(event);
   renderMarkdownPreview();
+}
+
+if (fmtUndo) {
+  fmtUndo.addEventListener("click", () => {
+    clipboardTextArea.focus();
+    document.execCommand("undo");
+  });
+}
+if (fmtRedo) {
+  fmtRedo.addEventListener("click", () => {
+    clipboardTextArea.focus();
+    document.execCommand("redo");
+  });
 }
 
 if (fmtBold) fmtBold.addEventListener("click", () => insertMarkdown("**", "**"));
@@ -1115,7 +1133,7 @@ if (fmtRemove) {
 // Table format shortcut
 if (fmtTable) {
   fmtTable.addEventListener("click", () => {
-    insertMarkdown("| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |");
+    insertMarkdown("\n\n| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n\n");
   });
 }
 
@@ -1218,14 +1236,25 @@ function closeConfirmModal() {
   }, 300);
 }
 
+function isFloatingNoteOpen() {
+  const panel = document.getElementById("floatingStickyNote");
+  return panel && !panel.classList.contains("closed");
+}
+
 if (confirmClearBtn) {
   confirmClearBtn.addEventListener("click", () => {
-    if (currentViewMode === 'sticky') {
+    if (currentViewMode === 'sticky' || isFloatingNoteOpen()) {
       const stickyTextArea = document.getElementById("stickyTextArea");
       if (stickyTextArea) stickyTextArea.value = "";
       const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
       if (floatingNoteTextArea) floatingNoteTextArea.value = "";
       clipboardRef.update({ stickyText: "" });
+      
+      if (typeof activeNoteId !== 'undefined' && activeNoteId && typeof username !== 'undefined') {
+        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
+          content: ""
+        });
+      }
       showNotification("Sticky note cleared", "success");
     } else {
       clipboardTextArea.value = "";
@@ -1275,9 +1304,11 @@ if (copyAllBtn) {
       return;
     }
     const stickyTextArea = document.getElementById("stickyTextArea");
-    const text = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value;
+    const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+    const text = (isFloatingNoteOpen() && floatingNoteTextArea) ? floatingNoteTextArea.value : 
+                 ((currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value);
     if (!text) {
-      return showNotification(currentViewMode === 'sticky' ? "Sticky note is empty" : "Clipboard is empty", "info");
+      return showNotification((currentViewMode === 'sticky' || isFloatingNoteOpen()) ? "Sticky note is empty" : "Clipboard is empty", "info");
     }
 
     navigator.clipboard.writeText(text).then(() => {
@@ -1286,7 +1317,7 @@ if (copyAllBtn) {
       copyAllBtn.innerHTML = `<i data-lucide="check" class="h-4 w-4 mr-1.5 text-green-600"></i> Copied!`;
       lucide.createIcons();
 
-      showNotification(currentViewMode === 'sticky' ? "Sticky note copied!" : "All content copied to clipboard!", "success");
+      showNotification((currentViewMode === 'sticky' || isFloatingNoteOpen()) ? "Sticky note copied!" : "All content copied to clipboard!", "success");
 
       setTimeout(() => {
         copyAllBtn.innerHTML = originalHtml;
@@ -1308,7 +1339,9 @@ if (exportBtn) {
       return;
     }
     const stickyTextArea = document.getElementById("stickyTextArea");
-    const text = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value;
+    const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+    const text = (isFloatingNoteOpen() && floatingNoteTextArea) ? floatingNoteTextArea.value : 
+                 ((currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value);
     if (!text) return showNotification("Nothing to export!", "info");
 
     const blob = new Blob([text], { type: "text/plain" });
@@ -1847,13 +1880,45 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Lucide library not loaded!");
   }
 
-  // Convert browser title attributes on elements with .tooltip class to data-tooltip
+  // Initialize JS-based tooltips to avoid overflow clipping issues
+  const globalTooltip = document.createElement('div');
+  globalTooltip.className = 'fixed pointer-events-none z-[9999] opacity-0 transition-opacity duration-150 bg-slate-900/95 text-slate-50 text-[11px] font-medium px-2.5 py-1.5 rounded-md shadow-lg border border-white/10 font-main whitespace-nowrap';
+  document.body.appendChild(globalTooltip);
+
   document.querySelectorAll('.tooltip').forEach(el => {
-    const title = el.getAttribute('title');
+    const title = el.getAttribute('title') || el.getAttribute('data-tooltip');
     if (title) {
       el.setAttribute('data-tooltip', title);
       el.removeAttribute('title');
     }
+
+    el.addEventListener('mouseenter', () => {
+      const text = el.getAttribute('data-tooltip');
+      if (!text) return;
+      globalTooltip.textContent = text;
+      
+      const rect = el.getBoundingClientRect();
+      // Default: position top
+      let top = rect.top - globalTooltip.offsetHeight - 8;
+      let left = rect.left + (rect.width / 2) - (globalTooltip.offsetWidth / 2);
+      
+      if (el.classList.contains('tooltip-bottom')) {
+         top = rect.bottom + 8;
+      }
+      if (el.classList.contains('tooltip-right-align')) {
+         left = rect.left;
+      }
+      
+      globalTooltip.style.top = `${top}px`;
+      globalTooltip.style.left = `${left}px`;
+      globalTooltip.classList.remove('opacity-0');
+      globalTooltip.classList.add('opacity-100');
+    });
+
+    el.addEventListener('mouseleave', () => {
+      globalTooltip.classList.remove('opacity-100');
+      globalTooltip.classList.add('opacity-0');
+    });
   });
 });
 
@@ -1863,7 +1928,9 @@ function generateRandomID() {
 
 function updateCharCount() {
   const stickyTextArea = document.getElementById("stickyTextArea");
-  const text = (currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value;
+  const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+  const text = (typeof isFloatingNoteOpen === 'function' && isFloatingNoteOpen() && floatingNoteTextArea) ? floatingNoteTextArea.value : 
+               ((currentViewMode === 'sticky' && stickyTextArea) ? stickyTextArea.value : clipboardTextArea.value);
   const count = text.length;
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const readTime = Math.max(1, Math.ceil(words / 200));
@@ -2040,7 +2107,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     const targetId = this.getAttribute('href');
     if (!targetId || targetId === '#') return;
 
-    const targetElement = document.querySelector(targetId);
+    let targetElement = null;
+    try {
+      targetElement = document.querySelector(targetId);
+    } catch (e) {
+      // Invalid selector (e.g. contains slashes), just ignore it
+    }
     if (targetElement) {
       e.preventDefault(); // Only prevent default when there IS a matching element
       window.scrollTo({
@@ -2567,7 +2639,6 @@ const initCommandPaletteSystem = () => {
   const paletteSearchInput = document.getElementById("paletteSearchInput");
   const commandsList = document.getElementById("paletteCommandsList");
   const navBtn = document.getElementById("navCommandPaletteBtn");
-  const mobileNavBtn = document.getElementById("mobileNavCommandPaletteBtn");
   
   const calcView = document.getElementById("paletteCalculatorView");
   const calendarView = document.getElementById("paletteCalendarView");
@@ -2637,7 +2708,6 @@ const initCommandPaletteSystem = () => {
 
   // Keyboard and Button triggers for open/close
   if (navBtn) navBtn.addEventListener("click", openCommandPalette);
-  if (mobileNavBtn) mobileNavBtn.addEventListener("click", openCommandPalette);
   if (backdrop) backdrop.addEventListener("click", closeCommandPalette);
 
   // Global Keydown Listener for Cmd+K / Ctrl+K & Hotkeys
@@ -3243,58 +3313,216 @@ if (document.readyState === 'loading') {
     setTimeout(() => { if (window.showNavNotif) window.showNavNotif(); }, 2000);
   }
 
-  // ── Focus Mode Implementation ──
-  const dockFocusModeBtn = document.getElementById("dockFocusModeBtn");
-  const focusExitBtnInner = document.getElementById("focusExitBtnInner");
 
-  function toggleFocusMode() {
-    const isFocus = document.body.classList.toggle("focus-mode");
-    if (dockFocusModeBtn) {
-      if (isFocus) {
-        dockFocusModeBtn.classList.add("active");
-        showNotification("Focus Mode enabled. Press Esc to exit.", "success");
-      } else {
-        dockFocusModeBtn.classList.remove("active");
-        showNotification("Focus Mode disabled", "info");
-      }
-    }
-    updateCharCount(); // refresh focus word count
-  }
+})();
 
-  if (dockFocusModeBtn) {
-    dockFocusModeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleFocusMode();
-    });
-  }
+// Floating Selection Bubble Logic
+(function initSelectionBubble() {
+  const textarea = document.getElementById("clipboard");
+  const bubble = document.getElementById("selectionBubble");
+  const btnBold = document.getElementById("bubbleBold");
+  const btnItalic = document.getElementById("bubbleItalic");
+  const btnCopy = document.getElementById("bubbleCopy");
+  const btnLink = document.getElementById("bubbleLink");
 
-  if (focusExitBtnInner) {
-    focusExitBtnInner.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (document.body.classList.contains("focus-mode")) {
-        toggleFocusMode();
-      }
-    });
-  }
+  if (!textarea || !bubble) return;
 
-  // Add Cmd+. / Ctrl+. and Esc keyboard shortcuts
-  document.addEventListener("keydown", (e) => {
-    const isMeta = e.metaKey || e.ctrlKey;
-    const key = e.key.toLowerCase();
+  // Track if mouse is down to avoid showing bubble mid-drag
+  let isMouseDown = false;
 
-    // Cmd+. or Ctrl+. to toggle focus mode
-    if (isMeta && key === '.') {
-      e.preventDefault();
-      toggleFocusMode();
-      return;
-    }
+  textarea.addEventListener("mousedown", () => {
+    isMouseDown = true;
+  });
 
-    // Escape to exit focus mode if active
-    if (e.key === 'Escape' && document.body.classList.contains("focus-mode")) {
-      e.preventDefault();
-      toggleFocusMode();
-      return;
+  document.addEventListener("mouseup", (e) => {
+    isMouseDown = false;
+    // Debounce slightly to let selection update
+    setTimeout(handleSelectionChange, 10);
+  });
+
+  textarea.addEventListener("keyup", handleSelectionChange);
+  textarea.addEventListener("scroll", handleSelectionChange);
+  textarea.addEventListener("input", hideBubble);
+
+  // Hide bubble when clicking outside of it and the textarea
+  document.addEventListener("mousedown", (e) => {
+    if (bubble.classList.contains("hidden")) return;
+    if (!bubble.contains(e.target) && e.target !== textarea) {
+      hideBubble();
     }
   });
 
+  // Action: Bold
+  if (btnBold) {
+    btnBold.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      insertMarkdown("**", "**");
+      handleSelectionChange();
+    });
+  }
+
+  // Action: Italic
+  if (btnItalic) {
+    btnItalic.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      insertMarkdown("*", "*");
+      handleSelectionChange();
+    });
+  }
+
+  // Action: Copy
+  if (btnCopy) {
+    btnCopy.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      if (selectedText) {
+        navigator.clipboard.writeText(selectedText).then(() => {
+          showNotification("Copied selection to clipboard", "success");
+          hideBubble();
+        }).catch(err => {
+          console.error("Failed to copy text: ", err);
+        });
+      }
+    });
+  }
+
+  // Action: Link
+  if (btnLink) {
+    btnLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      insertMarkdown("[", "](url)");
+      handleSelectionChange();
+    });
+  }
+
+  function hideBubble() {
+    bubble.classList.add("hidden");
+    bubble.style.display = "none";
+  }
+
+  function handleSelectionChange() {
+    if (isMouseDown) return;
+
+    if (isLocked) {
+      hideBubble();
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Only show if there is an active selection of length > 0
+    if (start === end || document.activeElement !== textarea) {
+      hideBubble();
+      return;
+    }
+
+    const coords = getSelectionCoords(textarea);
+    if (!coords) {
+      hideBubble();
+      return;
+    }
+
+    // Show bubble temporarily to measure its dimensions
+    bubble.style.display = "flex";
+    bubble.classList.remove("hidden");
+
+    const bubbleWidth = bubble.offsetWidth;
+    const bubbleHeight = bubble.offsetHeight;
+
+    // Center bubble above the selection span
+    let left = coords.left + (coords.width / 2) - (bubbleWidth / 2);
+    let top = coords.top - bubbleHeight - 10;
+
+    // Clamp coordinates to stay on screen
+    left = Math.max(10, Math.min(left, window.innerWidth - bubbleWidth - 10));
+    
+    // If the top goes above the viewport, position it below the selection instead
+    if (top < 10) {
+      top = coords.top + coords.height + 10;
+    }
+
+    bubble.style.left = left + "px";
+    bubble.style.top = top + "px";
+  }
+
+  // Mirror div positioning technique
+  function getSelectionCoords(textarea) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Create a mirror div if not already present
+    let mirror = document.getElementById("textarea-mirror");
+    if (!mirror) {
+      mirror = document.createElement("div");
+      mirror.id = "textarea-mirror";
+      document.body.appendChild(mirror);
+    }
+
+    // Mimic the exact typography and spacing of the textarea
+    const style = window.getComputedStyle(textarea);
+    const properties = [
+      'direction', 'boxSizing', 'borderWidth', 'borderStyle', 'borderColor',
+      'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+      'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'fontVariant',
+      'textTransform', 'wordSpacing', 'letterSpacing', 'lineHeight',
+      'textIndent', 'whiteSpace', 'wordBreak', 'overflowWrap'
+    ];
+    
+    properties.forEach(prop => {
+      mirror.style[prop] = style[prop];
+    });
+
+    mirror.style.position = 'absolute';
+    mirror.style.visibility = 'hidden';
+    mirror.style.whiteSpace = 'pre-wrap';
+    mirror.style.wordBreak = 'break-word';
+    mirror.style.overflowWrap = 'break-word';
+    mirror.style.top = '0';
+    mirror.style.left = '-9999px';
+
+    // Textarea width excluding scrollbar
+    mirror.style.width = textarea.clientWidth + 'px';
+
+    const text = textarea.value;
+    const beforeText = text.substring(0, start);
+    const selectedText = text.substring(start, end);
+
+    // Build the mirror DOM structure
+    mirror.textContent = "";
+    
+    const beforeNode = document.createTextNode(beforeText);
+    mirror.appendChild(beforeNode);
+    
+    const selectionSpan = document.createElement("span");
+    selectionSpan.textContent = selectedText || "|";
+    mirror.appendChild(selectionSpan);
+
+    const textareaRect = textarea.getBoundingClientRect();
+    
+    // Relative coordinates within the textarea viewport
+    const leftOffset = selectionSpan.offsetLeft - textarea.scrollLeft;
+    const topOffset = selectionSpan.offsetTop - textarea.scrollTop;
+
+    // Clamp coordinates to the viewport of the textarea (to hide if scrolled out of view)
+    const padding = parseFloat(style.paddingTop || 0);
+    const textareaHeight = textarea.clientHeight;
+    
+    if (topOffset < padding || topOffset > textareaHeight - padding) {
+      return null;
+    }
+
+    return {
+      top: textareaRect.top + topOffset,
+      left: textareaRect.left + leftOffset,
+      width: selectionSpan.offsetWidth,
+      height: selectionSpan.offsetHeight
+    };
+  }
 })();

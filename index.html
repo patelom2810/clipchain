@@ -98,7 +98,7 @@
         
         <!-- Workspace Switcher Button (Brand text) -->
         <button id="workspaceSwitcherBtn" class="flex items-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 px-2 py-1 rounded-lg transition-all ml-1.5 tooltip tooltip-bottom" title="Switch Workspace / Room">
-          <span class="font-bold text-xl tracking-tight text-secondary-900 dark:text-white font-cursive text-gradient-animate">Clip<span class="text-primary-600 hidden sm:inline">Chain</span></span>
+          <span class="font-bold text-xl tracking-tight text-secondary-900 dark:text-white font-cursive text-gradient-animate">Clip<span class="text-primary-600">Chain</span></span>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity: 0.5;"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
 
@@ -196,10 +196,7 @@
         </button>
       </div>
 
-      <!-- Mobile Command Palette -->
-      <button id="mobileNavCommandPaletteBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Command Palette">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
-      </button>
+
 
       <!-- Mobile Theme Toggle -->
       <button id="mobileThemeToggleBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Toggle Theme">
@@ -280,7 +277,8 @@
           <i data-lucide="search"
             class="absolute left-2.5 top-1.5 h-4 w-4 text-secondary-400 group-focus-within:text-primary-500 transition-colors"></i>
           <input type="text" id="searchInput" placeholder="Find in text..."
-            class="pl-9 pr-3 py-1 bg-white/50 dark:bg-slate-800/50 border border-transparent focus:bg-white dark:focus:bg-slate-700 focus:border-primary-200 dark:focus:border-primary-500 rounded-lg text-sm text-secondary-700 dark:text-gray-200 w-24 focus:w-32 sm:w-32 sm:focus:w-48 transition-all outline-none">
+            class="pl-9 pr-3 sm:pr-8 py-1 bg-white/50 dark:bg-slate-800/50 border border-transparent focus:bg-white dark:focus:bg-slate-700 focus:border-primary-200 dark:focus:border-primary-500 rounded-lg text-sm text-secondary-700 dark:text-gray-200 w-32 focus:w-40 sm:w-40 sm:focus:w-56 transition-all outline-none">
+          <kbd class="hidden sm:inline-block absolute right-1.5 top-1.5 pointer-events-none px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-500 dark:text-slate-400 opacity-100 group-focus-within:opacity-0 transition-opacity font-mono">⌘F</kbd>
           <div id="searchCount"
             class="hidden absolute right-2 top-1.5 text-xs text-secondary-400 dark:text-slate-500 bg-white dark:bg-slate-800 px-1 rounded">
             <span id="matchCount">0</span>
@@ -289,16 +287,26 @@
       </div>
 
       <!-- Formatting Toolbar — single clean row with group separators -->
-      <div id="formattingToolbar" class="flex items-center gap-0.5 px-3 py-1.5 bg-white/20 dark:bg-slate-800/20 border-b border-white/20 dark:border-slate-800/50">
+      <div id="formattingToolbar" class="flex items-center gap-0.5 px-3 py-1.5 bg-white/20 dark:bg-slate-800/20 border-b border-white/20 dark:border-slate-800/50 relative z-10">
+
+        <!-- Group 0: Undo / Redo -->
+        <button id="fmtUndo" class="fmt-btn tooltip tooltip-right-align" title="Undo (Ctrl/Cmd+Z)">
+          <i data-lucide="undo" class="h-3.5 w-3.5"></i>
+        </button>
+        <button id="fmtRedo" class="fmt-btn tooltip tooltip-right-align" title="Redo (Ctrl/Cmd+Shift+Z)">
+          <i data-lucide="redo" class="h-3.5 w-3.5"></i>
+        </button>
+
+        <div class="fmt-sep"></div>
 
         <!-- Group 1: Text Styles -->
-        <button id="fmtBold" class="fmt-btn tooltip" title="Bold (Ctrl+B)">
+        <button id="fmtBold" class="fmt-btn tooltip" title="Bold (Ctrl/Cmd+B)">
           <i data-lucide="bold" class="h-3.5 w-3.5"></i>
         </button>
-        <button id="fmtItalic" class="fmt-btn tooltip" title="Italic (Ctrl+I)">
+        <button id="fmtItalic" class="fmt-btn tooltip" title="Italic (Ctrl/Cmd+I)">
           <i data-lucide="italic" class="h-3.5 w-3.5"></i>
         </button>
-        <button id="fmtUnderline" class="fmt-btn tooltip" title="Underline (Ctrl+U)">
+        <button id="fmtUnderline" class="fmt-btn tooltip" title="Underline (Ctrl/Cmd+U)">
           <i data-lucide="underline" class="h-3.5 w-3.5"></i>
         </button>
         <button id="fmtStrikethrough" class="fmt-btn tooltip" title="Strikethrough">
@@ -430,83 +438,6 @@
             <p class="text-sm text-secondary-500 dark:text-secondary-400">
               Scan to open on mobile
             </p>
-          </div>
-        </div>
-
-        <!-- Keyboard Shortcuts Modal -->
-        <div id="shortcutsModal"
-          class="absolute inset-0 z-45 flex items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-          <div class="relative w-full max-w-sm mx-4 p-6 bg-white dark:bg-slate-800 border border-secondary-100 dark:border-slate-750 shadow-2xl rounded-2xl text-secondary-900 dark:text-white">
-            <button id="closeShortcutsModal"
-              class="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-secondary-400 hover:text-secondary-600 dark:text-slate-400 dark:hover:text-white transition-colors">
-              <i data-lucide="x" class="h-5 w-5"></i>
-            </button>
-
-            <div class="flex items-center gap-2 mb-5">
-              <div class="w-8 h-8 rounded-lg bg-primary-500/10 text-primary-500 flex items-center justify-center">
-                <i data-lucide="keyboard" class="h-4 w-4"></i>
-              </div>
-              <h3 class="text-base font-bold">Keyboard Shortcuts</h3>
-            </div>
-
-            <!-- Shortcut list -->
-            <div class="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
-              <div class="space-y-1.5">
-                <h4 class="text-[10px] font-bold text-primary-500 uppercase tracking-wider">Navigation & Search</h4>
-                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
-                  <span class="text-secondary-600 dark:text-slate-300">Toggle Command Palette</span>
-                  <div class="flex items-center gap-1">
-                    <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘K</kbd>
-                  </div>
-                </div>
-                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
-                  <span class="text-secondary-600 dark:text-slate-300">Universal Search</span>
-                  <div class="flex items-center gap-1">
-                    <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘/</kbd>
-                  </div>
-                </div>
-                <div class="flex items-center justify-between text-xs py-1">
-                  <span class="text-secondary-600 dark:text-slate-300">Toggle Shortcuts Panel</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">?</kbd>
-                </div>
-              </div>
-
-              <div class="space-y-1.5 pt-1">
-                <h4 class="text-[10px] font-bold text-violet-500 uppercase tracking-wider">Editor Actions</h4>
-                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
-                  <span class="text-secondary-600 dark:text-slate-300">Search inside Editor</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘F</kbd>
-                </div>
-                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
-                  <span class="text-secondary-600 dark:text-slate-300">Export Content</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘E</kbd>
-                </div>
-                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
-                  <span class="text-secondary-600 dark:text-slate-300">Focus Mode</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘.</kbd>
-                </div>
-                <div class="flex items-center justify-between text-xs py-1">
-                  <span class="text-secondary-600 dark:text-slate-300">Add Sticky Note</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘N</kbd>
-                </div>
-              </div>
-
-              <div class="space-y-1.5 pt-1">
-                <h4 class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Preferences</h4>
-                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
-                  <span class="text-secondary-600 dark:text-slate-300">Switch Room</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘G</kbd>
-                </div>
-                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
-                  <span class="text-secondary-600 dark:text-slate-300">Toggle Theme</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘D</kbd>
-                </div>
-                <div class="flex items-center justify-between text-xs py-1">
-                  <span class="text-secondary-600 dark:text-slate-300">Lock Room</span>
-                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘L</kbd>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -645,11 +576,6 @@
         </svg>
         <span>by <span class="font-medium text-secondary-800 dark:text-slate-200">Om Patel</span></span>
       </div>
-      <span class="hidden sm:inline text-secondary-300 dark:text-slate-700">•</span>
-      <a href="support.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-secondary-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-800/50 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-500 dark:hover:text-primary-400 transition-all shadow-sm" title="Help & Support">
-        <i data-lucide="help-circle" style="width:14px;height:14px;"></i>
-        <span class="font-medium">Help &amp; Support</span>
-      </a>
     </div>
   </footer>
 </div>
@@ -733,11 +659,6 @@
         <!-- Sticky Notes Toggle -->
         <button id="dockStickyBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Sticky Notes">
           <i data-lucide="sticky-note" class="h-4.5 w-4.5"></i>
-        </button>
-        
-        <!-- Focus Mode Button -->
-        <button id="dockFocusModeBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/20 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Focus Mode (⌘.)">
-          <i data-lucide="focus" class="h-4.5 w-4.5"></i>
         </button>
       </div>
     </div>
@@ -951,20 +872,6 @@
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- FOCUS MODE OVERLAY & EXIT BUTTON                            -->
-  <!-- ============================================================ -->
-  <div id="focusModeOverlay" class="focus-overlay"></div>
-  <div id="focusExitBtn" class="focus-exit-btn">
-    <button id="focusExitBtnInner" title="Exit Focus Mode (Esc)">
-      <i data-lucide="minimize-2" class="h-4 w-4"></i>
-      <span>Exit Focus</span>
-    </button>
-    <div class="focus-word-count-wrap">
-      <span id="focusWordCount">0 words</span>
-    </div>
-  </div>
-
   <!-- Floating Command Palette -->
   <div id="commandPaletteBackdrop" class="fixed inset-0 z-50"></div>
   <div id="commandPaletteCard" class="fixed">
@@ -989,7 +896,7 @@
               <span class="command-item-desc">Add a new colorful floating sticky note</span>
             </div>
           </div>
-          <span class="palette-shortcut-badge">Cmd+N</span>
+          <span class="palette-shortcut-badge">Ctrl/Cmd+N</span>
         </div>
 
         <div class="command-item" data-action="switch-room">
@@ -1000,7 +907,7 @@
               <span class="command-item-desc">Join or create a different clipboard room</span>
             </div>
           </div>
-          <span class="palette-shortcut-badge">Cmd+G</span>
+          <span class="palette-shortcut-badge">Ctrl/Cmd+G</span>
         </div>
 
         <div class="command-item" data-action="export">
@@ -1011,7 +918,7 @@
               <span class="command-item-desc">Download clipboard as .md or .txt file</span>
             </div>
           </div>
-          <span class="palette-shortcut-badge">Cmd+E</span>
+          <span class="palette-shortcut-badge">Ctrl/Cmd+E</span>
         </div>
 
         <div class="command-item" data-action="search">
@@ -1022,7 +929,7 @@
               <span class="command-item-desc">Fuzzy find text inside the main clipboard</span>
             </div>
           </div>
-          <span class="palette-shortcut-badge">Cmd+F</span>
+          <span class="palette-shortcut-badge">Ctrl/Cmd+F</span>
         </div>
 
         <div class="command-item" data-action="theme">
@@ -1033,7 +940,7 @@
               <span class="command-item-desc">Switch between light and dark themes</span>
             </div>
           </div>
-          <span class="palette-shortcut-badge">Cmd+D</span>
+          <span class="palette-shortcut-badge">Ctrl/Cmd+D</span>
         </div>
 
         <div class="command-item" data-action="lock">
@@ -1044,7 +951,7 @@
               <span class="command-item-desc">Toggle passcode protection on clipboard</span>
             </div>
           </div>
-          <span class="palette-shortcut-badge">Cmd+L</span>
+          <span class="palette-shortcut-badge">Ctrl/Cmd+L</span>
         </div>
 
         <div class="command-item" data-action="shortcuts">
@@ -1162,9 +1069,103 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Floating Selection Bubble Toolbar -->
+    <div id="selectionBubble" class="selection-bubble hidden" style="display: none;">
+      <button id="bubbleBold" class="selection-bubble-btn tooltip" title="Bold (Ctrl/Cmd+B)">
+        <i data-lucide="bold" class="w-3.5 h-3.5"></i>
+      </button>
+      <button id="bubbleItalic" class="selection-bubble-btn tooltip" title="Italic (Ctrl/Cmd+I)">
+        <i data-lucide="italic" class="w-3.5 h-3.5"></i>
+      </button>
+      <div class="selection-bubble-divider"></div>
+      <button id="bubbleCopy" class="selection-bubble-btn tooltip" title="Copy Selection">
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+      </button>
+      <button id="bubbleLink" class="selection-bubble-btn tooltip" title="Link">
+        <i data-lucide="link" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+
     <!-- html2canvas -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="script.js"></script>
-</body>
+
+
+        <!-- Keyboard Shortcuts Modal -->
+        <div id="shortcutsModal"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+          <div class="relative w-full max-w-sm mx-4 p-6 bg-white dark:bg-slate-800 border border-secondary-100 dark:border-slate-750 shadow-2xl rounded-2xl text-secondary-900 dark:text-white">
+            <button id="closeShortcutsModal"
+              class="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-secondary-400 hover:text-secondary-600 dark:text-slate-400 dark:hover:text-white transition-colors">
+              <i data-lucide="x" class="h-5 w-5"></i>
+            </button>
+
+            <div class="flex items-center gap-2 mb-5">
+              <div class="w-8 h-8 rounded-lg bg-primary-500/10 text-primary-500 flex items-center justify-center">
+                <i data-lucide="keyboard" class="h-4 w-4"></i>
+              </div>
+              <h3 class="text-base font-bold">Keyboard Shortcuts</h3>
+            </div>
+
+            <!-- Shortcut list -->
+            <div class="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+              <div class="space-y-1.5">
+                <h4 class="text-[10px] font-bold text-primary-500 uppercase tracking-wider">Navigation & Search</h4>
+                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
+                  <span class="text-secondary-600 dark:text-slate-300">Toggle Command Palette</span>
+                  <div class="flex items-center gap-1">
+                    <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘K</kbd>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
+                  <span class="text-secondary-600 dark:text-slate-300">Universal Search</span>
+                  <div class="flex items-center gap-1">
+                    <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘/</kbd>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-xs py-1">
+                  <span class="text-secondary-600 dark:text-slate-300">Toggle Shortcuts Panel</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">?</kbd>
+                </div>
+              </div>
+
+              <div class="space-y-1.5 pt-1">
+                <h4 class="text-[10px] font-bold text-violet-500 uppercase tracking-wider">Editor Actions</h4>
+                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
+                  <span class="text-secondary-600 dark:text-slate-300">Search inside Editor</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘F</kbd>
+                </div>
+                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
+                  <span class="text-secondary-600 dark:text-slate-300">Export Content</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘E</kbd>
+                </div>
+                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
+                  <span class="text-secondary-600 dark:text-slate-300">Focus Mode</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘.</kbd>
+                </div>
+                <div class="flex items-center justify-between text-xs py-1">
+                  <span class="text-secondary-600 dark:text-slate-300">Add Sticky Note</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘N</kbd>
+                </div>
+              </div>
+
+              <div class="space-y-1.5 pt-1">
+                <h4 class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Preferences</h4>
+                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
+                  <span class="text-secondary-600 dark:text-slate-300">Switch Room</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘G</kbd>
+                </div>
+                <div class="flex items-center justify-between text-xs py-1 border-b border-secondary-100/50 dark:border-slate-700/30">
+                  <span class="text-secondary-600 dark:text-slate-300">Toggle Theme</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘D</kbd>
+                </div>
+                <div class="flex items-center justify-between text-xs py-1">
+                  <span class="text-secondary-600 dark:text-slate-300">Lock Room</span>
+                  <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-800 dark:text-slate-200">⌘L</kbd>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></body>
 
 </html>
