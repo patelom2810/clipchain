@@ -3241,6 +3241,7 @@ body.app-layout .app-navbar {
   align-items: center !important;
   z-index: 40 !important;
   background: transparent !important;
+  pointer-events: none !important;
 }
 
 /* Adjust general glass dock styling for flex alignment & premium aesthetics */
@@ -3330,9 +3331,16 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
     gap: 8px !important;
   }
 
+  /* Centered scrollable container fix: parent flex-start + margin auto */
+  .app-bottom-toolbar {
+    justify-content: flex-start !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
   /* Make bottom dock swipe-able/scrollable horizontally on mobile */
   body.app-layout .glass-dock {
-    max-width: calc(100vw - 32px) !important;
+    max-width: 100% !important;
     min-width: 0 !important;
     width: auto !important;
     overflow-x: auto !important;
@@ -3340,9 +3348,12 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
     justify-content: flex-start !important;
     padding: 8px 12px !important;
     gap: 8px !important;
+    margin: 0 auto !important;
     scrollbar-width: none !important; /* Firefox */
     -ms-overflow-style: none !important;  /* IE 10+ */
     -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    pointer-events: auto !important;
   }
   body.app-layout .glass-dock::-webkit-scrollbar {
     display: none !important; /* Safari and Chrome */
