@@ -135,7 +135,7 @@
         <input type="text" id="mobileNavbarUsername" placeholder="Room ID"
           class="navbar-id-input" autocomplete="off">
         <button id="mobileNavShareBtn" class="navbar-go-btn share-button tooltip tooltip-bottom" title="Share">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3" stroke="#7BC143"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         </button>
       </div>
 
@@ -171,7 +171,10 @@
       <div
         class="glass-panel w-full flex items-center justify-between p-1.5 pl-4 rounded-full shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center overflow-hidden mr-2">
-          <i data-lucide="link" class="h-4 w-4 text-primary-500 flex-shrink-0 mr-3"></i>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#7BC143" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 flex-shrink-0 mr-3">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
           <a id="clipboardLink" href="#" target="_blank"
             class="text-sm font-mono text-primary-600 truncate hover:underline">...</a>
         </div>
@@ -180,7 +183,14 @@
           <button id="copyLink"
             class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-secondary-100 dark:hover:bg-slate-800 text-secondary-600 dark:text-gray-300 transition-colors tooltip"
             title="Copy Link">
-            <i data-lucide="copy" class="h-4 w-4"></i>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              <g transform="translate(15.5,15.5) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </g>
+            </svg>
           </button>
 
 
@@ -233,8 +243,11 @@
 
         <!-- Search -->
         <div class="relative group">
-          <i data-lucide="search"
-            class="absolute left-2.5 top-1.5 h-4 w-4 text-secondary-400 group-focus-within:text-primary-500 transition-colors"></i>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-1.5 h-4 w-4 text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <path d="M11 15a4 4 0 0 0 4-4" stroke="#7BC143" stroke-width="2"></path>
+          </svg>
           <input type="text" id="searchInput" placeholder="Find in text..."
             class="pl-9 pr-3 sm:pr-8 py-1 bg-white/50 dark:bg-slate-800/50 border border-transparent focus:bg-white dark:focus:bg-slate-700 focus:border-primary-200 dark:focus:border-primary-500 rounded-lg text-sm text-secondary-700 dark:text-gray-200 w-32 focus:w-40 sm:w-40 sm:focus:w-56 transition-all outline-none">
           <kbd class="hidden sm:inline-block absolute right-1.5 top-1.5 pointer-events-none px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-500 dark:text-slate-400 opacity-100 group-focus-within:opacity-0 transition-opacity font-mono">⌘F</kbd>
@@ -368,7 +381,14 @@
           class="absolute inset-0 z-30 bg-white/10 dark:bg-slate-900/10 backdrop-blur-md flex flex-col items-center justify-center hidden">
           <div class="bg-white/80 dark:bg-slate-800/80 p-6 rounded-2xl shadow-2xl text-center max-w-sm mx-4 border border-white/20 dark:border-slate-700/50">
             <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i data-lucide="lock" class="h-8 w-8 text-red-500"></i>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-red-500">
+                <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0110 0v4"></path>
+                <g transform="translate(12,16) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </g>
+              </svg>
             </div>
             <h3 class="text-xl font-bold text-secondary-900 dark:text-white mb-2">Content Locked</h3>
             <p class="text-secondary-600 dark:text-gray-300 mb-6">This clipboard is password protected.</p>
@@ -535,7 +555,7 @@
 
   <!-- Premium macOS/iOS Style Glass Dock Toolbar -->
   <div class="app-bottom-toolbar animate-enter delay-300">
-    <div class="glass-dock relative flex items-center justify-center p-2 px-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all w-fit mx-auto select-none gap-2 sm:gap-3 max-[480px]:hidden">
+    <div class="glass-dock relative flex items-center justify-center p-2 px-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-secondary-200 dark:border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all w-fit mx-auto select-none gap-2 sm:gap-3 max-[480px]:hidden">
       
       <!-- Section 1: Session Info & Room Settings -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
@@ -546,30 +566,57 @@
         
         <!-- Session Text Details -->
         <div class="hidden sm:flex flex-col min-w-0 pr-1 select-text">
-          <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-white truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
-          <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-slate-400 font-medium whitespace-nowrap">0 characters</span>
+          <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-secondary-900 dark:text-white truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
+          <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-secondary-500 dark:text-slate-400 font-medium whitespace-nowrap">0 characters</span>
         </div>
         
         <!-- Lock (Collapsible) -->
-        <button id="lockToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Set Passcode">
-          <i data-lucide="lock" class="h-4.5 w-4.5"></i>
+        <button id="lockToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Set Passcode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0110 0v4"></path>
+            <g transform="translate(12,16) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </g>
+          </svg>
           <span id="lockBtnText" class="hidden">Set Password</span>
         </button>
         
         <!-- Self-Destruct Timer (Collapsible) -->
-        <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Self-Destruct Timer">
+        <div class="relative dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Self-Destruct Timer">
           <select id="selfDestructTimer" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
             <option value="never" selected>No Timer</option>
             <option value="10m">10 Mins</option>
             <option value="1h">1 Hour</option>
             <option value="24h">24 Hours</option>
           </select>
-          <i data-lucide="timer" class="h-4.5 w-4.5"></i>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <circle cx="12" cy="13" r="8"></circle>
+            <polyline points="12 9 12 13 14 15"></polyline>
+            <line x1="12" y1="2" x2="12" y2="4"></line>
+            <g transform="translate(18,18) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </g>
+          </svg>
         </div>
         
         <!-- QR Code Button (Collapsible) -->
-        <button id="showQrBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Scan QR Code">
-          <i data-lucide="qr-code" class="h-4.5 w-4.5"></i>
+        <button id="showQrBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Scan QR Code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <path d="M3 7V5a2 2 0 012-2h2"></path>
+            <path d="M17 3h2a2 2 0 012 2v2"></path>
+            <path d="M21 17v2a2 2 0 01-2 2h-2"></path>
+            <path d="M7 21H5a2 2 0 01-2-2v-2"></path>
+            <rect x="6" y="6" width="3" height="3"></rect>
+            <rect x="15" y="6" width="3" height="3"></rect>
+            <rect x="6" y="15" width="3" height="3"></rect>
+            <g transform="translate(12,12) scale(0.4) translate(-12,-12)" stroke="#7BC143" stroke-width="3.5">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </g>
+          </svg>
         </button>
       </div>
       
@@ -579,18 +626,35 @@
       <!-- Section 2: Editor Actions -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
         <!-- Copy All (Top 3 - Always Visible) -->
-        <button id="copyAllBtn" class="dock-btn w-11 h-11 rounded-xl bg-primary-500/10 hover:bg-primary-600 text-primary-400 hover:text-white border border-primary-500/20 hover:border-primary-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Copy All">
-          <i data-lucide="copy" class="h-4.5 w-4.5"></i>
+        <button id="copyAllBtn" class="dock-btn w-11 h-11 rounded-xl bg-primary-500 hover:bg-primary-600 text-white border border-primary-600 flex items-center justify-center transition-all hover:scale-105 tooltip shadow-md shadow-primary-500/20" title="Copy All">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            <g transform="translate(15.5,15.5) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </g>
+          </svg>
         </button>
         
         <!-- Export (Collapsible) -->
-        <button id="exportBtn" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip max-[480px]:hidden" title="Export File">
-          <i data-lucide="download" class="h-4.5 w-4.5"></i>
+        <button id="exportBtn" class="dock-btn w-11 h-11 rounded-xl bg-violet-500 hover:bg-violet-600 text-white border border-violet-600 flex items-center justify-center transition-all hover:scale-105 tooltip max-[480px]:hidden shadow-md shadow-violet-500/20" title="Export File">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+            <path d="M7 19h10" stroke="#7BC143" stroke-width="2"></path>
+          </svg>
         </button>
         
         <!-- Clear (Top 3 - Always Visible) -->
-        <button id="clearClipboard" class="dock-btn w-11 h-11 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 hover:border-red-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Clear Clipboard">
-          <i data-lucide="trash" class="h-4.5 w-4.5"></i>
+        <button id="clearClipboard" class="dock-btn w-11 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white border border-red-600 flex items-center justify-center transition-all hover:scale-105 tooltip shadow-md shadow-red-500/20" title="Clear Clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17" stroke="#7BC143"></line>
+          </svg>
         </button>
       </div>
       
@@ -601,13 +665,18 @@
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
         
         <!-- History Drawer Toggle (Top 3 - Always Visible) -->
-        <button id="toggleHistoryBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Clipboard History">
-          <i data-lucide="layout-grid" class="h-4.5 w-4.5"></i>
+        <button id="toggleHistoryBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Clipboard History">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1" stroke="#7BC143"></rect>
+          </svg>
         </button>
 
         <!-- Mobile More Menu Toggle (Only on <480px) -->
         <div class="relative hidden max-[480px]:block">
-          <button id="mobileMoreToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="More Options" onclick="document.getElementById('mobileMoreDropdown').classList.toggle('hidden')">
+          <button id="mobileMoreToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-white dark:bg-slate-800/60 hover:bg-secondary-50 dark:hover:bg-slate-700 text-secondary-600 dark:text-slate-300 hover:text-secondary-900 dark:hover:text-white border border-secondary-200 dark:border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="More Options" onclick="document.getElementById('mobileMoreDropdown').classList.toggle('hidden')">
             <i data-lucide="more-horizontal" class="h-4.5 w-4.5"></i>
           </button>
           
@@ -615,7 +684,14 @@
           <div id="mobileMoreDropdown" class="absolute bottom-full right-0 mb-3 p-2 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col gap-2 hidden z-50">
             <!-- Lock -->
             <button onclick="document.getElementById('lockToggleBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Set Passcode">
-              <i data-lucide="lock" class="h-4.5 w-4.5"></i>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0110 0v4"></path>
+            <g transform="translate(12,16) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </g>
+          </svg>
             </button>
             <!-- Timer -->
             <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Self-Destruct Timer">
@@ -625,15 +701,40 @@
                 <option value="1h">1 Hour</option>
                 <option value="24h">24 Hours</option>
               </select>
-              <i data-lucide="timer" class="h-4.5 w-4.5"></i>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <circle cx="12" cy="13" r="8"></circle>
+            <polyline points="12 9 12 13 14 15"></polyline>
+            <line x1="12" y1="2" x2="12" y2="4"></line>
+            <g transform="translate(18,18) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </g>
+          </svg>
             </div>
             <!-- QR -->
             <button onclick="document.getElementById('showQrBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Scan QR Code">
-              <i data-lucide="qr-code" class="h-4.5 w-4.5"></i>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <path d="M3 7V5a2 2 0 012-2h2"></path>
+            <path d="M17 3h2a2 2 0 012 2v2"></path>
+            <path d="M21 17v2a2 2 0 01-2 2h-2"></path>
+            <path d="M7 21H5a2 2 0 01-2-2v-2"></path>
+            <rect x="6" y="6" width="3" height="3"></rect>
+            <rect x="15" y="6" width="3" height="3"></rect>
+            <rect x="6" y="15" width="3" height="3"></rect>
+            <g transform="translate(12,12) scale(0.4) translate(-12,-12)" stroke="#7BC143" stroke-width="3.5">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </g>
+          </svg>
             </button>
             <!-- Export -->
             <button onclick="document.getElementById('exportBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all tooltip" title="Export File">
-              <i data-lucide="download" class="h-4.5 w-4.5"></i>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+            <path d="M7 19h10" stroke="#7BC143" stroke-width="2"></path>
+          </svg>
             </button>
           </div>
         </div>
