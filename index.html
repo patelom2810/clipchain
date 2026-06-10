@@ -8,9 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&family=Pacifico&display=swap"
     rel="stylesheet">
-  <title>📋 ClipChain - Online Clipboard</title>
+  <title>Untitled - ClipChain</title>
+  <meta property="og:title" content="Untitled - ClipChain">
 
   <!-- Shortcut Icon (Clipboard Icon) -->
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/a/a1/Clipboard_icon.svg" type="image/x-icon">
@@ -91,96 +92,38 @@
 
       <!-- Workspace Switcher Wrap -->
       <div class="relative flex items-center">
-        <!-- Logo Icon (Acts as workspace avatar trigger) -->
-        <div id="workspaceAvatar" class="bg-primary-500/10 p-2 rounded-lg cursor-pointer select-none flex items-center justify-center">
-          <i data-lucide="clipboard-check" class="h-5 w-5 text-primary-600"></i>
-        </div>
-        
-        <!-- Workspace Switcher Button (Brand text) -->
-        <button id="workspaceSwitcherBtn" class="flex items-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 px-2 py-1 rounded-lg transition-all ml-1.5 tooltip tooltip-bottom" title="Switch Workspace / Room">
-          <span class="font-bold text-xl tracking-tight text-secondary-900 dark:text-white font-cursive text-gradient-animate">Clip<span class="text-primary-600">Chain</span></span>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity: 0.5;"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-
-        <!-- Switcher Dropdown -->
-        <div id="workspaceSwitcherDropdown" class="absolute left-0 top-full mt-2 w-48 bg-white dark:bg-slate-855 border border-secondary-200/60 dark:border-slate-800 rounded-xl shadow-xl p-2 hidden z-50">
-          <div class="text-[10px] font-bold text-secondary-400 dark:text-slate-500 px-2 py-1 uppercase tracking-wider">Switch Room</div>
-          <div class="flex items-center gap-1.5 px-2 py-1">
-            <input type="text" id="quickRoomSwitcherInput" class="w-full bg-slate-100 dark:bg-slate-855 border-none outline-none font-mono text-xs rounded px-2 py-1 text-secondary-900 dark:text-white" placeholder="Room ID..." autocomplete="off">
-            <button id="quickRoomSwitcherGo" class="p-1 bg-primary-600 hover:bg-primary-700 text-white rounded"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
+        <!-- Brand text (Acts as workspace switcher trigger) -->
+        <div id="workspaceAvatar" class="flex items-center px-2 py-1 ml-1 select-none cursor-pointer hover:opacity-80 transition-opacity" title="Switch Workspace">
+          <div class="flex items-center tracking-tight" style="font-family: 'Pacifico', cursive; font-size: 20px; font-weight: 400; line-height: 1; padding-bottom: 2px;">
+            <span style="color: #0f592f;">Clip</span><span style="color: #7bc143;">Chain</span><span style="color: #0f592f;">!</span>
+            <div class="relative flex items-center" style="color: #7bc143; margin-top: -10px; margin-left: 2px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(0deg);">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+              <!-- Sparks -->
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" class="absolute" style="top: -8px; right: -6px;">
+                <line x1="12" y1="2" x2="12" y2="7"></line>
+                <line x1="20" y1="6" x2="16" y2="9"></line>
+                <line x1="22" y1="14" x2="18" y2="14"></line>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- CENTER: Cleaner Room Name/ID Display -->
-    <div class="navbar-center">
-      <!-- Breadcrumbs & Live Sync Pulse -->
-      <div class="flex items-center gap-1 text-xs text-secondary-500 dark:text-slate-400 select-none">
-        <span class="hidden md:inline font-semibold">Rooms</span>
-        <span class="hidden md:inline text-secondary-300 dark:text-slate-600">/</span>
-        <div class="flex items-center gap-1.5">
-          <input type="text" id="documentTitleInput" 
-                 class="bg-transparent border-none outline-none font-semibold text-sm text-secondary-800 dark:text-gray-200 focus:bg-white/50 dark:focus:bg-slate-800/50 rounded px-1.5 py-0.5 w-32 sm:w-44 md:w-56 text-center transition-all"
-                 value="Untitled Clipboard"
-                 placeholder="Untitled Clipboard"
-                 autocomplete="off" spellcheck="false" title="Click to rename document">
-          
-          <!-- Live Sync Pulse -->
-          <span class="relative flex h-2 w-2" title="Live Synced to Cloud">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Hidden compatibility elements to keep old room switching events functioning -->
-      <div class="hidden">
-        <input type="text" id="username">
-        <button id="setUsername"></button>
-      </div>
-    </div>
+    <!-- CENTER: Empty or minimal -->
+    <div class="navbar-center"></div>
 
     <!-- RIGHT: Action Icons + Share -->
     <div class="navbar-right">
 
-      <!-- Command Palette Button -->
-      <button id="navCommandPaletteBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Command Palette (⌘K)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
-      </button>
 
-      <!-- User Avatar with online dot -->
-      <div class="navbar-avatar tooltip tooltip-bottom" id="navUserAvatar" title="Your room ID">
-        <span id="navAvatarInitial">?</span>
-        <span class="navbar-avatar-dot"></span>
-      </div>
 
-      <!-- Share Button (with dropdown arrow) -->
-      <div class="navbar-share-wrap">
-        <button id="navShareBtn" class="navbar-share-btn share-button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          <span>Share</span>
-        </button>
-        <button id="navShareDropdownBtn" class="navbar-share-dropdown-btn tooltip tooltip-bottom" title="More share options">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-      </div>
 
-      <!-- Share dropdown menu -->
+
       <div id="navShareDropdown" class="navbar-share-dropdown hidden">
-        <button class="navbar-dropdown-item share-button">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-          Copy Link
-        </button>
-        <button class="navbar-dropdown-item" id="navDropdownQR">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><rect width="5" height="5" x="16" y="16" rx="1"/></svg>
-          QR Code
-        </button>
-        <div class="navbar-dropdown-sep"></div>
-        <button class="navbar-dropdown-item" id="navDropdownExport">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export File
-        </button>
       </div>
     </div>
 
@@ -211,6 +154,18 @@
   <main class="py-6 px-4 sm:px-6 lg:px-8 max-w-5xl w-full mx-auto animate-enter delay-200 flex-grow flex flex-col flex-shrink-0 min-h-0">
     <div class="space-y-6 flex-grow flex flex-col flex-shrink-0 min-h-0">
 
+    <!-- Document Title Section -->
+    <div class="mb-4 flex items-center justify-between group">
+      <div class="flex items-center w-full max-w-3xl relative">
+        <input type="text" id="documentTitleInput" 
+               class="bg-transparent border border-transparent outline-none font-bold text-3xl sm:text-4xl text-secondary-900 dark:text-white placeholder-secondary-300 dark:placeholder-slate-600 focus:bg-white/60 dark:focus:bg-slate-800/60 hover:bg-white/40 dark:hover:bg-slate-800/40 focus:border-primary-300 dark:focus:border-primary-600 rounded-xl px-3 py-1.5 w-full transition-all"
+               value="Untitled"
+               placeholder="Untitled"
+               autocomplete="off" spellcheck="false" title="Click to rename document">
+        <i data-lucide="edit-2" class="absolute right-3 h-5 w-5 text-secondary-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></i>
+      </div>
+    </div>
+
     <!-- URL/Link Display Section -->
     <div class="mb-6">
       <div
@@ -240,6 +195,11 @@
     <!-- Web Editor Container -->
     <div
       class="relative glass-panel rounded-2xl shadow-2xl border border-white/50 overflow-hidden transition-all duration-300 flex-grow flex flex-col min-h-0">
+      
+      <!-- Multi-Clipboard Tabs -->
+      <div id="multiClipTabs" class="flex items-end gap-1 overflow-x-auto no-scrollbar pt-2 px-2 border-b border-white/30 dark:border-slate-700/50 bg-white/10 dark:bg-slate-900/20">
+        <!-- Tabs rendered via JS -->
+      </div>
 
       <!-- Toolbar / Header of Editor -->
       <div class="bg-white/40 border-b border-white/30 px-4 py-3 flex items-center justify-between">
@@ -253,7 +213,10 @@
             class="ml-3 text-xs font-semibold text-secondary-500 uppercase tracking-widest hidden sm:inline-block">Live
             Editor</span>
           
-
+          <!-- Formatting Toggle -->
+          <button id="toggleFormattingBtn" class="ml-1 sm:ml-2 px-2 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-primary-600 dark:hover:text-primary-400 bg-transparent hover:bg-white/50 dark:hover:bg-slate-700/50 tooltip tooltip-bottom" title="Rich Text">
+            <i data-lucide="type" class="h-3.5 w-3.5"></i>
+          </button>
           
           <!-- View Modes Tab Bar -->
           <div class="flex items-center bg-secondary-100/50 dark:bg-slate-800/40 rounded-lg p-0.5 ml-1 sm:ml-4 border border-white/20 dark:border-slate-700/50">
@@ -261,11 +224,11 @@
               <i data-lucide="edit-3" class="h-3.5 w-3.5"></i>
               <span class="hidden md:inline">Edit</span>
             </button>
-            <button id="btnViewPreview" class="px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
+            <button id="btnViewPreview" class="hidden px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
               <i data-lucide="eye" class="h-3.5 w-3.5"></i>
               <span class="hidden md:inline">Preview</span>
             </button>
-            <button id="btnViewSplit" class="px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
+            <button id="btnViewSplit" class="hidden px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
               <i data-lucide="columns" class="h-3.5 w-3.5"></i>
               <span class="hidden md:inline">Split</span>
             </button>
@@ -287,7 +250,7 @@
       </div>
 
       <!-- Formatting Toolbar — single clean row with group separators -->
-      <div id="formattingToolbar" class="flex items-center gap-0.5 px-3 py-1.5 bg-white/20 dark:bg-slate-800/20 border-b border-white/20 dark:border-slate-800/50 relative z-10">
+      <div id="formattingToolbar" class="flex items-center gap-0.5 px-3 py-1.5 bg-white/20 dark:bg-slate-800/20 border-b border-white/20 dark:border-slate-800/50 relative z-10 hidden">
 
         <!-- Group 0: Undo / Redo -->
         <button id="fmtUndo" class="fmt-btn tooltip tooltip-right-align" title="Undo (Ctrl/Cmd+Z)">
@@ -566,23 +529,17 @@
     </div>
   </main>
 
-  <!-- Mini Footer — Centered, transparent with subtle grid pattern background -->
-  <footer class="w-full py-6 footer-diagonal-grid border-t border-secondary-200/10 dark:border-slate-800/10">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-secondary-500 dark:text-slate-400">
-      <div class="flex items-center gap-1.5">
-        <span>Made with</span>
-        <svg class="w-3.5 h-3.5 text-red-500 animate-pulse fill-red-500 inline" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
-        <span>by <span class="font-medium text-secondary-800 dark:text-slate-200">Om Patel</span></span>
-      </div>
+  <!-- Attribution Tooltip -->
+  <div class="fixed bottom-4 right-4 z-40 opacity-30 hover:opacity-100 transition-opacity">
+    <div class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-help tooltip" title="Made with ❤️ by Om Patel">
+      <i data-lucide="info" class="w-3.5 h-3.5"></i>
     </div>
-  </footer>
+  </div>
 </div>
 
   <!-- Premium macOS/iOS Style Glass Dock Toolbar -->
   <div class="app-bottom-toolbar animate-enter delay-300">
-    <div class="glass-dock flex items-center justify-center p-2 px-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all w-fit mx-auto select-none gap-2 sm:gap-3">
+    <div class="glass-dock relative flex items-center justify-center p-2 px-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all w-fit mx-auto select-none gap-2 sm:gap-3 max-[480px]:hidden">
       
       <!-- Section 1: Session Info & Room Settings -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
@@ -597,14 +554,14 @@
           <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-slate-400 font-medium whitespace-nowrap">0 characters</span>
         </div>
         
-        <!-- Lock -->
-        <button id="lockToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Set Passcode">
+        <!-- Lock (Collapsible) -->
+        <button id="lockToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Set Passcode">
           <i data-lucide="lock" class="h-4.5 w-4.5"></i>
           <span id="lockBtnText" class="hidden">Set Password</span>
         </button>
         
-        <!-- Self-Destruct Timer -->
-        <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Self-Destruct Timer">
+        <!-- Self-Destruct Timer (Collapsible) -->
+        <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Self-Destruct Timer">
           <select id="selfDestructTimer" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
             <option value="never" selected>No Timer</option>
             <option value="10m">10 Mins</option>
@@ -614,54 +571,121 @@
           <i data-lucide="timer" class="h-4.5 w-4.5"></i>
         </div>
         
-        <!-- QR Code Button -->
-        <button id="showQrBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Scan QR Code">
+        <!-- QR Code Button (Collapsible) -->
+        <button id="showQrBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip max-[480px]:hidden" title="Scan QR Code">
           <i data-lucide="qr-code" class="h-4.5 w-4.5"></i>
         </button>
       </div>
       
       <!-- Group Separator 1 -->
-      <div class="dock-separator"></div>
+      <div class="dock-separator max-[480px]:hidden"></div>
       
       <!-- Section 2: Editor Actions -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-        <!-- Copy All -->
+        <!-- Copy All (Top 3 - Always Visible) -->
         <button id="copyAllBtn" class="dock-btn w-11 h-11 rounded-xl bg-primary-500/10 hover:bg-primary-600 text-primary-400 hover:text-white border border-primary-500/20 hover:border-primary-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Copy All">
           <i data-lucide="copy" class="h-4.5 w-4.5"></i>
         </button>
         
-        <!-- Export -->
-        <button id="exportBtn" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Export File">
+        <!-- Export (Collapsible) -->
+        <button id="exportBtn" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip max-[480px]:hidden" title="Export File">
           <i data-lucide="download" class="h-4.5 w-4.5"></i>
         </button>
         
-        <!-- Clear -->
+        <!-- Clear (Top 3 - Always Visible) -->
         <button id="clearClipboard" class="dock-btn w-11 h-11 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 hover:border-red-500/40 flex items-center justify-center transition-all hover:scale-105 tooltip" title="Clear Clipboard">
           <i data-lucide="trash" class="h-4.5 w-4.5"></i>
         </button>
       </div>
       
       <!-- Group Separator 2 -->
-      <div class="dock-separator"></div>
+      <div class="dock-separator max-[480px]:hidden"></div>
       
       <!-- Section 3: Additional Tools -->
       <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-        <!-- Screenshot Capture -->
-        <button id="dockScreenshotBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Capture Screenshot">
-          <i data-lucide="camera" class="h-4.5 w-4.5"></i>
-        </button>
         
-        <!-- History Drawer Toggle -->
+        <!-- History Drawer Toggle (Top 3 - Always Visible) -->
         <button id="toggleHistoryBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Clipboard History">
           <i data-lucide="layout-grid" class="h-4.5 w-4.5"></i>
         </button>
         
-        <!-- Sticky Notes Toggle -->
-        <button id="dockStickyBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="Sticky Notes">
+        <!-- Sticky Notes Toggle (Collapsible) -->
+        <button id="dockStickyBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip max-[480px]:hidden" title="Sticky Notes">
           <i data-lucide="sticky-note" class="h-4.5 w-4.5"></i>
         </button>
+
+        <!-- Mobile More Menu Toggle (Only on <480px) -->
+        <div class="relative hidden max-[480px]:block">
+          <button id="mobileMoreToggleBtn" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all hover:scale-110 tooltip" title="More Options" onclick="document.getElementById('mobileMoreDropdown').classList.toggle('hidden')">
+            <i data-lucide="more-horizontal" class="h-4.5 w-4.5"></i>
+          </button>
+          
+          <!-- Dropdown Popup -->
+          <div id="mobileMoreDropdown" class="absolute bottom-full right-0 mb-3 p-2 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col gap-2 hidden z-50">
+            <!-- Lock -->
+            <button onclick="document.getElementById('lockToggleBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Set Passcode">
+              <i data-lucide="lock" class="h-4.5 w-4.5"></i>
+            </button>
+            <!-- Timer -->
+            <div class="relative dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Self-Destruct Timer">
+              <select class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" onchange="let orig=document.getElementById('selfDestructTimer'); orig.value=this.value; orig.dispatchEvent(new Event('change')); this.parentElement.parentElement.classList.add('hidden');">
+                <option value="never" selected>No Timer</option>
+                <option value="10m">10 Mins</option>
+                <option value="1h">1 Hour</option>
+                <option value="24h">24 Hours</option>
+              </select>
+              <i data-lucide="timer" class="h-4.5 w-4.5"></i>
+            </div>
+            <!-- QR -->
+            <button onclick="document.getElementById('showQrBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Scan QR Code">
+              <i data-lucide="qr-code" class="h-4.5 w-4.5"></i>
+            </button>
+            <!-- Export -->
+            <button onclick="document.getElementById('exportBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-xl bg-violet-500/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-500/20 hover:border-violet-500/40 flex items-center justify-center transition-all tooltip" title="Export File">
+              <i data-lucide="download" class="h-4.5 w-4.5"></i>
+            </button>
+            <!-- Sticky Notes -->
+            <button onclick="document.getElementById('dockStickyBtn').click(); this.parentElement.classList.add('hidden')" class="dock-btn w-11 h-11 rounded-full bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 flex items-center justify-center transition-all tooltip" title="Sticky Notes">
+              <i data-lucide="sticky-note" class="h-4.5 w-4.5"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+
+  <!-- Custom Mobile Curved Dock (Screens < 480px) -->
+  <div class="fixed bottom-6 left-4 right-4 h-[72px] hidden max-[480px]:flex z-[60] pointer-events-none animate-enter delay-300 drop-shadow-[0_15px_25px_rgba(0,0,0,0.35)]">
+    
+    <!-- Left Solid Area -->
+    <div class="h-full bg-[#4a5142] rounded-l-[26px] pointer-events-auto" style="width: 24px;"></div>
+
+    <!-- The Smooth SVG Notch -->
+    <div class="h-full w-[100px] pointer-events-auto relative flex-shrink-0">
+      <svg width="100" height="72" viewBox="0 0 100 72" fill="none" class="absolute inset-0">
+        <path d="M 0 0 C 10 0 12 5 15 15 C 25 45 75 45 85 15 C 88 5 90 0 100 0 L 100 72 L 0 72 Z" fill="#4a5142" />
+      </svg>
+      <!-- Glowing FAB (Orb) -->
+      <button id="mobileFabCopyBtn" class="absolute flex items-center justify-center transition-all pointer-events-auto active:scale-95 cursor-pointer" 
+              style="top: -18px; left: 24px; width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #a4e05b, #629c1e); box-shadow: 0 0 25px rgba(132,204,22,0.6), inset 0 2px 5px rgba(255,255,255,0.4);">
+        <!-- Subtle highlight dot for the glass orb effect -->
+        <div class="absolute w-1.5 h-1.5 bg-white/70 rounded-full" style="top: 14px; left: 20px; filter: blur(0.5px);"></div>
+      </button>
+    </div>
+
+    <!-- Right Solid Area -->
+    <div class="h-full flex-1 bg-[#4a5142] rounded-r-[26px] pointer-events-auto flex items-center justify-end pr-8 gap-8">
+      <button id="mobileFabHistoryBtn" class="text-white/60 hover:text-[#92d04a] transition-colors pointer-events-auto flex items-center justify-center" title="Actions">
+        <i data-lucide="cloud-lightning" class="h-[28px] w-[28px] stroke-[1.5]"></i>
+      </button>
+      <button id="mobileFabMoreBtn" class="text-white/60 hover:text-[#92d04a] transition-colors pointer-events-auto flex items-center justify-center" title="Settings">
+        <i data-lucide="settings" class="h-[28px] w-[28px] stroke-[1.5]"></i>
+      </button>
+      <button id="mobileFabQrBtn" class="text-white/60 hover:text-[#92d04a] transition-colors pointer-events-auto flex items-center justify-center" title="Media">
+        <i data-lucide="image" class="h-[28px] w-[28px] stroke-[1.5]"></i>
+      </button>
+    </div>
+
   </div>
 
   <!-- Premium History Drawer -->

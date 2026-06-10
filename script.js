@@ -103,8 +103,13 @@ function safeLocalStorageRemove(key) {
 let openCommandPalette;
 
 // DOM Elements
-const usernameInput = document.getElementById("username");
-const setUsernameBtn = document.getElementById("setUsername");
+// Refactored to remove hidden DOM elements for room switching
+let currentUsernameValue = "";
+const usernameInput = {
+  get value() { return currentUsernameValue; },
+  set value(v) { currentUsernameValue = v; }
+};
+const setUsernameBtn = document.createElement("button");
 const clipboardTextArea = document.getElementById("clipboard");
 const clipboardLink = document.getElementById("clipboardLink");
 const editClipboardBtn = document.getElementById("editClipboard");
@@ -152,6 +157,32 @@ let isLocked = false;
 let isPasswordModalOpen = false;
 let passwordMode = 'unlock'; // 'unlock' | 'set'
 let currentViewMode = 'edit'; // 'edit' | 'preview' | 'split'
+
+window.isFormattingEnabled = false;
+const toggleFormattingBtn = document.getElementById("toggleFormattingBtn");
+if (toggleFormattingBtn) {
+  toggleFormattingBtn.addEventListener("click", () => {
+    window.isFormattingEnabled = !window.isFormattingEnabled;
+    const btnViewPreview = document.getElementById("btnViewPreview");
+    const btnViewSplit = document.getElementById("btnViewSplit");
+    
+    if (window.isFormattingEnabled) {
+      toggleFormattingBtn.classList.add("bg-white/50", "dark:bg-slate-700/50", "text-primary-600");
+      toggleFormattingBtn.classList.remove("text-secondary-500", "hover:text-primary-600");
+      if (btnViewPreview) btnViewPreview.classList.remove("hidden");
+      if (btnViewSplit) btnViewSplit.classList.remove("hidden");
+    } else {
+      toggleFormattingBtn.classList.remove("bg-white/50", "dark:bg-slate-700/50", "text-primary-600");
+      toggleFormattingBtn.classList.add("text-secondary-500", "hover:text-primary-600");
+      if (btnViewPreview) btnViewPreview.classList.add("hidden");
+      if (btnViewSplit) btnViewSplit.classList.add("hidden");
+      if (currentViewMode !== 'edit') {
+        currentViewMode = 'edit';
+      }
+    }
+    if (typeof setViewMode === 'function') setViewMode(currentViewMode);
+  });
+}
 let lastKnownRemoteText = "";
 let floatingNotes = {};
 let activeNoteId = null;
@@ -169,15 +200,114 @@ if (closeMenuBtn && mobileMenu) {
   });
 }
 
-// Initialize username from URL or localStorage
-let username = getUsernameFromURL() || safeLocalStorageGet("clipUsername") || generateRandomID();
+// MULTI-CLIPBOARD STATE
+window.savedSlots = [];
+try {
+  window.savedSlots = JSON.parse(safeLocalStorageGet("clipSavedSlots", "[]"));
+} catch (e) {
+  window.savedSlots = [];
+}
+
+let urlUsername = getUsernameFromURL();
+let username;
+
+if (urlUsername) {
+  username = urlUsername;
+  const exists = window.savedSlots.find(s => s.id === username);
+  if (!exists) {
+    window.savedSlots.push({ id: username, name: `Clip ${window.savedSlots.length + 1}` });
+    safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
+  }
+} else {
+  if (window.savedSlots.length > 0) {
+    username = window.savedSlots[0].id;
+  } else {
+    username = safeLocalStorageGet("clipUsername") || generateRandomID();
+    window.savedSlots.push({ id: username, name: "Clip 1" });
+    safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
+  }
+  if (typeof history !== 'undefined') history.replaceState(null, '', '/?id=' + username);
+}
+
 updateURL(username);
 updateLinkDisplay(username);
 safeLocalStorageSet("clipUsername", username);
 usernameInput.value = username;
 const dockSessionId = document.getElementById("dockSessionId");
 if (dockSessionId) dockSessionId.textContent = "#" + username;
-if (usernameDisplay) usernameDisplay.textContent = username;
+if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
+
+// Set up Multi-Clip Tabs
+function renderMultiClipTabs() {
+  const tabsContainer = document.getElementById("multiClipTabs");
+  if (!tabsContainer) return;
+  tabsContainer.innerHTML = "";
+  
+  window.savedSlots.forEach((slot, index) => {
+    const isActive = slot.id === username;
+    const btn = document.createElement("button");
+    btn.className = `flex items-center gap-2 px-4 py-2 text-sm font-semibold border-t border-x rounded-t-xl transition-all select-none ${isActive ? 'bg-white/40 dark:bg-slate-800/80 border-white/30 text-secondary-900 dark:text-white pb-3 -mb-1 z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]' : 'bg-white/20 dark:bg-slate-800/40 border-transparent text-secondary-500 hover:text-secondary-700 dark:hover:text-slate-300 hover:bg-white/30 cursor-pointer'}`;
+    
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = slot.name || `Clip ${index + 1}`;
+    btn.appendChild(nameSpan);
+    
+    if (window.savedSlots.length > 1) {
+      const closeBtn = document.createElement("div");
+      closeBtn.className = "w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-secondary-400 hover:text-red-500 transition-colors ml-1";
+      closeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.savedSlots = window.savedSlots.filter(s => s.id !== slot.id);
+        safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
+        if (isActive) window.switchSlot(window.savedSlots[0].id);
+        else renderMultiClipTabs();
+      });
+      btn.appendChild(closeBtn);
+    }
+    
+    btn.addEventListener("click", () => {
+      if (!isActive) window.switchSlot(slot.id);
+    });
+    tabsContainer.appendChild(btn);
+  });
+  
+  if (window.savedSlots.length < 10) {
+    const addBtn = document.createElement("button");
+    addBtn.className = "flex items-center justify-center px-3 py-2 text-secondary-400 hover:text-secondary-700 dark:hover:text-white transition-colors cursor-pointer mb-1";
+    addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+    addBtn.title = "Add new clipboard";
+    addBtn.addEventListener("click", () => {
+      const newId = generateRandomID();
+      window.savedSlots.push({ id: newId, name: `Clip ${window.savedSlots.length + 1}` });
+      safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
+      window.switchSlot(newId);
+    });
+    tabsContainer.appendChild(addBtn);
+  }
+}
+
+window.switchSlot = function(newId) {
+  username = newId;
+  safeLocalStorageSet("clipUsername", newId);
+  history.pushState(null, '', '/?id=' + newId);
+  clipboardRef = db.ref(`clipboards/${username}`);
+  clipboardTextArea.value = "";
+  const docTitleInput = document.getElementById("documentTitleInput");
+  if (docTitleInput) docTitleInput.value = "Untitled";
+  if (typeof renderMarkdownPreview === 'function') renderMarkdownPreview();
+  updateURL(username);
+  updateLinkDisplay(username);
+  const dockSessionId = document.getElementById("dockSessionId");
+  if (dockSessionId) dockSessionId.textContent = "#" + username;
+  if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
+  if (typeof syncNavbarMeta === 'function') syncNavbarMeta(newId);
+  if (typeof initClipboardListener === 'function') initClipboardListener();
+  renderMultiClipTabs();
+};
+
+document.addEventListener("DOMContentLoaded", renderMultiClipTabs);
+// end Multi-Clip
 
 // History State
 let clipHistory = [];
@@ -327,9 +457,22 @@ function initClipboardListener() {
       const title = titleSnapshot.val() || "";
       const input = document.getElementById("documentTitleInput");
       if (input && document.activeElement !== input) {
-        input.value = title || username;
+        input.value = title || "Untitled";
       }
-      document.title = (title || username) + " - ClipChain";
+      const displayTitle = title || "Untitled";
+      document.title = displayTitle + " - ClipChain";
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.content = displayTitle + " - ClipChain";
+      
+      // Sync Title to Multi-Clip Tab
+      if (window.savedSlots) {
+        const slot = window.savedSlots.find(s => s.id === username);
+        if (slot && slot.name !== displayTitle) {
+          slot.name = displayTitle;
+          safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
+          if (typeof renderMultiClipTabs === 'function') renderMultiClipTabs();
+        }
+      }
     });
 
     db.ref(`clipboards/${username}/stickyText`).on("value", stickySnapshot => {
@@ -918,14 +1061,25 @@ function setViewMode(mode) {
   const tabs = [btnViewEdit, btnViewPreview, btnViewSplit];
   tabs.forEach(tab => {
     if (tab) {
-      tab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white";
+      tab.classList.remove("bg-white", "dark:bg-slate-700", "text-primary-600", "dark:text-primary-400", "shadow-sm");
+      tab.classList.add("text-secondary-500", "hover:text-secondary-800", "dark:hover:text-white");
     }
   });
 
   // Active tab styles
   const activeTab = mode === 'edit' ? btnViewEdit : mode === 'preview' ? btnViewPreview : btnViewSplit;
   if (activeTab) {
-    activeTab.className = "px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm";
+    activeTab.classList.add("bg-white", "dark:bg-slate-700", "text-primary-600", "dark:text-primary-400", "shadow-sm");
+    activeTab.classList.remove("text-secondary-500", "hover:text-secondary-800", "dark:hover:text-white");
+  }
+
+  // Handle hidden state for preview and split based on formatting enabled state
+  if (!window.isFormattingEnabled) {
+    if (btnViewPreview) btnViewPreview.classList.add("hidden");
+    if (btnViewSplit) btnViewSplit.classList.add("hidden");
+  } else {
+    if (btnViewPreview) btnViewPreview.classList.remove("hidden");
+    if (btnViewSplit) btnViewSplit.classList.remove("hidden");
   }
 
   // Toggle grid and layout columns
@@ -1002,10 +1156,10 @@ function setViewMode(mode) {
     }
   }
 
-  // Hide/show formatting toolbar based on mode
+  // Hide/show formatting toolbar based on mode and formatting state
   const formattingToolbar = document.getElementById("formattingToolbar");
   if (formattingToolbar) {
-    if (mode === 'edit' || mode === 'split') {
+    if ((mode === 'edit' || mode === 'split') && window.isFormattingEnabled) {
       formattingToolbar.classList.remove("hidden");
     } else {
       formattingToolbar.classList.add("hidden");
@@ -1017,7 +1171,22 @@ function setViewMode(mode) {
 
 if (btnViewEdit) btnViewEdit.addEventListener("click", () => setViewMode('edit'));
 if (btnViewPreview) btnViewPreview.addEventListener("click", () => setViewMode('preview'));
-if (btnViewSplit) btnViewSplit.addEventListener("click", () => setViewMode('split'));
+if (document.getElementById("btnViewSplit")) document.getElementById("btnViewSplit").addEventListener("click", () => setViewMode('split'));
+
+  // Bind Mobile Custom Dock Buttons
+  const mobileFabCopyBtn = document.getElementById("mobileFabCopyBtn");
+  if (mobileFabCopyBtn) mobileFabCopyBtn.addEventListener("click", () => document.getElementById("copyAllBtn")?.click());
+  
+  const mobileFabHistoryBtn = document.getElementById("mobileFabHistoryBtn");
+  if (mobileFabHistoryBtn) mobileFabHistoryBtn.addEventListener("click", () => document.getElementById("toggleHistoryBtn")?.click());
+  
+  const mobileFabQrBtn = document.getElementById("mobileFabQrBtn");
+  if (mobileFabQrBtn) mobileFabQrBtn.addEventListener("click", () => document.getElementById("showQrBtn")?.click());
+  
+  const mobileFabMoreBtn = document.getElementById("mobileFabMoreBtn");
+  if (mobileFabMoreBtn) mobileFabMoreBtn.addEventListener("click", () => document.getElementById("lockToggleBtn")?.click());
+
+  // Listeners for typing
 
 
 // Formatting Shortcuts Toolbar Logic
@@ -3162,19 +3331,11 @@ if (document.readyState === 'loading') {
   const currentId = typeof username !== "undefined" ? username : (safeLocalStorageGet("clipUsername") || "?");
   syncNavbarMeta(currentId);
 
-  // Watch for username changes (patch setUsername click)
-  const setUsernameBtn = document.getElementById("setUsername");
-  const usernameInputEl = document.getElementById("username");
-  if (setUsernameBtn && usernameInputEl) {
+  // Using the global in-memory setUsernameBtn and usernameInput instead of querying DOM
+  if (typeof setUsernameBtn !== 'undefined' && setUsernameBtn && typeof usernameInput !== 'undefined' && usernameInput) {
     setUsernameBtn.addEventListener("click", () => {
-      const newId = usernameInputEl.value.trim();
+      const newId = typeof usernameInput.value === 'string' ? usernameInput.value.trim() : "";
       if (newId) syncNavbarMeta(newId);
-    });
-    usernameInputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const newId = usernameInputEl.value.trim();
-        if (newId) syncNavbarMeta(newId);
-      }
     });
   }
 
