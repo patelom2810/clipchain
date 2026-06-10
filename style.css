@@ -17,12 +17,12 @@
   /* Crisper, almost solid white borders */
   --glass-blur: blur(30px) saturate(180%);
 
-  --primary-color: #0073ff;
-  --primary-hover: #005ccc;
-  --primary-active: #004599;
-  --primary-glow: rgba(0, 115, 255, 0.25);
-  --primary-light: rgba(0, 115, 255, 0.08);
-  --primary-light-border: rgba(0, 115, 255, 0.2);
+  --primary-color: #7BC143;
+  --primary-hover: #629e32;
+  --primary-active: #4b7b25;
+  --primary-glow: rgba(123, 193, 67, 0.25);
+  --primary-light: rgba(123, 193, 67, 0.08);
+  --primary-light-border: rgba(123, 193, 67, 0.2);
   
   --export-color: #8b5cf6;
   --export-hover: #7c3aed;
@@ -56,12 +56,12 @@
   --surface-color: rgba(15, 23, 42, 0.65);
   --surface-border: rgba(255, 255, 255, 0.08);
 
-  --primary-color: #338fff;
-  --primary-hover: #66abff;
-  --primary-active: #0073ff;
-  --primary-glow: rgba(51, 143, 255, 0.35);
-  --primary-light: rgba(51, 143, 255, 0.12);
-  --primary-light-border: rgba(51, 143, 255, 0.25);
+  --primary-color: #8edc4f;
+  --primary-hover: #a5e672;
+  --primary-active: #7bc143;
+  --primary-glow: rgba(142, 220, 79, 0.35);
+  --primary-light: rgba(142, 220, 79, 0.12);
+  --primary-light-border: rgba(142, 220, 79, 0.25);
   
   --export-color: #a78bfa;
   --export-hover: #c084fc;
@@ -1933,17 +1933,17 @@ mark {
 }
 
 .glass-dock #copyAllBtn {
-  background-color: rgba(37, 99, 235, 0.06) !important;
-  border-color: rgba(37, 99, 235, 0.2) !important;
-  color: rgb(37, 99, 235) !important;
+  background-color: var(--primary-light) !important;
+  border-color: var(--primary-light-border) !important;
+  color: var(--primary-color) !important;
   border-radius: 9999px !important;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.05) !important;
+  box-shadow: 0 2px 6px var(--primary-glow) !important;
 }
 .glass-dock #copyAllBtn:hover {
-  background-color: rgba(37, 99, 235, 0.12) !important;
-  border-color: rgba(37, 99, 235, 0.4) !important;
-  color: rgb(29, 78, 216) !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+  background-color: rgba(123, 193, 67, 0.12) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--primary-hover) !important;
+  box-shadow: 0 4px 12px var(--primary-glow) !important;
 }
 
 .glass-dock #exportBtn {
@@ -1976,16 +1976,16 @@ mark {
 
 /* Dark theme overrides for colored buttons */
 html.dark .glass-dock #copyAllBtn {
-  background-color: rgba(96, 165, 250, 0.08) !important;
-  border-color: rgba(96, 165, 250, 0.2) !important;
-  color: rgb(96, 165, 250) !important;
+  background-color: var(--primary-light) !important;
+  border-color: var(--primary-light-border) !important;
+  color: var(--primary-color) !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
 }
 html.dark .glass-dock #copyAllBtn:hover {
-  background-color: rgba(96, 165, 250, 0.18) !important;
-  border-color: rgba(96, 165, 250, 0.5) !important;
-  color: rgb(147, 197, 253) !important;
-  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.25) !important;
+  background-color: rgba(142, 220, 79, 0.18) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--primary-hover) !important;
+  box-shadow: 0 4px 12px var(--primary-glow) !important;
 }
 
 html.dark .glass-dock #exportBtn {
