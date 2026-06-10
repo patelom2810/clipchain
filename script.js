@@ -183,9 +183,7 @@ if (toggleFormattingBtn) {
     if (typeof setViewMode === 'function') setViewMode(currentViewMode);
   });
 }
-let lastKnownRemoteText = "";
-let floatingNotes = {};
-let activeNoteId = null;
+let activeTabId = null;
 
 // Mobile Menu Toggle (Removed as per user request)
 if (mobileMenuBtn && mobileMenu) {
@@ -416,7 +414,6 @@ function initClipboardListener() {
   db.ref(`clipboards/${username}/expiresAt`).off();
   db.ref(`clipboards/${username}/text`).off();
   db.ref(`clipboards/${username}/stickyText`).off();
-  db.ref(`clipboards/${username}/floatingNotes`).off();
   db.ref(`clipboards/${username}/title`).off();
 
   let passwordVal = null;
@@ -486,41 +483,6 @@ function initClipboardListener() {
           }
         }
       }
-      const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
-      if (floatingNoteTextArea && !isLocked) {
-        if (floatingNoteTextArea.value !== stickyText) {
-          floatingNoteTextArea.value = stickyText;
-        }
-      }
-    });
-
-    db.ref(`clipboards/${username}/floatingNotes`).on("value", snapshot => {
-      const remoteNotes = snapshot.val() || {};
-      floatingNotes = remoteNotes;
-      
-      // Sync active note state
-      if (activeNoteId && !floatingNotes[activeNoteId]) {
-        // If active note was deleted, switch to first remaining or close panel
-        activeNoteId = Object.keys(floatingNotes)[0] || null;
-        if (activeNoteId) {
-          loadActiveNoteData();
-        } else {
-          closeFloatingNotePanelDirectly();
-        }
-      } else if (activeNoteId) {
-        const curNote = floatingNotes[activeNoteId];
-        const titleInput = document.getElementById("floatingNoteTitle");
-        const textArea = document.getElementById("floatingNoteTextArea");
-        if (titleInput && titleInput.value !== (curNote.title || "")) {
-          titleInput.value = curNote.title || "";
-        }
-        if (textArea && textArea.value !== (curNote.content || "")) {
-          textArea.value = curNote.content || "";
-        }
-        updateNotePanelColorClass(curNote.color || "babyyellow");
-      }
-      
-      renderPinnedNotes();
     });
   }
 
@@ -1180,8 +1142,8 @@ if (document.getElementById("btnViewSplit")) document.getElementById("btnViewSpl
   const mobileFabHistoryBtn = document.getElementById("mobileFabHistoryBtn");
   if (mobileFabHistoryBtn) mobileFabHistoryBtn.addEventListener("click", () => document.getElementById("toggleHistoryBtn")?.click());
   
-  const mobileFabQrBtn = document.getElementById("mobileFabQrBtn");
-  if (mobileFabQrBtn) mobileFabQrBtn.addEventListener("click", () => document.getElementById("showQrBtn")?.click());
+  const mobileFabNotesBtn = document.getElementById("mobileFabNotesBtn");
+  if (mobileFabNotesBtn) mobileFabNotesBtn.addEventListener("click", () => document.getElementById("showQrBtn")?.click());
   
   const mobileFabMoreBtn = document.getElementById("mobileFabMoreBtn");
   if (mobileFabMoreBtn) mobileFabMoreBtn.addEventListener("click", () => document.getElementById("lockToggleBtn")?.click());
@@ -1405,25 +1367,12 @@ function closeConfirmModal() {
   }, 300);
 }
 
-function isFloatingNoteOpen() {
-  const panel = document.getElementById("floatingStickyNote");
-  return panel && !panel.classList.contains("closed");
-}
-
 if (confirmClearBtn) {
   confirmClearBtn.addEventListener("click", () => {
-    if (currentViewMode === 'sticky' || isFloatingNoteOpen()) {
+    if (currentViewMode === 'sticky') {
       const stickyTextArea = document.getElementById("stickyTextArea");
       if (stickyTextArea) stickyTextArea.value = "";
-      const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
-      if (floatingNoteTextArea) floatingNoteTextArea.value = "";
       clipboardRef.update({ stickyText: "" });
-      
-      if (typeof activeNoteId !== 'undefined' && activeNoteId && typeof username !== 'undefined') {
-        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
-          content: ""
-        });
-      }
       showNotification("Sticky note cleared", "success");
     } else {
       clipboardTextArea.value = "";
@@ -2466,338 +2415,7 @@ if (stickyColorBtns.length > 0 && stickyNoteCard && stickyNoteTextarea) {
   }
 }
 
-// ==========================================
-// FLOATING STICKY NOTE SYSTEM LOGIC
-// ==========================================
 
-// Global functions for floating sticky note system (hoisted and globally accessible)
-function loadActiveNoteData() {
-  if (!activeNoteId || !floatingNotes[activeNoteId]) return;
-  const curNote = floatingNotes[activeNoteId];
-  
-  const titleInput = document.getElementById("floatingNoteTitle");
-  const textArea = document.getElementById("floatingNoteTextArea");
-  
-  if (titleInput) titleInput.value = curNote.title || "";
-  if (textArea) textArea.value = curNote.content || "";
-  
-  updateNotePanelColorClass(curNote.color || "babyyellow");
-  updateFloatingNoteCharCount();
-}
-
-function closeFloatingNotePanelDirectly() {
-  const panel = document.getElementById("floatingStickyNote");
-  if (panel) panel.classList.add("closed");
-  const overlay = document.getElementById("floatingNoteOverlay");
-  if (overlay) {
-    overlay.classList.add("opacity-0");
-    overlay.style.opacity = "0";
-    setTimeout(() => {
-      overlay.classList.add("hidden");
-    }, 350);
-  }
-}
-
-function updateNotePanelColorClass(color) {
-  const panel = document.getElementById("floatingStickyNote");
-  if (!panel) return;
-  
-  panel.classList.remove(
-    "note-theme-yellow", "note-theme-blue", "note-theme-green", "note-theme-pink", "note-theme-purple",
-    "note-theme-babyblue", "note-theme-babyred", "note-theme-babypink", "note-theme-babypurple", "note-theme-babygreen", "note-theme-babyyellow"
-  );
-  panel.classList.add(`note-theme-${color}`);
-}
-
-function renderPinnedNotes() {
-  const container = document.getElementById("pinnedNotesContainer");
-  const panel = document.getElementById("floatingStickyNote");
-  if (!container || !panel) return;
-  
-  container.innerHTML = "";
-  
-  const isPanelOpen = !panel.classList.contains("closed");
-  
-  Object.values(floatingNotes).forEach(note => {
-    // If the panel is open, do not show the active note as a pinned badge
-    if (isPanelOpen && note.id === activeNoteId) return;
-    
-    const tab = document.createElement("div");
-    tab.className = `pinned-mini-note pointer-events-auto flex items-center justify-center w-12 h-14 rounded-l-2xl border border-r-0 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] cursor-pointer tooltip note-theme-${note.color || "babyyellow"}`;
-    tab.dataset.noteId = note.id;
-    tab.setAttribute('data-tooltip', note.title || "Untitled Note");
-    
-    // Custom content inside side tab (first letter of heading or a note icon)
-    const firstLetter = note.title ? note.title.trim().charAt(0) : "";
-    if (firstLetter) {
-      tab.innerHTML = `<span class="text-sm font-bold uppercase select-none text-current">${firstLetter}</span>`;
-    } else {
-      tab.innerHTML = `<i data-lucide="sticky-note" class="h-4.5 w-4.5 text-current"></i>`;
-    }
-    
-    tab.addEventListener("click", () => {
-      activeNoteId = note.id;
-      loadActiveNoteData();
-      openFloatingNotePanel();
-    });
-    
-    container.appendChild(tab);
-  });
-  
-  if (window.lucide) {
-    lucide.createIcons();
-  }
-}
-
-function updateFloatingNoteCharCount() {
-  const textArea = document.getElementById("floatingNoteTextArea");
-  const charCountSpan = document.getElementById("floatingNoteCharCount");
-  if (textArea && charCountSpan) {
-    const text = textArea.value;
-    const count = text.length;
-    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    const readTime = Math.max(1, Math.ceil(words / 200));
-    charCountSpan.textContent = `${count} char${count !== 1 ? 's' : ''} · ${words} word${words !== 1 ? 's' : ''} · ${readTime}m read`;
-  }
-}
-
-// Open the floating note editor panel
-function openFloatingNotePanel() {
-  if (isLocked) {
-    showNotification("Clipboard is locked. Please unlock first.", "error");
-    return;
-  }
-  
-  const floatingStickyNote = document.getElementById("floatingStickyNote");
-  const floatingNoteOverlay = document.getElementById("floatingNoteOverlay");
-  
-  if (!floatingStickyNote || !floatingNoteOverlay) return;
-  
-  // Slide note open
-  floatingStickyNote.classList.remove("closed", "pinning");
-  
-  // Show overlay
-  floatingNoteOverlay.classList.remove("hidden");
-  setTimeout(() => {
-    floatingNoteOverlay.classList.remove("opacity-0");
-    floatingNoteOverlay.style.opacity = "1";
-  }, 10);
-  
-  // Refresh side docked tabs (hiding the current active note tab)
-  renderPinnedNotes();
-  
-  const textArea = document.getElementById("floatingNoteTextArea");
-  if (textArea) {
-    setTimeout(() => textArea.focus(), 100);
-  }
-}
-
-// Done Button click (Pin the current note)
-function pinActiveNote() {
-  if (isLocked) {
-    showNotification("Clipboard is locked. Please unlock first.", "error");
-    return;
-  }
-  
-  const floatingStickyNote = document.getElementById("floatingStickyNote");
-  const floatingNoteOverlay = document.getElementById("floatingNoteOverlay");
-  if (!floatingStickyNote || !floatingNoteOverlay) return;
-  
-  // Trigger fly-away / pinning collapse animation
-  floatingStickyNote.classList.add("pinning");
-  
-  // Fade out backdrop blur overlay
-  floatingNoteOverlay.classList.add("opacity-0");
-  floatingNoteOverlay.style.opacity = "0";
-  
-  // Update state database
-  if (activeNoteId) {
-    const titleInput = document.getElementById("floatingNoteTitle");
-    const textArea = document.getElementById("floatingNoteTextArea");
-    db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
-      title: titleInput ? titleInput.value.trim() : "",
-      content: textArea ? textArea.value : ""
-    });
-  }
-  
-  setTimeout(() => {
-    floatingStickyNote.classList.add("closed");
-    floatingStickyNote.classList.remove("pinning");
-    floatingNoteOverlay.classList.add("hidden");
-    
-    // Re-render sidebar to show all notes as tabs (including this one)
-    renderPinnedNotes();
-  }, 450);
-  
-  showNotification("Note pinned to side edge", "success");
-}
-
-// Controller Initialization
-document.addEventListener("DOMContentLoaded", () => {
-  const dockStickyBtn = document.getElementById("dockStickyBtn");
-  const dockAddStickyBtn = document.getElementById("dockAddStickyBtn");
-  const closeFloatingNoteBtn = document.getElementById("closeFloatingNoteBtn");
-  const doneFloatingNoteBtn = document.getElementById("doneFloatingNoteBtn");
-  const deleteFloatingNoteBtn = document.getElementById("deleteFloatingNoteBtn");
-  const floatingNoteTitle = document.getElementById("floatingNoteTitle");
-  const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
-  const colorPresetsDiv = document.getElementById("noteColorPresets");
-  const floatingNoteOverlay = document.getElementById("floatingNoteOverlay");
-
-  if (!dockStickyBtn) return;
-
-  // Toggle notes manager from dock
-  dockStickyBtn.addEventListener("click", () => {
-    if (isLocked) {
-      showNotification("Clipboard is locked. Please unlock first.", "error");
-      return;
-    }
-    
-    // If no notes exist, spin a default one up
-    const noteIds = Object.keys(floatingNotes);
-    if (noteIds.length === 0) {
-      const newId = "note_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
-      const defaultNote = {
-        id: newId,
-        title: "Ideas",
-        content: "",
-        color: "babyyellow"
-      };
-      activeNoteId = newId;
-      db.ref(`clipboards/${username}/floatingNotes/${newId}`).set(defaultNote).then(() => {
-        loadActiveNoteData();
-        openFloatingNotePanel();
-      });
-    } else {
-      // Open the first note, or current active one
-      if (!activeNoteId || !floatingNotes[activeNoteId]) {
-        activeNoteId = noteIds[0];
-      }
-      loadActiveNoteData();
-      openFloatingNotePanel();
-    }
-  });
-
-  // "+ Add Sticky Note" click handler directly on the dock button
-  if (dockAddStickyBtn) {
-    dockAddStickyBtn.addEventListener("click", () => {
-      if (isLocked) {
-        showNotification("Clipboard is locked. Please unlock first.", "error");
-        return;
-      }
-      
-      // Save changes of the currently open note if the panel is open
-      const panel = document.getElementById("floatingStickyNote");
-      const isPanelOpen = panel && !panel.classList.contains("closed");
-      if (isPanelOpen && activeNoteId) {
-        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
-          title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
-          content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
-        });
-      }
-
-      // Create new note
-      const newId = "note_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
-      const newNote = {
-        id: newId,
-        title: "Heading " + (Object.keys(floatingNotes).length + 1),
-        content: "",
-        color: "babyblue"
-      };
-      
-      activeNoteId = newId;
-      db.ref(`clipboards/${username}/floatingNotes/${newId}`).set(newNote).then(() => {
-        loadActiveNoteData();
-        openFloatingNotePanel();
-        showNotification("New sticky note created", "success");
-      });
-    });
-  }
-
-  // Close floating notes panel
-  if (closeFloatingNoteBtn) {
-    closeFloatingNoteBtn.addEventListener("click", () => {
-      // Save changes before closing
-      if (activeNoteId) {
-        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
-          title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
-          content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
-        });
-      }
-      closeFloatingNotePanelDirectly();
-    });
-  }
-
-  // Done button pins the note
-  if (doneFloatingNoteBtn) {
-    doneFloatingNoteBtn.addEventListener("click", pinActiveNote);
-  }
-
-  // Overlay click closes panel and saves note
-  if (floatingNoteOverlay) {
-    floatingNoteOverlay.addEventListener("click", () => {
-      if (activeNoteId) {
-        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
-          title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
-          content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
-        });
-      }
-      closeFloatingNotePanelDirectly();
-    });
-  }
-
-  // "Delete Note" click
-  if (deleteFloatingNoteBtn) {
-    deleteFloatingNoteBtn.addEventListener("click", () => {
-      if (!activeNoteId) return;
-      if (isLocked) {
-        showNotification("Clipboard is locked. Please unlock first.", "error");
-        return;
-      }
-      
-      const targetId = activeNoteId;
-      db.ref(`clipboards/${username}/floatingNotes/${targetId}`).set(null).then(() => {
-        showNotification("Sticky note deleted", "info");
-      });
-    });
-  }
-
-  // Sync inputs locally in realtime to Firebase
-  let syncNoteDebounce;
-  const syncLocalNoteInputs = () => {
-    if (!activeNoteId || isLocked) return;
-    clearTimeout(syncNoteDebounce);
-    syncNoteDebounce = setTimeout(() => {
-      db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
-        title: floatingNoteTitle ? floatingNoteTitle.value.trim() : "",
-        content: floatingNoteTextArea ? floatingNoteTextArea.value : ""
-      });
-    }, 400); // 400ms debounce
-    updateFloatingNoteCharCount();
-  };
-
-  if (floatingNoteTitle) {
-    floatingNoteTitle.addEventListener("input", syncLocalNoteInputs);
-  }
-  if (floatingNoteTextArea) {
-    floatingNoteTextArea.addEventListener("input", syncLocalNoteInputs);
-  }
-
-  // Color presets click listener
-  if (colorPresetsDiv) {
-    colorPresetsDiv.addEventListener("click", (e) => {
-      const btn = e.target.closest("button");
-      if (!btn || !activeNoteId || isLocked) return;
-      
-      const newColor = btn.getAttribute("data-color");
-      if (newColor) {
-        db.ref(`clipboards/${username}/floatingNotes/${activeNoteId}`).update({
-          color: newColor
-        });
-      }
-    });
-  }
-});
 
 // ==========================================================================
 // FLOATING COMMAND PALETTE SYSTEM (Notion & Linear Inspired Glassmorphism)
@@ -2910,10 +2528,7 @@ const initCommandPaletteSystem = () => {
     }
 
     if (isMeta && !isTyping) {
-      if (key === 'n') {
-        e.preventDefault();
-        executeAction('create-note');
-      } else if (key === 'g') {
+      if (key === 'g') {
         e.preventDefault();
         executeAction('switch-room');
       } else if (key === 'e') {
@@ -3062,15 +2677,7 @@ const initCommandPaletteSystem = () => {
 
     // Bug 1 fix: wrap each case that declares variables in its own block scope
     switch (action) {
-      case 'create-note': {
-        const dockAddStickyBtn = document.getElementById("dockAddStickyBtn");
-        if (dockAddStickyBtn) {
-          dockAddStickyBtn.click();
-        } else {
-          showNotification("Could not create sticky note", "error");
-        }
-        break;
-      }
+
       case 'shortcuts': {
         openShortcutsModal();
         break;
