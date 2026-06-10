@@ -3280,4 +3280,183 @@ if (document.readyState === 'loading') {
       height: selectionSpan.offsetHeight
     };
   }
+
+  // ==========================================================================
+  // REDESIGNED bottom DOCK INTERACTIVE SYSTEM
+  // ==========================================================================
+  (function initRedesignedDock() {
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const dock = document.querySelector(".glass-dock");
+    const dockButtons = document.querySelectorAll(".glass-dock .dock-btn");
+
+    // 1. macOS-style Dock Magnification Effect (Only for hover-supporting screens)
+    if (dock && dockButtons.length && !isTouch) {
+      const maxScale = 1.25;
+      const maxRange = 80; // pixels range of influence
+
+      document.addEventListener("mousemove", (e) => {
+        const rect = dock.getBoundingClientRect();
+        // Only trigger magnification when cursor is near the dock vertically
+        if (e.clientY >= rect.top - 100 && e.clientY <= rect.bottom + 50 &&
+            e.clientX >= rect.left - 50 && e.clientX <= rect.right + 50) {
+          
+          dockButtons.forEach(btn => {
+            const btnRect = btn.getBoundingClientRect();
+            const btnCenter = btnRect.left + btnRect.width / 2;
+            const distance = Math.abs(e.clientX - btnCenter);
+            
+            if (distance < maxRange) {
+              const ratio = (maxRange - distance) / maxRange;
+              const ease = Math.sin(ratio * Math.PI / 2); // Smooth sine curve
+              const scale = 1 + (maxScale - 1) * ease;
+              btn.style.setProperty("--dock-scale", scale);
+            } else {
+              btn.style.setProperty("--dock-scale", 1);
+            }
+          });
+        } else {
+          // Cursor is far away, reset scale
+          dockButtons.forEach(btn => {
+            btn.style.setProperty("--dock-scale", 1);
+          });
+        }
+      });
+
+      dock.addEventListener("mouseleave", () => {
+        dockButtons.forEach(btn => {
+          btn.style.setProperty("--dock-scale", 1);
+        });
+      });
+    }
+
+    // 2. Custom Self-Destruct Timer Dropdown
+    const selfDestructBtn = document.getElementById("selfDestructBtn");
+    const selfDestructMenu = document.getElementById("selfDestructMenu");
+    const selfDestructTimerSelect = document.getElementById("selfDestructTimer");
+
+    if (selfDestructBtn && selfDestructMenu && selfDestructTimerSelect) {
+      // Toggle dropdown menu open/close
+      selfDestructBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (selfDestructTimerSelect.disabled) return;
+        
+        const isHidden = selfDestructMenu.classList.contains("hidden");
+        
+        // Close other dropdowns if any
+        document.dispatchEvent(new Event("click"));
+        
+        if (isHidden) {
+          selfDestructMenu.classList.remove("hidden");
+          setTimeout(() => selfDestructMenu.classList.add("show"), 10);
+        } else {
+          selfDestructMenu.classList.remove("show");
+          setTimeout(() => selfDestructMenu.classList.add("hidden"), 150);
+        }
+      });
+
+      // Item selection handler
+      document.querySelectorAll("#selfDestructMenu .dropdown-item").forEach(item => {
+        item.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const val = item.getAttribute("data-value");
+          
+          selfDestructTimerSelect.value = val;
+          // Trigger the standard change listener in the codebase
+          selfDestructTimerSelect.dispatchEvent(new Event("change"));
+          
+          selfDestructMenu.classList.remove("show");
+          setTimeout(() => selfDestructMenu.classList.add("hidden"), 150);
+        });
+      });
+
+      // Click outside to close dropdown
+      document.addEventListener("click", (e) => {
+        if (!selfDestructBtn.contains(e.target) && !selfDestructMenu.contains(e.target)) {
+          if (!selfDestructMenu.classList.contains("hidden")) {
+            selfDestructMenu.classList.remove("show");
+            setTimeout(() => selfDestructMenu.classList.add("hidden"), 150);
+          }
+        }
+      });
+
+      // UI synchronizer helper
+      function syncSelfDestructUI(val) {
+        // Update active state dot on self-destruct btn
+        const destructDot = document.querySelector("#selfDestructBtn .dock-active-dot");
+        if (destructDot) {
+          if (val && val !== 'never') {
+            destructDot.classList.remove("opacity-0");
+            destructDot.classList.add("opacity-100");
+          } else {
+            destructDot.classList.remove("opacity-100");
+            destructDot.classList.add("opacity-0");
+          }
+        }
+        
+        // Highlight active dropdown list item
+        document.querySelectorAll("#selfDestructMenu .dropdown-item").forEach(item => {
+          const itemVal = item.getAttribute("data-value");
+          if (itemVal === val) {
+            item.classList.add("bg-secondary-100", "dark:bg-slate-800", "text-primary-600", "dark:text-primary-400");
+          } else {
+            item.classList.remove("bg-secondary-100", "dark:bg-slate-800", "text-primary-600", "dark:text-primary-400");
+          }
+        });
+      }
+
+      // Intercept standard select value property sets using defineProperty
+      try {
+        const originalDescriptor = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+        Object.defineProperty(selfDestructTimerSelect, 'value', {
+          set: function(val) {
+            originalDescriptor.set.call(this, val);
+            syncSelfDestructUI(val);
+          },
+          get: function() {
+            return originalDescriptor.get.call(this);
+          }
+        });
+        
+        // Sync initial state
+        syncSelfDestructUI(selfDestructTimerSelect.value);
+      } catch (err) {
+        console.error("Failed to intercept select value descriptor:", err);
+      }
+
+      // Monitor standard select disabled state to styling our custom button
+      const disabledObserver = new MutationObserver(() => {
+        if (selfDestructTimerSelect.disabled) {
+          selfDestructBtn.classList.add("opacity-50", "pointer-events-none");
+          selfDestructMenu.classList.remove("show");
+          selfDestructMenu.classList.add("hidden");
+        } else {
+          selfDestructBtn.classList.remove("opacity-50", "pointer-events-none");
+        }
+      });
+      disabledObserver.observe(selfDestructTimerSelect, { attributes: true, attributeFilter: ["disabled"] });
+    }
+
+    // 3. History Drawer Active Indicator Dot via MutationObserver
+    const historyDrawer = document.getElementById("historyDrawer");
+    const historyDot = document.querySelector("#toggleHistoryBtn .dock-active-dot");
+
+    if (historyDrawer && historyDot) {
+      const observer = new MutationObserver(() => {
+        if (historyDrawer.classList.contains("open")) {
+          historyDot.classList.remove("opacity-0");
+          historyDot.classList.add("opacity-100");
+        } else {
+          historyDot.classList.remove("opacity-100");
+          historyDot.classList.add("opacity-0");
+        }
+      });
+      observer.observe(historyDrawer, { attributes: true, attributeFilter: ["class"] });
+      
+      // Sync initial state
+      if (historyDrawer.classList.contains("open")) {
+        historyDot.classList.remove("opacity-0");
+        historyDot.classList.add("opacity-100");
+      }
+    }
+  })();
 })();

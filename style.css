@@ -1879,12 +1879,15 @@ mark {
 
 /* Premium macOS/iOS Glass Dock Style (Default / Light Theme) */
 .glass-dock {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(20px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 20px 40px -10px rgba(0, 115, 255, 0.15), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(30px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.03),
+    0 20px 40px -10px rgba(15, 23, 42, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.02) !important;
 }
 
 .glass-dock span {
@@ -1904,10 +1907,18 @@ mark {
   align-items: center !important;
   justify-content: center !important;
   border-radius: 9999px !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  background-color: rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
   color: #475569 !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+  transition: 
+    transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+  transform-origin: bottom center !important;
+  position: relative;
 }
 
 .glass-dock .dock-btn svg {
@@ -1916,60 +1927,91 @@ mark {
   stroke-width: 2.2 !important;
 }
 
-.glass-dock .dock-btn:hover {
-  background-color: rgba(0, 0, 0, 0.08) !important;
-  color: #0f172a !important;
-  transform: scale(1.08);
-}
-
 .glass-dock button,
 .glass-dock .relative {
   border-radius: 9999px !important;
 }
 
 .glass-dock #copyAllBtn {
-  background-color: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px var(--primary-glow) !important;
+  background-color: rgba(37, 99, 235, 0.06) !important;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+  color: rgb(37, 99, 235) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.05) !important;
 }
 .glass-dock #copyAllBtn:hover {
-  background-color: var(--primary-hover) !important;
-  border-color: var(--primary-hover) !important;
-  color: #ffffff !important;
-  transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px var(--primary-glow) !important;
+  background-color: rgba(37, 99, 235, 0.12) !important;
+  border-color: rgba(37, 99, 235, 0.4) !important;
+  color: rgb(29, 78, 216) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
 }
 
 .glass-dock #exportBtn {
-  background-color: var(--export-color) !important;
-  border-color: var(--export-color) !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px var(--export-glow) !important;
+  background-color: rgba(139, 92, 246, 0.06) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+  color: rgb(139, 92, 246) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.05) !important;
 }
 .glass-dock #exportBtn:hover {
-  background-color: var(--export-hover) !important;
-  border-color: var(--export-hover) !important;
-  color: #ffffff !important;
-  transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px var(--export-glow) !important;
+  background-color: rgba(139, 92, 246, 0.12) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+  color: rgb(109, 40, 217) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
 }
 
 .glass-dock #clearClipboard {
-  background-color: var(--danger-color) !important;
-  border-color: var(--danger-color) !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px var(--danger-glow) !important;
+  background-color: rgba(239, 68, 68, 0.06) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  color: rgb(239, 68, 68) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.05) !important;
 }
 .glass-dock #clearClipboard:hover {
-  background-color: var(--danger-hover) !important;
-  border-color: var(--danger-hover) !important;
-  color: #ffffff !important;
-  transform: scale(1.08) !important;
-  box-shadow: 0 6px 18px var(--danger-glow) !important;
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: rgb(220, 38, 38) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Dark theme overrides for colored buttons */
+html.dark .glass-dock #copyAllBtn {
+  background-color: rgba(96, 165, 250, 0.08) !important;
+  border-color: rgba(96, 165, 250, 0.2) !important;
+  color: rgb(96, 165, 250) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+html.dark .glass-dock #copyAllBtn:hover {
+  background-color: rgba(96, 165, 250, 0.18) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  color: rgb(147, 197, 253) !important;
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.25) !important;
+}
+
+html.dark .glass-dock #exportBtn {
+  background-color: rgba(167, 139, 250, 0.08) !important;
+  border-color: rgba(167, 139, 250, 0.2) !important;
+  color: rgb(167, 139, 250) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+html.dark .glass-dock #exportBtn:hover {
+  background-color: rgba(167, 139, 250, 0.18) !important;
+  border-color: rgba(167, 139, 250, 0.5) !important;
+  color: rgb(196, 181, 253) !important;
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.25) !important;
+}
+
+html.dark .glass-dock #clearClipboard {
+  background-color: rgba(248, 113, 113, 0.08) !important;
+  border-color: rgba(248, 113, 113, 0.2) !important;
+  color: rgb(248, 113, 113) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+html.dark .glass-dock #clearClipboard:hover {
+  background-color: rgba(248, 113, 113, 0.18) !important;
+  border-color: rgba(248, 113, 113, 0.5) !important;
+  color: rgb(252, 165, 165) !important;
+  box-shadow: 0 4px 12px rgba(248, 113, 113, 0.25) !important;
 }
 
 /* Specific lock state classes */
@@ -1981,6 +2023,7 @@ mark {
 .glass-dock .dock-btn.locked:hover {
   background-color: #b91c1c !important;
   color: white !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .glass-dock .dock-btn.unlocked {
@@ -1991,6 +2034,7 @@ mark {
 .glass-dock .dock-btn.unlocked:hover {
   background-color: #047857 !important;
   color: white !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 /* History Drawer Styling (Default / Light Theme) */
@@ -2017,10 +2061,13 @@ mark {
 
 /* --- Dark Mode Override Styles --- */
 html.dark .glass-dock {
-  background: rgba(15, 23, 42, 0.75) !important;
+  background: rgba(15, 23, 42, 0.55) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.2),
+    0 20px 40px -10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0.5px rgba(0, 0, 0, 0.2) !important;
 }
 
 html.dark .glass-dock span {
@@ -2033,14 +2080,17 @@ html.dark .glass-dock #dockCharCount {
 }
 
 html.dark .glass-dock .dock-btn {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
   color: #cbd5e1 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
 }
 
 html.dark .glass-dock .dock-btn:hover {
-  background-color: rgba(255, 255, 255, 0.12) !important;
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
   color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 
@@ -2063,6 +2113,47 @@ html.dark #historyDrawer .history-item {
 html.dark #historyDrawer .history-item:hover {
   background-color: rgba(255, 255, 255, 0.08) !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Custom Destruct Dropdown upward styling */
+.custom-dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  transform: translate(-50%, 8px) scale(0.95);
+  pointer-events: none;
+  transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.custom-dropdown-menu.show {
+  display: flex !important;
+  opacity: 1 !important;
+  transform: translate(-50%, 0) scale(1) !important;
+  pointer-events: auto !important;
+}
+
+/* Dropdown items styling */
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Active status indicator dot styling */
+.dock-active-dot {
+  width: 4px !important;
+  height: 4px !important;
+  min-width: 4px !important;
+  border-radius: 9999px !important;
+  position: absolute !important;
+  bottom: 3px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  transition: opacity 0.3s ease, background-color 0.3s ease !important;
+  pointer-events: none !important;
 }
 
 /* --- RESPONSIVE HISTORY DRAWER TRANSITIONS --- */
@@ -3165,21 +3256,25 @@ body.app-layout .glass-dock {
   gap: 12px !important;
   padding: 8px 16px !important;
   border-radius: 20px !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), 
-              0 2px 8px rgba(0, 0, 0, 0.04),
-              inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(30px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.03),
+    0 20px 40px -10px rgba(15, 23, 42, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.02) !important;
 }
 
 html.dark body.app-layout .glass-dock {
-  background: rgba(15, 23, 42, 0.75) !important;
+  background: rgba(15, 23, 42, 0.55) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4),
-              0 2px 8px rgba(0, 0, 0, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.2),
+    0 20px 40px -10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0.5px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Premium dock separators */
@@ -3196,24 +3291,28 @@ html.dark .dock-separator {
 
 /* Standardize circular dock buttons styling */
 body.app-layout .glass-dock .dock-btn {
-  background-color: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
   border-color: rgba(0, 0, 0, 0.06) !important;
   color: #475569 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
 }
 body.app-layout .glass-dock .dock-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1) !important;
+  background-color: rgba(255, 255, 255, 1) !important;
   color: #0f172a !important;
-  transform: scale(1.08) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 html.dark body.app-layout .glass-dock .dock-btn {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
   color: #cbd5e1 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
 }
 html.dark body.app-layout .glass-dock .dock-btn:hover {
-  background-color: rgba(255, 255, 255, 0.16) !important;
-  color: #ffffff !important;
-  transform: scale(1.08) !important;
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Style primary and destructive dock actions consistently as rounded squares */
