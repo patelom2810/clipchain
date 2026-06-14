@@ -81,84 +81,88 @@
 <!-- ============================================================ -->
 <!-- NAVBAR — Minimal Modern App Style (Notion / Linear inspired) -->
 <!-- ============================================================ -->
-<nav id="appNavbar" class="app-navbar">
-  <div class="app-navbar-inner">
-
-    <!-- LEFT: Hamburger + Room Name -->
-    <div class="navbar-left">
-      <button id="navMenuBtn" class="navbar-icon-btn hidden md:flex tooltip tooltip-bottom" title="Menu">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+<nav id="appNavbar" class="app-navbar px-4 py-2 flex items-center justify-between border-b border-secondary-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-50">
+  <!-- LEFT: Brand Logo & Interactive Workspace Switcher -->
+  <div class="flex items-center gap-3">
+    <!-- Brand text Logo -->
+    <div id="workspaceAvatar" class="flex items-center select-none cursor-pointer hover:opacity-80 transition-opacity" style="font-family: 'Pacifico', cursive; font-size: 20px; font-weight: 400; line-height: 1; padding-bottom: 2px;" title="Switch Workspace">
+      <span style="color: #0f592f;" class="dark:text-emerald-500">Clip</span><span style="color: #7bc143;">Chain</span><span style="color: #0f592f;" class="dark:text-emerald-500">!</span>
+      <div class="relative flex items-center" style="color: #7bc143; margin-top: -10px; margin-left: 2px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(0deg);">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+        <!-- Sparks -->
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" class="absolute" style="top: -8px; right: -6px;">
+          <line x1="12" y1="2" x2="12" y2="7"></line>
+          <line x1="20" y1="6" x2="16" y2="9"></line>
+          <line x1="22" y1="14" x2="18" y2="14"></line>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="h-4 w-px bg-secondary-200 dark:bg-slate-700"></div>
+    
+    <!-- Workspace Switcher Pill -->
+    <div class="relative">
+      <button id="workspaceSwitcherBtn" class="flex items-center gap-1.5 px-2.5 py-1 bg-secondary-100/80 hover:bg-secondary-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-secondary-800 dark:text-slate-200 text-xs font-semibold rounded-lg border border-secondary-200/50 dark:border-slate-700/50 transition-colors focus:outline-none cursor-pointer" title="Switch Workspace Room">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+        <span id="navRoomLabel">#...</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="opacity-60"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
-
-      <!-- Workspace Switcher Wrap -->
-      <div class="relative flex items-center">
-        <!-- Brand text (Acts as workspace switcher trigger) -->
-        <div id="workspaceAvatar" class="flex items-center px-2 py-1 ml-1 select-none cursor-pointer hover:opacity-80 transition-opacity" title="Switch Workspace">
-          <div class="flex items-center tracking-tight" style="font-family: 'Pacifico', cursive; font-size: 20px; font-weight: 400; line-height: 1; padding-bottom: 2px;">
-            <span style="color: #0f592f;">Clip</span><span style="color: #7bc143;">Chain</span><span style="color: #0f592f;">!</span>
-            <div class="relative flex items-center" style="color: #7bc143; margin-top: -10px; margin-left: 2px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(0deg);">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-              </svg>
-              <!-- Sparks -->
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" class="absolute" style="top: -8px; right: -6px;">
-                <line x1="12" y1="2" x2="12" y2="7"></line>
-                <line x1="20" y1="6" x2="16" y2="9"></line>
-                <line x1="22" y1="14" x2="18" y2="14"></line>
-              </svg>
-            </div>
-          </div>
+      
+      <!-- Dropdown popup -->
+      <div id="workspaceSwitcherDropdown" class="hidden absolute top-9 left-0 mt-1 p-3 bg-white dark:bg-slate-900 border border-secondary-200 dark:border-slate-800 rounded-xl shadow-xl z-50 w-64 animate-enter">
+        <p class="text-[10px] font-bold text-secondary-400 dark:text-slate-450 mb-2 uppercase tracking-wider">Switch Room / ID</p>
+        <div class="flex gap-2 mb-2">
+          <input type="text" id="quickRoomSwitcherInput" placeholder="Enter Room ID" class="flex-1 px-2.5 py-1 bg-secondary-50 dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 dark:text-white rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary-500 font-mono text-center">
+          <button id="quickRoomSwitcherGo" class="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-lg transition-colors">Go</button>
         </div>
+        <p class="text-[9px] text-secondary-400 dark:text-slate-500 leading-normal">Enter any Room ID to join or spin up a new shared clipboard instantly.</p>
       </div>
     </div>
+  </div>
 
-    <!-- CENTER: Empty or minimal -->
-    <div class="navbar-center"></div>
+  <!-- RIGHT: Desktop & Mobile Controls (Unified & Ultra Clean) -->
+  <div class="flex items-center gap-1.5">
+    <!-- Search Everywhere Shortcut -->
+    <button id="navSearchEverywhereBtn" class="flex items-center gap-1.5 px-2.5 py-1 bg-secondary-50 dark:bg-slate-800/40 hover:bg-secondary-100 dark:hover:bg-slate-800/80 text-secondary-500 dark:text-slate-400 hover:text-secondary-800 dark:hover:text-white text-xs rounded-lg border border-secondary-200/30 dark:border-slate-700/30 transition-colors focus:outline-none cursor-pointer">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span class="hidden sm:inline">Search Commands</span>
+      <kbd class="hidden sm:inline-block px-1 py-0.2 text-[8px] font-semibold bg-secondary-100 dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded text-secondary-400 font-mono">⌘K</kbd>
+    </button>
 
-    <!-- RIGHT: Action Icons + Share -->
-    <div class="navbar-right">
+    <div class="h-4 w-px bg-secondary-200 dark:bg-slate-700 mx-1"></div>
 
+    <!-- Share Button (Trigger link copy) -->
+    <button id="navShareDropdownBtn" class="navbar-icon-btn share-button tooltip tooltip-bottom" title="Share Space">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
 
-
-
-
-      <div id="navShareDropdown" class="navbar-share-dropdown hidden">
-      </div>
-    </div>
-
-    <!-- MOBILE RIGHT -->
-    <div class="navbar-mobile-right">
-      <!-- Mobile ID input compact -->
-      <div class="navbar-id-pill" style="max-width:150px;">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8;flex-shrink:0;"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
-        <input type="text" id="mobileNavbarUsername" placeholder="Room ID"
-          class="navbar-id-input" autocomplete="off">
-        <button id="mobileNavShareBtn" class="navbar-go-btn share-button tooltip tooltip-bottom" title="Share">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3" stroke="#7BC143"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        </button>
-      </div>
-
-
-
-      <!-- Mobile Theme Toggle -->
-      <button id="mobileThemeToggleBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Toggle Theme">
-        <i data-lucide="moon" class="h-5 w-5"></i>
-      </button>
-    </div>
-
+    <!-- Theme Toggle Button -->
+    <button id="themeToggleBtn" class="navbar-icon-btn tooltip tooltip-bottom" title="Toggle Light/Dark Theme">
+      <i data-lucide="moon" class="h-4.5 w-4.5"></i>
+    </button>
+    <input type="checkbox" id="themeToggle" class="hidden">
+    <!-- Hidden elements kept for compatibility with existing JS selectors -->
+    <input type="checkbox" id="mobileThemeToggle" class="hidden">
+    <input type="text" id="mobileNavbarUsername" class="hidden">
+    <button id="setUsernameBtn" class="hidden"></button>
+    <input type="text" id="mobileUsername" class="hidden">
+    <button id="mobileSetUsername" class="hidden"></button>
+    <button id="mobileMenuBtn" class="hidden"></button>
   </div>
 </nav>
 
 <div class="app-content-area">
-  <main class="py-6 px-4 sm:px-6 lg:px-8 max-w-5xl w-full mx-auto animate-enter delay-200 flex-grow flex flex-col flex-shrink-0 min-h-0">
+  <main class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl w-full mx-auto animate-enter delay-200 flex-grow flex flex-col flex-shrink-0 min-h-0">
     <div class="space-y-6 flex-grow flex flex-col flex-shrink-0 min-h-0">
 
     <!-- Document Title Section -->
-    <div class="mb-4 flex items-center justify-between group">
+    <div class="mb-2 flex items-center justify-between group">
       <div class="flex items-center w-full max-w-3xl relative">
         <input type="text" id="documentTitleInput" 
-               class="bg-transparent border border-transparent outline-none font-bold text-3xl sm:text-4xl text-secondary-900 dark:text-white placeholder-secondary-300 dark:placeholder-slate-600 focus:bg-white/60 dark:focus:bg-slate-800/60 hover:bg-white/40 dark:hover:bg-slate-800/40 focus:border-primary-300 dark:focus:border-primary-600 rounded-xl px-3 py-1.5 w-full transition-all"
+               class="bg-transparent border border-transparent outline-none font-bold text-3xl sm:text-4xl text-secondary-900 dark:text-white placeholder-secondary-300 dark:placeholder-secondary-400 focus:bg-white/60 dark:focus:bg-slate-800/60 hover:bg-white/40 dark:hover:bg-slate-800/40 focus:border-primary-300 dark:focus:border-primary-600 rounded-xl px-3 py-1.5 w-full transition-all"
                value="Untitled"
                placeholder="Untitled"
                autocomplete="off" spellcheck="false" title="Click to rename document">
@@ -166,36 +170,16 @@
       </div>
     </div>
 
-    <!-- URL/Link Display Section -->
-    <div class="mb-6">
-      <div
-        class="glass-panel w-full flex items-center justify-between p-1.5 pl-4 rounded-full shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center overflow-hidden mr-2">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#7BC143" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 flex-shrink-0 mr-3">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-          </svg>
-          <a id="clipboardLink" href="#" target="_blank"
-            class="text-sm font-mono text-primary-600 truncate hover:underline">...</a>
-        </div>
-
-        <div class="flex items-center gap-1 flex-shrink-0">
-          <button id="copyLink"
-            class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-secondary-100 dark:hover:bg-slate-800 text-secondary-600 dark:text-gray-300 transition-colors tooltip"
-            title="Copy Link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              <g transform="translate(15.5,15.5) scale(0.35) translate(-12,-12)" stroke="#7BC143" stroke-width="4">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-              </g>
-            </svg>
-          </button>
-
-
-        </div>
-      </div>
+    <!-- URL/Link Display Section (Redesigned as compact inline component) -->
+    <div class="flex items-center gap-2 px-3 mb-6 flex-wrap">
+      <span class="text-xs text-secondary-400 dark:text-slate-500 flex items-center gap-1.5">
+        <i data-lucide="link" class="w-3.5 h-3.5 text-primary-500"></i>
+        <span>Share Link:</span>
+      </span>
+      <a id="clipboardLink" href="#" target="_blank" class="text-xs font-mono text-primary-600 dark:text-primary-400 hover:underline truncate max-w-[200px] sm:max-w-sm">...</a>
+      <button id="copyLink" class="p-1 rounded-md hover:bg-secondary-100 dark:hover:bg-slate-800 text-secondary-500 dark:text-slate-400 hover:text-primary-600 transition-colors tooltip" title="Copy Link">
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+      </button>
     </div>
 
     <!-- Web Editor Container -->
@@ -208,52 +192,58 @@
       </div>
 
       <!-- Toolbar / Header of Editor -->
-      <div class="bg-white/40 border-b border-white/30 px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <div class="hidden sm:flex space-x-1.5">
+      <div class="bg-white/40 border-b border-white/30 px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center space-x-2 flex-wrap gap-y-1.5">
+          <div class="hidden sm:flex space-x-1.5 mr-1.5">
             <div class="w-3 h-3 rounded-full bg-red-400"></div>
             <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
             <div class="w-3 h-3 rounded-full bg-green-400"></div>
           </div>
-          <span
-            class="ml-3 text-xs font-semibold text-secondary-500 uppercase tracking-widest hidden sm:inline-block">Live
-            Editor</span>
           
           <!-- Formatting Toggle -->
-          <button id="toggleFormattingBtn" class="ml-1 sm:ml-2 px-2 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-primary-600 dark:hover:text-primary-400 bg-transparent hover:bg-white/50 dark:hover:bg-slate-700/50 tooltip tooltip-bottom" title="Rich Text">
+          <button id="toggleFormattingBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 bg-transparent hover:bg-secondary-100 dark:hover:bg-slate-800/60 tooltip tooltip-bottom" title="Rich Text formatting toolbar">
             <i data-lucide="type" class="h-3.5 w-3.5"></i>
+            <span class="text-[11px]">Format</span>
           </button>
           
           <!-- View Modes Tab Bar -->
-          <div class="flex items-center bg-secondary-100/50 dark:bg-slate-800/40 rounded-lg p-0.5 ml-1 sm:ml-4 border border-white/20 dark:border-slate-700/50">
-            <button id="btnViewEdit" class="px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm">
+          <div class="flex items-center bg-secondary-100/50 dark:bg-slate-800/40 rounded-lg p-0.5 border border-white/20 dark:border-slate-700/50">
+            <button id="btnViewEdit" class="px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm cursor-pointer">
               <i data-lucide="edit-3" class="h-3.5 w-3.5"></i>
-              <span class="hidden md:inline">Edit</span>
+              <span class="text-[11px]">Edit</span>
             </button>
-            <button id="btnViewPreview" class="hidden px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
+            <button id="btnViewPreview" class="hidden px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white cursor-pointer">
               <i data-lucide="eye" class="h-3.5 w-3.5"></i>
-              <span class="hidden md:inline">Preview</span>
+              <span class="text-[11px]">Preview</span>
             </button>
-            <button id="btnViewSplit" class="hidden px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 hover:text-secondary-800 dark:hover:text-white">
+            <button id="btnViewSplit" class="hidden px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 focus:outline-none text-secondary-500 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white cursor-pointer">
               <i data-lucide="columns" class="h-3.5 w-3.5"></i>
-              <span class="hidden md:inline">Split</span>
+              <span class="text-[11px]">Split</span>
             </button>
           </div>
         </div>
 
-        <!-- Search -->
-        <div class="relative group">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-1.5 h-4 w-4 text-secondary-400 group-focus-within:text-primary-500 transition-colors">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            <path d="M11 15a4 4 0 0 0 4-4" stroke="#7BC143" stroke-width="2"></path>
-          </svg>
-          <input type="text" id="searchInput" placeholder="Find in text..."
-            class="pl-9 pr-3 sm:pr-8 py-1 bg-white/50 dark:bg-slate-800/50 border border-transparent focus:bg-white dark:focus:bg-slate-700 focus:border-primary-200 dark:focus:border-primary-500 rounded-lg text-sm text-secondary-700 dark:text-gray-200 w-32 focus:w-40 sm:w-40 sm:focus:w-56 transition-all outline-none">
-          <kbd class="hidden sm:inline-block absolute right-1.5 top-1.5 pointer-events-none px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 dark:bg-slate-700 border border-secondary-200 dark:border-slate-600 rounded text-secondary-500 dark:text-slate-400 opacity-100 group-focus-within:opacity-0 transition-opacity font-mono">⌘F</kbd>
-          <div id="searchCount"
-            class="hidden absolute right-2 top-1.5 text-xs text-secondary-400 dark:text-slate-500 bg-white dark:bg-slate-800 px-1 rounded">
-            <span id="matchCount">0</span>
+        <!-- Search Container (Adaptive) -->
+        <div id="editorSearchContainer" class="relative flex items-center justify-end">
+          <!-- Mobile Search Trigger Button -->
+          <button id="mobileSearchTrigger" class="md:hidden flex w-8 h-8 items-center justify-center rounded-lg hover:bg-secondary-100 dark:hover:bg-slate-800 text-secondary-500 dark:text-slate-400 focus:outline-none cursor-pointer" title="Search inside editor">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+          
+          <!-- Search Input Wrap -->
+          <div id="searchWrap" class="hidden md:flex items-center relative group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-secondary-400 group-focus-within:text-primary-500 transition-colors pointer-events-none">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Find in text..."
+              class="pl-8 pr-8 py-1.5 bg-secondary-100/50 focus:bg-white dark:bg-slate-800/40 dark:focus:bg-slate-700 border border-transparent focus:border-primary-500 rounded-lg text-xs text-secondary-800 dark:text-gray-100 transition-all outline-none placeholder-secondary-450 w-32 focus:w-44 sm:w-40 sm:focus:w-56">
+            
+            <kbd class="hidden sm:inline-block absolute right-2.5 top-2 pointer-events-none px-1.5 py-0.5 text-[9px] font-semibold bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-700 rounded text-secondary-400 dark:text-slate-500 font-mono">⌘F</kbd>
+            
+            <div id="searchCount" class="hidden absolute right-2.5 top-2.5 text-[10px] text-secondary-400 bg-white dark:bg-slate-800 px-1 rounded border border-secondary-100 dark:border-slate-700">
+              <span id="matchCount">0</span>
+            </div>
           </div>
         </div>
       </div>
@@ -482,15 +472,48 @@
         </div>
 
         <!-- Edit Pane -->
-        <div id="editPane" class="relative h-full w-full border-r border-white/20 dark:border-slate-800/50 animate-enter delay-100">
+        <div id="editPane" class="relative h-full w-full border-r border-white/20 dark:border-slate-800/50 animate-enter delay-100 flex flex-col">
           <!-- Highlight Overlay for Search -->
           <div id="highlightOverlay"
             class="absolute inset-0 p-6 font-mono text-lg leading-relaxed whitespace-pre-wrap break-words pointer-events-none text-transparent z-10 overflow-auto bg-transparent">
           </div>
           <!-- Main Text Area -->
           <textarea id="clipboard"
-            class="bg-transparent border-none outline-none resize-none text-secondary-800 dark:text-gray-200 placeholder-secondary-400 focus:ring-0"
+            class="bg-transparent border-none outline-none resize-none text-secondary-800 dark:text-gray-250 placeholder-secondary-300 dark:placeholder-slate-500 focus:ring-0 w-full h-full p-6 relative z-20 flex-1 min-h-0"
             placeholder="Type or paste your text here... It will sync instantly across all devices."></textarea>
+          
+          <!-- Onboarding / Empty State Overlay -->
+          <div id="editorEmptyState" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 transition-all duration-300 pointer-events-none opacity-0">
+            <div class="max-w-sm space-y-5">
+              <div class="w-12 h-12 mx-auto rounded-xl bg-gradient-to-tr from-primary-500/10 to-indigo-500/10 dark:from-primary-500/20 dark:to-indigo-500/20 flex items-center justify-center border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-pulse"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+              </div>
+              
+              <div class="space-y-1">
+                <h4 class="text-base font-bold text-secondary-800 dark:text-white">Collaborative Clipboard</h4>
+                <p class="text-xs text-secondary-400 dark:text-slate-450">Type in this editor to sync instantly. Share the Room Link to invite others.</p>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-2 text-left">
+                <div class="p-2.5 bg-white/40 dark:bg-slate-800/40 border border-white/50 dark:border-slate-700/20 rounded-xl">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold text-secondary-700 dark:text-slate-200 mb-0.5">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-primary-500"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span>Instant URL Sync</span>
+                  </div>
+                  <p class="text-[9px] text-secondary-400 dark:text-slate-500 leading-normal">Invite others by sending the link at the top.</p>
+                </div>
+                <div class="p-2.5 bg-white/40 dark:bg-slate-800/40 border border-white/50 dark:border-slate-700/20 rounded-xl">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold text-secondary-700 dark:text-slate-200 mb-0.5">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-500"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span>Privacy Lock</span>
+                  </div>
+                  <p class="text-[9px] text-secondary-400 dark:text-slate-500 leading-normal">Lock your clipboard in the bottom dock.</p>
+                </div>
+              </div>
+
+              <p class="text-[10px] text-secondary-400 dark:text-slate-500">Press <kbd class="px-1 py-0.5 bg-secondary-100 dark:bg-slate-800 rounded border border-secondary-200 dark:border-slate-700">⌘K</kbd> to explore command palette</p>
+            </div>
+          </div>
         </div>
 
         <!-- Preview Pane -->
@@ -507,7 +530,7 @@
             <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/20 rotate-2 shadow-sm rounded-sm"></div>
             
             <!-- Sticky Text (Editable!) -->
-            <textarea id="stickyTextArea" class="w-full h-full bg-transparent border-none outline-none resize-none font-cursive text-2xl leading-relaxed text-amber-900 dark:text-amber-100 placeholder-amber-700/50 focus:ring-0 p-0 overflow-y-auto no-scrollbar" placeholder="Write a quick sticky note..."></textarea>
+            <textarea id="stickyTextArea" class="w-full h-full bg-transparent border-none outline-none resize-none font-cursive text-2xl leading-relaxed text-amber-900 dark:text-amber-100 placeholder-amber-700/50 dark:placeholder-amber-400/40 focus:ring-0 p-0 overflow-y-auto no-scrollbar" placeholder="Write a quick sticky note..."></textarea>
             
             <!-- Color Palette for Sticky Note -->
             <div class="flex justify-end gap-1.5 pt-2 border-t border-black/5 dark:border-white/10 mt-2 z-10">
@@ -523,7 +546,7 @@
 
       <!-- Footer of Editor -->
       <div
-        class="editor-card-footer bg-white/40 dark:bg-slate-800/30 border-t border-white/30 dark:border-slate-700/30 px-4 py-2 flex items-center justify-between text-xs font-medium text-secondary-500">
+        class="editor-card-footer bg-white/40 dark:bg-slate-800/30 border-t border-white/30 dark:border-slate-700/30 px-4 py-2 flex items-center justify-between text-xs font-medium text-secondary-500 dark:text-secondary-400">
         <div class="flex items-center gap-3">
           <span id="statusIndicator" class="flex items-center gap-1.5">
             <div class="flex items-center gap-1.5 status-pop">
@@ -566,8 +589,8 @@
         
         <!-- Session Text Details -->
         <div class="hidden sm:flex flex-col min-w-0 pr-1 select-text">
-          <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-secondary-900 truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
-          <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-secondary-500 font-medium whitespace-nowrap">0 characters</span>
+          <span id="dockSessionId" class="text-xs sm:text-sm font-bold text-secondary-900 dark:text-white truncate max-w-[100px] sm:max-w-[160px]" title="Room ID">#...</span>
+          <span id="dockCharCount" class="text-[9px] sm:text-[10px] text-secondary-500 dark:text-secondary-400 font-medium whitespace-nowrap">0 characters</span>
         </div>
         
         <!-- Lock (Collapsible) -->
@@ -589,7 +612,7 @@
             <option value="24h">24 Hours</option>
           </select>
           
-          <div id="selfDestructMenu" class="custom-dropdown-menu hidden opacity-0 absolute bottom-14 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-secondary-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-xl transition-all duration-200 z-50 flex flex-col gap-1 w-32">
+          <div id="selfDestructMenu" class="custom-dropdown-menu hidden opacity-0 absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-secondary-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-xl transition-all duration-200 z-50 flex flex-col gap-1 w-32">
             <button class="dropdown-item flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl text-secondary-700 dark:text-slate-200 hover:bg-secondary-100 dark:hover:bg-slate-800 transition-colors" data-value="never">
               <i data-lucide="clock" class="w-3.5 h-3.5 text-secondary-400"></i>
               <span>No Timer</span>
@@ -1024,7 +1047,7 @@
         <!-- Keyboard Shortcuts Modal -->
         <div id="shortcutsModal"
           class="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-          <div class="relative w-full max-w-sm mx-4 p-6 bg-white dark:bg-slate-800 border border-secondary-100 dark:border-slate-750 shadow-2xl rounded-2xl text-secondary-900 dark:text-white">
+          <div class="relative w-full max-w-sm mx-4 p-6 bg-white dark:bg-slate-800 border border-secondary-100 dark:border-slate-700 shadow-2xl rounded-2xl text-secondary-900 dark:text-white">
             <button id="closeShortcutsModal"
               class="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-secondary-400 hover:text-secondary-600 dark:text-slate-400 dark:hover:text-white transition-colors">
               <i data-lucide="x" class="h-5 w-5"></i>
@@ -1093,6 +1116,9 @@
               </div>
             </div>
           </div>
-        </div></body>
+        </div>
+
+
+      </body>
 
 </html>

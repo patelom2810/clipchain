@@ -100,6 +100,42 @@ function safeLocalStorageRemove(key) {
   }
 }
 
+// Session passcode storage helpers
+function getSessionPassword(roomId) {
+  try {
+    return sessionStorage.getItem(`clipSessionPass_${roomId}`) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setSessionPassword(roomId, password) {
+  try {
+    if (password) {
+      sessionStorage.setItem(`clipSessionPass_${roomId}`, password);
+    } else {
+      sessionStorage.removeItem(`clipSessionPass_${roomId}`);
+    }
+  } catch (e) {
+    console.warn("sessionStorage failed:", e);
+  }
+}
+
+// Global cleanup for a specific room ID
+function cleanupClipboardListeners(roomId) {
+  if (!roomId) return;
+  try {
+    db.ref(`clipboards/${roomId}`).off();
+    db.ref(`clipboards/${roomId}/password`).off();
+    db.ref(`clipboards/${roomId}/expiresAt`).off();
+    db.ref(`clipboards/${roomId}/text`).off();
+    db.ref(`clipboards/${roomId}/stickyText`).off();
+    db.ref(`clipboards/${roomId}/title`).off();
+  } catch (e) {
+    console.error("Error cleaning up listeners:", e);
+  }
+}
+
 let openCommandPalette;
 
 // DOM Elements
@@ -124,6 +160,7 @@ const usernameDisplay = document.getElementById("usernameDisplay");
 const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 const mobileMenu = document.getElementById("mobileMenu");
 const closeMenuBtn = document.getElementById("closeMenu");
+const mobileMenuBackdrop = document.getElementById("mobileMenuBackdrop");
 const mobileThemeToggleBtn = document.getElementById("mobileThemeToggleBtn");
 const mobileNavbarUsername = document.getElementById("mobileNavbarUsername");
 
@@ -185,18 +222,10 @@ if (toggleFormattingBtn) {
 }
 let activeTabId = null;
 
-// Mobile Menu Toggle (Removed as per user request)
-if (mobileMenuBtn && mobileMenu) {
-  mobileMenuBtn.addEventListener("click", () => {
-    mobileMenu.classList.remove("translate-x-full");
-  });
-}
-
-if (closeMenuBtn && mobileMenu) {
-  closeMenuBtn.addEventListener("click", () => {
-    mobileMenu.classList.add("translate-x-full");
-  });
-}
+// // Mobile Menu Toggle with Smooth Transitions and Backdrop support (Removed)
+const closeMobileMenu = () => {
+  document.body.style.overflow = "";
+};
 
 // MULTI-CLIPBOARD STATE
 window.savedSlots = [];
@@ -231,6 +260,7 @@ updateURL(username);
 updateLinkDisplay(username);
 safeLocalStorageSet("clipUsername", username);
 usernameInput.value = username;
+sessionPassword = getSessionPassword(username);
 const dockSessionId = document.getElementById("dockSessionId");
 if (dockSessionId) dockSessionId.textContent = "#" + username;
 if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
@@ -244,7 +274,7 @@ function renderMultiClipTabs() {
   window.savedSlots.forEach((slot, index) => {
     const isActive = slot.id === username;
     const btn = document.createElement("button");
-    btn.className = `flex items-center gap-2 px-4 py-2 text-sm font-semibold border-t border-x rounded-t-xl transition-all select-none ${isActive ? 'bg-white/40 dark:bg-slate-800/80 border-white/30 text-secondary-900 dark:text-white pb-3 -mb-1 z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]' : 'bg-white/20 dark:bg-slate-800/40 border-transparent text-secondary-500 hover:text-secondary-700 dark:hover:text-slate-300 hover:bg-white/30 cursor-pointer'}`;
+    btn.className = `clip-tab ${isActive ? 'active-tab' : 'inactive-tab'}`;
     
     const nameSpan = document.createElement("span");
     nameSpan.textContent = slot.name || `Clip ${index + 1}`;
@@ -252,7 +282,7 @@ function renderMultiClipTabs() {
     
     if (window.savedSlots.length > 1) {
       const closeBtn = document.createElement("div");
-      closeBtn.className = "w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-secondary-400 hover:text-red-500 transition-colors ml-1";
+      closeBtn.className = "close-tab-btn";
       closeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
       closeBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -272,7 +302,7 @@ function renderMultiClipTabs() {
   
   if (window.savedSlots.length < 10) {
     const addBtn = document.createElement("button");
-    addBtn.className = "flex items-center justify-center px-3 py-2 text-secondary-400 hover:text-secondary-700 dark:hover:text-white transition-colors cursor-pointer mb-1";
+    addBtn.className = "add-tab-btn";
     addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
     addBtn.title = "Add new clipboard";
     addBtn.addEventListener("click", () => {
@@ -286,20 +316,45 @@ function renderMultiClipTabs() {
 }
 
 window.switchSlot = function(newId) {
+  if (!newId) return;
+  
+  // Clean up old listeners (on the current username before changing it)
+  cleanupClipboardListeners(username);
+  detachDataListeners();
+  stopCountdown();
+  
   username = newId;
-  safeLocalStorageSet("clipUsername", newId);
-  history.pushState(null, '', '/?id=' + newId);
-  clipboardRef = db.ref(`clipboards/${username}`);
-  clipboardTextArea.value = "";
-  const docTitleInput = document.getElementById("documentTitleInput");
-  if (docTitleInput) docTitleInput.value = "Untitled";
-  if (typeof renderMarkdownPreview === 'function') renderMarkdownPreview();
+  safeLocalStorageSet("clipUsername", username);
   updateURL(username);
   updateLinkDisplay(username);
+  
+  // Reset sessionPassword from sessionStorage for the new room
+  sessionPassword = getSessionPassword(username);
+  isLocked = false; // Will be determined properly by the password listener
+  
+  clipboardRef = db.ref(`clipboards/${username}`);
+  clearContentUI();
+  const docTitleInput = document.getElementById("documentTitleInput");
+  if (docTitleInput) docTitleInput.value = "Untitled";
+  
   const dockSessionId = document.getElementById("dockSessionId");
   if (dockSessionId) dockSessionId.textContent = "#" + username;
   if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
-  if (typeof syncNavbarMeta === 'function') syncNavbarMeta(newId);
+  
+  // Sync mobile menu/navbar elements when slot changes
+  if (typeof mobileNavbarUsername !== 'undefined' && mobileNavbarUsername) {
+    mobileNavbarUsername.value = username;
+  }
+  const mobileMenuRoomId = document.getElementById("mobileMenuRoomId");
+  if (mobileMenuRoomId) {
+    mobileMenuRoomId.textContent = "#" + username;
+  }
+  const mobileUsernameInput = document.getElementById("mobileUsername");
+  if (mobileUsernameInput) {
+    mobileUsernameInput.value = username;
+  }
+
+  if (typeof syncNavbarMeta === 'function') syncNavbarMeta(username);
   if (typeof initClipboardListener === 'function') initClipboardListener();
   renderMultiClipTabs();
 };
@@ -308,6 +363,7 @@ document.addEventListener("DOMContentLoaded", renderMultiClipTabs);
 // end Multi-Clip
 
 // History State
+let lastKnownRemoteText = "";
 let clipHistory = [];
 try {
   clipHistory = JSON.parse(safeLocalStorageGet("clipHistory") || "[]");
@@ -351,15 +407,9 @@ function startCountdown(expiresAt) {
     const timeLeft = expiresAt - now;
 
     if (timeLeft <= 0) {
-      clearInterval(countdownInterval);
-      expiryBadge.classList.add("hidden");
-      expiryBadge.classList.remove("flex");
-      if (expiryProgressBar) {
-        expiryProgressBar.classList.add("hidden");
-        expiryProgressBar.style.width = "0%";
-      }
-      clipboardTextArea.value = "";
-      renderMarkdownPreview();
+      db.ref(`clipboards/${username}`).set(null);
+      clearContentUI();
+      stopCountdown();
       showNotification("This clip has self-destructed.", "error");
       return;
     }
@@ -405,27 +455,97 @@ function stopCountdown() {
 }
 
 // Initialize Clipboard Listener
-let textListenerActive = false;
+let dataListenersAttached = false;
+let dataListenersRoomId = null;
+
+function attachDataListeners(roomId) {
+  if (dataListenersAttached && dataListenersRoomId === roomId) return;
+  detachDataListeners();
+  
+  dataListenersAttached = true;
+  dataListenersRoomId = roomId;
+
+  db.ref(`clipboards/${roomId}/text`).on("value", textSnapshot => {
+    if (isLocked) return;
+    const text = textSnapshot.val() || "";
+    if (clipboardTextArea.value !== text) {
+      applyRemoteChange(text);
+    } else {
+      lastKnownRemoteText = text;
+    }
+  });
+
+  db.ref(`clipboards/${roomId}/title`).on("value", titleSnapshot => {
+    const title = titleSnapshot.val() || "";
+    const input = document.getElementById("documentTitleInput");
+    if (input && document.activeElement !== input) {
+      input.value = title || "Untitled";
+    }
+    const displayTitle = title || "Untitled";
+    document.title = displayTitle + " - ClipChain";
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.content = displayTitle + " - ClipChain";
+    
+    // Sync Title to Multi-Clip Tab
+    if (window.savedSlots) {
+      const slot = window.savedSlots.find(s => s.id === roomId);
+      if (slot && slot.name !== displayTitle) {
+        slot.name = displayTitle;
+        safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
+        if (typeof renderMultiClipTabs === 'function') renderMultiClipTabs();
+      }
+    }
+  });
+
+  db.ref(`clipboards/${roomId}/stickyText`).on("value", stickySnapshot => {
+    if (isLocked) return;
+    const stickyText = stickySnapshot.val() || "";
+    const stickyTextArea = document.getElementById("stickyTextArea");
+    if (stickyTextArea) {
+      if (stickyTextArea.value !== stickyText) {
+        stickyTextArea.value = stickyText;
+        if (currentViewMode === 'sticky') {
+          updateCharCount();
+        }
+      }
+    }
+  });
+}
+
+function detachDataListeners() {
+  if (!dataListenersAttached || !dataListenersRoomId) return;
+  try {
+    db.ref(`clipboards/${dataListenersRoomId}/text`).off();
+    db.ref(`clipboards/${dataListenersRoomId}/title`).off();
+    db.ref(`clipboards/${dataListenersRoomId}/stickyText`).off();
+  } catch (e) {
+    console.error("Error detaching data listeners:", e);
+  }
+  dataListenersAttached = false;
+  dataListenersRoomId = null;
+}
+
+function clearContentUI() {
+  clipboardTextArea.value = "";
+  const stickyTextArea = document.getElementById("stickyTextArea");
+  if (stickyTextArea) stickyTextArea.value = "";
+  const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
+  if (floatingNoteTextArea) floatingNoteTextArea.value = "";
+  updateCharCount();
+  updateHighlight();
+  if (currentViewMode !== 'edit') renderMarkdownPreview();
+}
 
 function initClipboardListener() {
-  // Clear any existing listeners
-  clipboardRef.off();
-  db.ref(`clipboards/${username}/password`).off();
-  db.ref(`clipboards/${username}/expiresAt`).off();
-  db.ref(`clipboards/${username}/text`).off();
-  db.ref(`clipboards/${username}/stickyText`).off();
-  db.ref(`clipboards/${username}/title`).off();
-
-  let passwordVal = null;
-  let expiresAtVal = null;
-  textListenerActive = false;
+  // Clear any existing listeners on the new room ID before registering
+  cleanupClipboardListeners(username);
+  detachDataListeners();
 
   clipboardTextArea.placeholder = "Type or paste your text here... It will sync instantly across all devices.";
 
   // Sync title locally on input/change
   const docTitleInput = document.getElementById("documentTitleInput");
   if (docTitleInput) {
-    // Remove existing event listener if any (by replacing the node or simply re-binding a single handler)
     const newDocTitleInput = docTitleInput.cloneNode(true);
     docTitleInput.parentNode.replaceChild(newDocTitleInput, docTitleInput);
     
@@ -435,120 +555,41 @@ function initClipboardListener() {
     });
   }
 
-  if (!textListenerActive) {
-    textListenerActive = true;
-    db.ref(`clipboards/${username}/text`).on("value", textSnapshot => {
-      const text = textSnapshot.val() || "";
-      
-      // Only update content if unlocked
-      if (!isLocked) {
-        if (clipboardTextArea.value !== text) {
-          applyRemoteChange(text);
-        } else {
-          lastKnownRemoteText = text;
-        }
-      }
-    });
-
-    db.ref(`clipboards/${username}/title`).on("value", titleSnapshot => {
-      const title = titleSnapshot.val() || "";
-      const input = document.getElementById("documentTitleInput");
-      if (input && document.activeElement !== input) {
-        input.value = title || "Untitled";
-      }
-      const displayTitle = title || "Untitled";
-      document.title = displayTitle + " - ClipChain";
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      if (ogTitle) ogTitle.content = displayTitle + " - ClipChain";
-      
-      // Sync Title to Multi-Clip Tab
-      if (window.savedSlots) {
-        const slot = window.savedSlots.find(s => s.id === username);
-        if (slot && slot.name !== displayTitle) {
-          slot.name = displayTitle;
-          safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
-          if (typeof renderMultiClipTabs === 'function') renderMultiClipTabs();
-        }
-      }
-    });
-
-    db.ref(`clipboards/${username}/stickyText`).on("value", stickySnapshot => {
-      const stickyText = stickySnapshot.val() || "";
-      const stickyTextArea = document.getElementById("stickyTextArea");
-      if (stickyTextArea && !isLocked) {
-        if (stickyTextArea.value !== stickyText) {
-          stickyTextArea.value = stickyText;
-          if (currentViewMode === 'sticky') {
-            updateCharCount();
-          }
-        }
-      }
-    });
-  }
-
+  // Set up password protection listener
   db.ref(`clipboards/${username}/password`).on("value", snap => {
-    passwordVal = snap.val();
+    const passwordVal = snap.val();
     currentPassword = passwordVal;
     
     if (passwordVal) {
       lockBtnText.textContent = "Locked";
-      // Lock if locally stored password doesn't match database password
-      if (sessionPassword !== passwordVal) {
+      if (sessionPassword === passwordVal) {
+        isLocked = false;
+        updateLockState();
+        attachDataListeners(username);
+      } else {
         isLocked = true;
-        clipboardTextArea.value = "";
-        const stickyTextArea = document.getElementById("stickyTextArea");
-        if (stickyTextArea) stickyTextArea.value = "";
-        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
-        if (floatingNoteTextArea) floatingNoteTextArea.value = "";
-        updateCharCount();
-        updateHighlight();
-        if (currentViewMode !== 'edit') renderMarkdownPreview();
+        detachDataListeners();
+        clearContentUI();
         updateLockState();
       }
     } else {
       isLocked = false;
       sessionPassword = null;
+      setSessionPassword(username, null);
       lockBtnText.textContent = "Set Password";
       updateLockState();
-      
-      // Fetch text if it was locked before
-      clipboardRef.once('value').then(snap => {
-        const data = snap.val() || {};
-        const text = typeof data === 'object' ? (data.text || "") : data;
-        const stickyText = typeof data === 'object' ? (data.stickyText || "") : "";
-        if (clipboardTextArea.value !== text) {
-          clipboardTextArea.value = text;
-          updateCharCount();
-          updateHighlight();
-          if (currentViewMode !== 'edit') renderMarkdownPreview();
-        }
-        const stickyTextArea = document.getElementById("stickyTextArea");
-        if (stickyTextArea && stickyTextArea.value !== stickyText) {
-          stickyTextArea.value = stickyText;
-          if (currentViewMode === 'sticky') {
-            updateCharCount();
-          }
-        }
-        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
-        if (floatingNoteTextArea && floatingNoteTextArea.value !== stickyText) {
-          floatingNoteTextArea.value = stickyText;
-        }
-      });
+      attachDataListeners(username);
     }
   });
 
+  // Set up expiration / self-destruct listener
   db.ref(`clipboards/${username}/expiresAt`).on("value", snap => {
-    expiresAtVal = snap.val();
+    const expiresAtVal = snap.val();
     const selfDestructSelect = document.getElementById("selfDestructTimer");
     if (expiresAtVal) {
       if (Date.now() > expiresAtVal) {
         db.ref(`clipboards/${username}`).set(null);
-        clipboardTextArea.value = "";
-        const stickyTextArea = document.getElementById("stickyTextArea");
-        if (stickyTextArea) stickyTextArea.value = "";
-        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
-        if (floatingNoteTextArea) floatingNoteTextArea.value = "";
-        if (currentViewMode !== 'edit') renderMarkdownPreview();
+        clearContentUI();
         stopCountdown();
         showNotification("This clip has self-destructed.", "error");
       } else {
@@ -564,10 +605,30 @@ function initClipboardListener() {
         }
       }
     } else {
-      stopCountdown();
-      if (selfDestructSelect) {
-        selfDestructSelect.value = 'never';
-        selfDestructSelect.dataset.currentValue = 'never';
+      // Timer removed or room deleted
+      if (countdownInterval) {
+        // A countdown was active, let's verify if the room was deleted
+        db.ref(`clipboards/${username}`).once('value').then(parentSnap => {
+          if (!parentSnap.exists()) {
+            // Room was deleted - self-destructed!
+            clearContentUI();
+            stopCountdown();
+            showNotification("This clip has self-destructed.", "error");
+          } else {
+            // Room still exists - timer was manually turned off
+            stopCountdown();
+            if (selfDestructSelect) {
+              selfDestructSelect.value = 'never';
+              selfDestructSelect.dataset.currentValue = 'never';
+            }
+          }
+        });
+      } else {
+        stopCountdown();
+        if (selfDestructSelect) {
+          selfDestructSelect.value = 'never';
+          selfDestructSelect.dataset.currentValue = 'never';
+        }
       }
     }
   });
@@ -686,7 +747,9 @@ function openPasswordModal(mode) {
   } else {
     removePasswordBtn.classList.add("hidden");
   }
-  passwordInput.focus();
+  setTimeout(() => {
+    passwordInput.focus();
+  }, 100);
 }
 
 function closePasswordModal() {
@@ -707,6 +770,7 @@ passwordForm.addEventListener("submit", (e) => {
       return;
     }
     sessionPassword = inputVal; // Authorize this local session immediately
+    setSessionPassword(username, inputVal);
     clipboardRef.update({ password: inputVal });
     showNotification("Password set successfully", "success");
     closePasswordModal();
@@ -714,10 +778,13 @@ passwordForm.addEventListener("submit", (e) => {
     // Check if password matches before removing
     if (inputVal === currentPassword) {
       sessionPassword = null;
+      setSessionPassword(username, null);
       clipboardRef.update({ password: null });
       showNotification("Password removed", "success");
       closePasswordModal();
     } else {
+      passwordInput.value = "";
+      passwordInput.focus();
       passwordInput.classList.add("shake-animation");
       passwordInput.style.borderColor = "#ef4444"; // Red
       showNotification("Incorrect password", "error");
@@ -730,25 +797,14 @@ passwordForm.addEventListener("submit", (e) => {
     // Unlock mode
     if (inputVal === currentPassword) {
       sessionPassword = inputVal; // Authorize local session
+      setSessionPassword(username, inputVal);
       isLocked = false;
       updateLockState();
+      attachDataListeners(username);
       closePasswordModal();
-      // Force re-fetch text to show it
-      clipboardRef.once('value').then(snap => {
-        const data = snap.val() || {};
-        const text = typeof data === 'object' ? (data.text || "") : data;
-        const stickyText = typeof data === 'object' ? (data.stickyText || "") : "";
-        clipboardTextArea.value = text;
-        const stickyTextArea = document.getElementById("stickyTextArea");
-        if (stickyTextArea) stickyTextArea.value = stickyText;
-        const floatingNoteTextArea = document.getElementById("floatingNoteTextArea");
-        if (floatingNoteTextArea) floatingNoteTextArea.value = stickyText;
-        updateCharCount();
-        updateHighlight();
-        if (currentViewMode !== 'edit') renderMarkdownPreview();
-      });
     } else {
-      // Wrong password animation
+      passwordInput.value = "";
+      passwordInput.focus();
       passwordInput.classList.add("shake-animation");
       passwordInput.style.borderColor = "#ef4444"; // Red
       showNotification("Incorrect password", "error");
@@ -945,39 +1001,36 @@ function escapeRegExp(string) {
 
 // --- Previous Logic Updates ---
 
+let pendingRoomSwitchId = null;
+
 setUsernameBtn.addEventListener("click", () => {
   const newUsername = usernameInput.value.trim();
   if (!newUsername) return showNotification("Please enter a valid username", "error");
+  if (newUsername === username) return;
+
+  pendingRoomSwitchId = newUsername;
 
   db.ref(`clipboards/${newUsername}`).once("value", snapshot => {
-    // Logic update: New username might have password
-    const data = snapshot.val();
-    const hasPass = data && typeof data === 'object' && data.password;
+    if (pendingRoomSwitchId !== newUsername) {
+      // Newer switch request exists, ignore this old response
+      return;
+    }
+    pendingRoomSwitchId = null;
 
+    const data = snapshot.val();
     if (data && (typeof data !== 'object' || data.text)) { // if exists
-      // B6 fix: use a toast notification instead of blocking confirm()
-      // Simply join — the user explicitly typed the ID and pressed Go.
-      // The lock overlay will protect password-protected clipboards automatically.
       showNotification("Joining existing clipboard: " + newUsername, "info");
     }
 
-    if (hasPass) {
-      // Prompt for password immediately? Or just switch and let the locked state handle it
-      // Ideally switch and let locked state handle it
+    // Add slot to savedSlots if it's not already there
+    const exists = window.savedSlots.find(s => s.id === newUsername);
+    if (!exists) {
+      window.savedSlots.push({ id: newUsername, name: (data && data.title) || `Clip ${window.savedSlots.length + 1}` });
+      safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
     }
 
-    username = newUsername;
-    safeLocalStorageSet("clipUsername", username);
-    updateURL(username);
-    updateLinkDisplay(username);
-    const dockSessionId = document.getElementById("dockSessionId");
-    if (dockSessionId) dockSessionId.textContent = "#" + username;
-
-    clipboardRef.off(); // detach old listener
-    clipboardRef = db.ref(`clipboards/${username}`);
-    initClipboardListener();
-
-    showNotification("Joined ID: " + username, "success");
+    window.switchSlot(newUsername);
+    showNotification("Joined ID: " + newUsername, "success");
   });
 });
 
@@ -1674,6 +1727,12 @@ if (themeToggle) {
   });
 }
 
+if (mobileThemeToggle) {
+  mobileThemeToggle.addEventListener("change", (e) => {
+    setTheme(e.target.checked);
+  });
+}
+
 if (mobileThemeToggleBtn) {
   mobileThemeToggleBtn.addEventListener("click", () => {
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -1724,6 +1783,9 @@ if (mobileSetUsernameBtn && mobileUsernameInput) {
 
     if (usernameInput) usernameInput.value = newUsername;
     if (setUsernameBtn) setUsernameBtn.click();
+    
+    // Smoothly close mobile drawer menu
+    closeMobileMenu();
   });
 
   mobileUsernameInput.addEventListener("keydown", (e) => {
@@ -2051,6 +2113,12 @@ function updateCharCount() {
   const focusWordCount = document.getElementById("focusWordCount");
   if (focusWordCount) {
     focusWordCount.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+  }
+  
+  // Sync character count inside the mobile menu drawer
+  const mobileMenuCharCount = document.getElementById("mobileMenuCharCount");
+  if (mobileMenuCharCount) {
+    mobileMenuCharCount.textContent = `${count} char${count !== 1 ? 's' : ''}`;
   }
 }
 
@@ -2965,8 +3033,8 @@ if (document.readyState === 'loading') {
     const handleSwitch = () => {
       const targetRoom = quickInput.value.trim();
       if (targetRoom && targetRoom !== username) {
-        if (usernameInputEl && setUsernameBtn) {
-          usernameInputEl.value = targetRoom;
+        if (usernameInput && setUsernameBtn) {
+          usernameInput.value = targetRoom;
           // Trigger the standard room change procedure
           setUsernameBtn.click();
         }
@@ -3280,6 +3348,7 @@ if (document.readyState === 'loading') {
       height: selectionSpan.offsetHeight
     };
   }
+})();
 
   // ==========================================================================
   // REDESIGNED bottom DOCK INTERACTIVE SYSTEM
@@ -3459,4 +3528,14 @@ if (document.readyState === 'loading') {
       }
     }
   })();
-})();
+
+// Remove/Reinitialize listeners when switching tabs to save resources and prevent memory leaks
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    cleanupClipboardListeners(username);
+    detachDataListeners();
+    stopCountdown();
+  } else {
+    initClipboardListener();
+  }
+});

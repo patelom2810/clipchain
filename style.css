@@ -3363,6 +3363,82 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
   body.app-layout .glass-dock > * {
     flex-shrink: 0 !important;
   }
+
+  /* iOS Input Auto-Zoom fix */
+  .navbar-id-input,
+  #mobileUsername,
+  #passwordInput {
+    font-size: 16px !important;
+  }
+
+  /* Formatting Toolbar horizontal scroll */
+  #formattingToolbar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  #formattingToolbar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Reposition format dropdowns on mobile to prevent clipping */
+  #fmtColorDropdown,
+  #fmtFontDropdown {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 80px !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    z-index: 100 !important;
+  }
+
+  /* Reposition self-destruct menu on mobile to prevent clipping inside scrollable dock */
+  #selfDestructMenu {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 80px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 140px !important;
+    max-width: calc(100vw - 32px) !important;
+    z-index: 100 !important;
+  }
+
+  /* Modal positioning fix on keyboard focus */
+  #passwordModal,
+  #confirmModal,
+  #lockOverlay,
+  #qrModal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 150 !important;
+  }
+
+  /* Touch target optimizations for tabs */
+  #multiClipTabs button {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+  }
+  #multiClipTabs button div {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Fix for extra small screen widths (e.g. < 360px) navbar and dock crowding */
+  @media (max-width: 359px) {
+    .navbar-mobile-right {
+      gap: 4px !important;
+    }
+    .navbar-id-pill {
+      max-width: 110px !important;
+    }
+    .dock-separator {
+      display: none !important;
+    }
+  }
 }
 
 /* Floating Selection Bubble Toolbar Styles */
@@ -3430,4 +3506,176 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* ==========================================================================
+   DESIGN SYSTEM STANDARDIZATION OVERRIDES
+   ========================================================================== */
+/* Standardize Border Radii for Containers */
+.glass-panel,
+#passwordModal > div,
+#confirmModal > div,
+#historyDrawer,
+.glass-dock {
+  border-radius: 20px !important;
+}
+
+/* Standardize Border Radii for Modals & Inputs */
+.navbar-id-pill,
+.navbar-icon-btn,
+.dock-btn,
+.fmt-btn,
+.custom-dropdown-menu,
+#mobileUsername,
+#passwordInput {
+  border-radius: 12px !important;
+}
+
+/* Fix Icon & Text Vertical Baseline Alignment */
+.fmt-btn,
+.widget-back-btn,
+.footer-built-badge,
+.footer-logo {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+
+/* Standardize Button Spacing */
+.fmt-btn {
+  padding: 6px 10px !important;
+}
+
+/* Typography Hierarchy Adjustments */
+#dockCharCount {
+  font-size: 10px !important;
+  letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   PREMIUM BROWSER-LIKE TABS SYSTEM
+   ========================================================================== */
+#multiClipTabs {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  padding-bottom: 0px !important;
+  gap: 4px !important;
+  background: rgba(248, 250, 252, 0.3) !important;
+}
+html.dark #multiClipTabs {
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5) !important;
+  background: rgba(15, 23, 42, 0.2) !important;
+}
+
+.clip-tab {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  border: 1px solid transparent !important;
+  border-bottom: none !important;
+  background-color: transparent !important;
+  color: #64748b !important;
+  position: relative !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  animation: tab-spawn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  margin-bottom: -1px !important;
+  height: 34px !important;
+}
+html.dark .clip-tab {
+  color: #94a3b8 !important;
+}
+
+@keyframes tab-spawn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.clip-tab:hover {
+  background-color: rgba(241, 245, 249, 0.8) !important;
+  color: #1e293b !important;
+}
+html.dark .clip-tab:hover {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Active Tab */
+.clip-tab.active-tab {
+  background-color: #ffffff !important;
+  border-color: rgba(226, 232, 240, 0.9) rgba(226, 232, 240, 0.9) transparent rgba(226, 232, 240, 0.9) !important;
+  color: #7bc143 !important; /* Brand color */
+  box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.02) !important;
+  z-index: 10 !important;
+}
+html.dark .clip-tab.active-tab {
+  background-color: #1e293b !important; /* slate-800 */
+  border-color: rgba(51, 65, 85, 0.5) rgba(51, 65, 85, 0.5) transparent rgba(51, 65, 85, 0.5) !important;
+  color: #7bc143 !important;
+  box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Close button on tab */
+.close-tab-btn {
+  width: 14px !important;
+  height: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  color: #94a3b8 !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: all 0.2s ease !important;
+  margin-left: 2px !important;
+}
+.clip-tab:hover .close-tab-btn {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+.close-tab-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: #ef4444 !important;
+}
+html.dark .close-tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f87171 !important;
+}
+
+/* Add Tab button */
+.add-tab-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 8px !important;
+  color: #94a3b8 !important;
+  background-color: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  margin-bottom: 3px !important;
+  margin-left: 4px !important;
+}
+.add-tab-btn:hover {
+  background-color: rgba(241, 245, 249, 0.8) !important;
+  color: #1e293b !important;
+  transform: scale(1.05) !important;
+}
+html.dark .add-tab-btn:hover {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  color: #f1f5f9 !important;
 }
