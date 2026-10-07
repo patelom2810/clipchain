@@ -196,41 +196,13 @@ let passwordMode = 'unlock'; // 'unlock' | 'set'
 let currentViewMode = 'edit'; // 'edit' | 'preview' | 'split'
 
 
-let activeTabId = null;
-
 // // Mobile Menu Toggle with Smooth Transitions and Backdrop support (Removed)
 const closeMobileMenu = () => {
   document.body.style.overflow = "";
 };
 
-// MULTI-CLIPBOARD STATE
-window.savedSlots = [];
-try {
-  window.savedSlots = JSON.parse(safeLocalStorageGet("clipSavedSlots", "[]"));
-} catch (e) {
-  window.savedSlots = [];
-}
-
 let urlUsername = getUsernameFromURL();
-let username;
-
-if (urlUsername) {
-  username = urlUsername;
-  const exists = window.savedSlots.find(s => s.id === username);
-  if (!exists) {
-    window.savedSlots.push({ id: username, name: `Clip ${window.savedSlots.length + 1}` });
-    safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
-  }
-} else {
-  if (window.savedSlots.length > 0) {
-    username = window.savedSlots[0].id;
-  } else {
-    username = safeLocalStorageGet("clipUsername") || generateRandomID();
-    window.savedSlots.push({ id: username, name: "Clip 1" });
-    safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
-  }
-  if (typeof history !== 'undefined') history.replaceState(null, '', '/?id=' + username);
-}
+let username = urlUsername || safeLocalStorageGet("clipUsername") || generateRandomID();
 
 updateURL(username);
 updateLinkDisplay(username);
@@ -238,56 +210,6 @@ safeLocalStorageSet("clipUsername", username);
 usernameInput.value = username;
 sessionPassword = getSessionPassword(username);
 if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
-
-// Set up Multi-Clip Tabs
-function renderMultiClipTabs() {
-  const tabsContainer = document.getElementById("multiClipTabs");
-  if (!tabsContainer) return;
-  tabsContainer.innerHTML = "";
-  
-  window.savedSlots.forEach((slot, index) => {
-    const isActive = slot.id === username;
-    const btn = document.createElement("button");
-    btn.className = `clip-tab ${isActive ? 'active-tab' : 'inactive-tab'}`;
-    
-    const nameSpan = document.createElement("span");
-    nameSpan.textContent = slot.name || `Clip ${index + 1}`;
-    btn.appendChild(nameSpan);
-    
-    if (window.savedSlots.length > 1) {
-      const closeBtn = document.createElement("div");
-      closeBtn.className = "close-tab-btn";
-      closeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-      closeBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        window.savedSlots = window.savedSlots.filter(s => s.id !== slot.id);
-        safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
-        if (isActive) window.switchSlot(window.savedSlots[0].id);
-        else renderMultiClipTabs();
-      });
-      btn.appendChild(closeBtn);
-    }
-    
-    btn.addEventListener("click", () => {
-      if (!isActive) window.switchSlot(slot.id);
-    });
-    tabsContainer.appendChild(btn);
-  });
-  
-  if (window.savedSlots.length < 10) {
-    const addBtn = document.createElement("button");
-    addBtn.className = "add-tab-btn";
-    addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
-    addBtn.title = "Add new clipboard";
-    addBtn.addEventListener("click", () => {
-      const newId = generateRandomID();
-      window.savedSlots.push({ id: newId, name: `Clip ${window.savedSlots.length + 1}` });
-      safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
-      window.switchSlot(newId);
-    });
-    tabsContainer.appendChild(addBtn);
-  }
-}
 
 window.switchSlot = function(newId) {
   if (!newId) return;
@@ -328,11 +250,7 @@ if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.t
 
   if (typeof syncNavbarMeta === 'function') syncNavbarMeta(username);
   if (typeof initClipboardListener === 'function') initClipboardListener();
-  renderMultiClipTabs();
 };
-
-document.addEventListener("DOMContentLoaded", renderMultiClipTabs);
-// end Multi-Clip
 
 // History State
 let lastKnownRemoteText = "";
@@ -458,15 +376,6 @@ function attachDataListeners(roomId) {
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.content = displayTitle + " - ClipChain";
     
-    // Sync Title to Multi-Clip Tab
-    if (window.savedSlots) {
-      const slot = window.savedSlots.find(s => s.id === roomId);
-      if (slot && slot.name !== displayTitle) {
-        slot.name = displayTitle;
-        safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
-        if (typeof renderMultiClipTabs === 'function') renderMultiClipTabs();
-      }
-    }
   });
 
   db.ref(`clipboards/${roomId}/stickyText`).on("value", stickySnapshot => {
@@ -994,13 +903,6 @@ setUsernameBtn.addEventListener("click", () => {
       showNotification("Joining existing clipboard: " + newUsername, "info");
     }
 
-    // Add slot to savedSlots if it's not already there
-    const exists = window.savedSlots.find(s => s.id === newUsername);
-    if (!exists) {
-      window.savedSlots.push({ id: newUsername, name: (data && data.title) || `Clip ${window.savedSlots.length + 1}` });
-      safeLocalStorageSet("clipSavedSlots", JSON.stringify(window.savedSlots));
-    }
-
     window.switchSlot(newUsername);
     showNotification("Joined ID: " + newUsername, "success");
   });
@@ -1327,6 +1229,10 @@ showQrBtn.addEventListener("click", () => {
     showNotification("Failed to generate QR Code", "error");
   }
 
+  if (window.lucide && typeof lucide.createIcons === 'function') {
+    lucide.createIcons();
+  }
+
   // Small delay for transition
   setTimeout(() => {
     qrModal.classList.remove("opacity-0");
@@ -1456,9 +1362,22 @@ shareButtons.forEach(btn => {
   }
 });
 
-// Theme Toggle
+// Theme Toggle & Logo Logic
 const themeToggle = document.getElementById("themeToggle");
 const mobileThemeToggle = document.getElementById("mobileThemeToggle");
+const themeToggleBtn = document.getElementById("themeToggleBtn");
+
+const THEME_SUN_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-400"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+const THEME_MOON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+
+// Animated Logo Replay
+window.replayLogo = function() {
+  const logo = document.getElementById("workspaceAvatar");
+  if (!logo) return;
+  logo.classList.remove("play");
+  void logo.offsetWidth; // Force browser layout reflow to restart animation
+  logo.classList.add("play");
+};
 
 function setTheme(isDark) {
   const hljsLight = document.getElementById("hljs-light-theme");
@@ -1482,16 +1401,44 @@ function setTheme(isDark) {
     safeLocalStorageSet("theme", "light");
   }
 
-  // Sync mobile toggle button icon
+  // Update navbar theme toggle button icon & tooltip
+  const navThemeBtn = document.getElementById("themeToggleBtn");
+  if (navThemeBtn) {
+    navThemeBtn.innerHTML = isDark ? THEME_SUN_SVG : THEME_MOON_SVG;
+    const label = isDark ? "Switch to Light Theme" : "Switch to Dark Theme";
+    navThemeBtn.setAttribute("title", label);
+    navThemeBtn.setAttribute("aria-label", label);
+  }
+
+  // Update mobile theme button if present
   const mobileThemeBtn = document.getElementById("mobileThemeToggleBtn");
   if (mobileThemeBtn) {
-    mobileThemeBtn.innerHTML = isDark
-      ? '<i data-lucide="sun" class="h-5 w-5"></i>'
-      : '<i data-lucide="moon" class="h-5 w-5"></i>';
-    if (window.lucide) {
-      lucide.createIcons();
-    }
+    mobileThemeBtn.innerHTML = isDark ? THEME_SUN_SVG : THEME_MOON_SVG;
+    mobileThemeBtn.setAttribute("title", isDark ? "Switch to Light Theme" : "Switch to Dark Theme");
   }
+
+  if (window.lucide && typeof lucide.createIcons === "function") {
+    lucide.createIcons();
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
+  setTheme(!isDark);
+}
+
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleTheme();
+  });
+}
+
+if (mobileThemeToggleBtn) {
+  mobileThemeToggleBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleTheme();
+  });
 }
 
 if (themeToggle) {
@@ -1506,19 +1453,24 @@ if (mobileThemeToggle) {
   });
 }
 
-if (mobileThemeToggleBtn) {
-  mobileThemeToggleBtn.addEventListener("click", () => {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    setTheme(!isDark);
-  });
-}
-
 // Init Theme
 const savedTheme = safeLocalStorageGet("theme");
 if (savedTheme === "dark") {
   setTheme(true);
-} else {
+} else if (savedTheme === "light") {
   setTheme(false);
+} else {
+  const systemPrefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  setTheme(systemPrefersDark);
+}
+
+// Listen for system theme changes if user has no explicit preference stored
+if (window.matchMedia) {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    if (!safeLocalStorageGet("theme")) {
+      setTheme(e.matches);
+    }
+  });
 }
 
 // Mobile Username Logic
@@ -1778,39 +1730,72 @@ if (newsletterForm) {
 
 // Helper Functions
 function updateURL(user) {
-  // Instead of changing the actual URL path, use URL hash or query parameter
-  // Option 1: Using hash (preferred for static sites)
-  window.history.replaceState({}, "", `#${user}`);
-
-  // Option 2: Using query parameter (alternative approach)
-  // window.history.replaceState({}, "", `?username=${user}`);
+  if (typeof history !== 'undefined' && history.replaceState) {
+    try {
+      const url = new URL(window.location.href);
+      url.search = ""; // Remove any query params to keep clean hash URL
+      url.hash = user ? `#${user}` : "";
+      history.replaceState(null, "", url.pathname + url.hash);
+    } catch (e) {
+      history.replaceState(null, "", `#${user}`);
+    }
+  }
 }
 
-// Replace the getUsernameFromURL function with this:
 function getUsernameFromURL() {
-  // Get username from hash
+  // 1. Primary: hash format #username (e.g. https://clipchain.netlify.app/#room)
   const hash = window.location.hash;
   if (hash && hash.length > 1) {
-    return hash.substring(1); // Remove the # character
+    try {
+      return decodeURIComponent(hash.substring(1)).trim();
+    } catch (e) {
+      return hash.substring(1).trim();
+    }
   }
 
-  // Alternative: Get username from query parameter
-  // const params = new URLSearchParams(window.location.search);
-  // return params.get('username');
+  // 2. Fallback: query parameter (?id= or ?username=)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const idFromQuery = params.get("id") || params.get("username") || params.get("room");
+    if (idFromQuery && idFromQuery.trim()) {
+      return idFromQuery.trim();
+    }
+  } catch (e) {
+    console.warn("Could not parse query parameters:", e);
+  }
 
   return null;
 }
 
-// Update the updateLinkDisplay function:
 function updateLinkDisplay(user) {
-  // Update to show the URL with hash format
-  const baseUrl = window.location.origin;
-  const fullLink = `${baseUrl}/#${user}`;
-  // Alternative: const fullLink = `${baseUrl}/?username=${user}`;
+  let fullLink;
+  if (window.location.origin && window.location.origin !== "null" && window.location.protocol.startsWith("http")) {
+    try {
+      const url = new URL(window.location.href);
+      url.search = ""; // Remove query parameters
+      url.hash = `#${user}`;
+      fullLink = url.toString();
+    } catch (e) {
+      fullLink = `${window.location.origin}/#${user}`;
+    }
+  } else {
+    // Netlify fallback for file:// or offline environments
+    fullLink = `https://clipchain.netlify.app/#${user}`;
+  }
 
   clipboardLink.textContent = fullLink;
   clipboardLink.href = fullLink;
 }
+
+// Listen for hash navigation (e.g. back/forward button or manual hash change)
+window.addEventListener("hashchange", () => {
+  const newHashUser = getUsernameFromURL();
+  if (newHashUser && newHashUser !== username) {
+    if (typeof window.switchSlot === 'function') {
+      window.switchSlot(newHashUser);
+    }
+  }
+});
 
 // Initialize Icons and Tooltips
 document.addEventListener("DOMContentLoaded", () => {
@@ -2250,7 +2235,7 @@ const initCommandPaletteSystem = () => {
   const card = document.getElementById("commandPaletteCard");
   const paletteSearchInput = document.getElementById("paletteSearchInput");
   const commandsList = document.getElementById("paletteCommandsList");
-  const navBtn = document.getElementById("navCommandPaletteBtn");
+  const navBtn = document.getElementById("navSearchEverywhereBtn");
   
   const calcView = document.getElementById("paletteCalculatorView");
   const calendarView = document.getElementById("paletteCalendarView");
@@ -2789,11 +2774,18 @@ if (document.readyState === 'loading') {
       }
     };
     switcherBtn.addEventListener("click", toggleSwitcher);
-    if (avatar) avatar.addEventListener("click", toggleSwitcher);
+    if (avatar) {
+      avatar.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (typeof window.replayLogo === "function") {
+          window.replayLogo();
+        }
+      });
+    }
 
     // Close on outside click
     document.addEventListener("click", (e) => {
-      if (!switcherDropdown.contains(e.target) && e.target !== switcherBtn && e.target !== avatar) {
+      if (!switcherDropdown.contains(e.target) && !switcherBtn.contains(e.target)) {
         switcherDropdown.classList.add("hidden");
       }
     });
