@@ -195,31 +195,7 @@ let isPasswordModalOpen = false;
 let passwordMode = 'unlock'; // 'unlock' | 'set'
 let currentViewMode = 'edit'; // 'edit' | 'preview' | 'split'
 
-window.isFormattingEnabled = false;
-const toggleFormattingBtn = document.getElementById("toggleFormattingBtn");
-if (toggleFormattingBtn) {
-  toggleFormattingBtn.addEventListener("click", () => {
-    window.isFormattingEnabled = !window.isFormattingEnabled;
-    const btnViewPreview = document.getElementById("btnViewPreview");
-    const btnViewSplit = document.getElementById("btnViewSplit");
-    
-    if (window.isFormattingEnabled) {
-      toggleFormattingBtn.classList.add("bg-white/50", "dark:bg-slate-700/50", "text-primary-600");
-      toggleFormattingBtn.classList.remove("text-secondary-500", "hover:text-primary-600");
-      if (btnViewPreview) btnViewPreview.classList.remove("hidden");
-      if (btnViewSplit) btnViewSplit.classList.remove("hidden");
-    } else {
-      toggleFormattingBtn.classList.remove("bg-white/50", "dark:bg-slate-700/50", "text-primary-600");
-      toggleFormattingBtn.classList.add("text-secondary-500", "hover:text-primary-600");
-      if (btnViewPreview) btnViewPreview.classList.add("hidden");
-      if (btnViewSplit) btnViewSplit.classList.add("hidden");
-      if (currentViewMode !== 'edit') {
-        currentViewMode = 'edit';
-      }
-    }
-    if (typeof setViewMode === 'function') setViewMode(currentViewMode);
-  });
-}
+
 let activeTabId = null;
 
 // // Mobile Menu Toggle with Smooth Transitions and Backdrop support (Removed)
@@ -261,8 +237,6 @@ updateLinkDisplay(username);
 safeLocalStorageSet("clipUsername", username);
 usernameInput.value = username;
 sessionPassword = getSessionPassword(username);
-const dockSessionId = document.getElementById("dockSessionId");
-if (dockSessionId) dockSessionId.textContent = "#" + username;
 if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
 
 // Set up Multi-Clip Tabs
@@ -337,9 +311,7 @@ window.switchSlot = function(newId) {
   const docTitleInput = document.getElementById("documentTitleInput");
   if (docTitleInput) docTitleInput.value = "Untitled";
   
-  const dockSessionId = document.getElementById("dockSessionId");
-  if (dockSessionId) dockSessionId.textContent = "#" + username;
-  if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
+if (typeof usernameDisplay !== 'undefined' && usernameDisplay) usernameDisplay.textContent = username;
   
   // Sync mobile menu/navbar elements when slot changes
   if (typeof mobileNavbarUsername !== 'undefined' && mobileNavbarUsername) {
@@ -1046,9 +1018,6 @@ if (editClipboardBtn) {
 const editPane = document.getElementById("editPane");
 const previewPane = document.getElementById("previewPane");
 const editorContentGrid = document.getElementById("editorContentGrid");
-const btnViewEdit = document.getElementById("btnViewEdit");
-const btnViewPreview = document.getElementById("btnViewPreview");
-const btnViewSplit = document.getElementById("btnViewSplit");
 const markdownPreview = document.getElementById("markdownPreview");
 
 function renderMarkdownPreview() {
@@ -1071,31 +1040,6 @@ function setViewMode(mode) {
   currentViewMode = mode;
 
   const stickyPane = document.getElementById("stickyPane");
-
-  // Reset tab button styles
-  const tabs = [btnViewEdit, btnViewPreview, btnViewSplit];
-  tabs.forEach(tab => {
-    if (tab) {
-      tab.classList.remove("bg-white", "dark:bg-slate-700", "text-primary-600", "dark:text-primary-400", "shadow-sm");
-      tab.classList.add("text-secondary-500", "hover:text-secondary-800", "dark:hover:text-white");
-    }
-  });
-
-  // Active tab styles
-  const activeTab = mode === 'edit' ? btnViewEdit : mode === 'preview' ? btnViewPreview : btnViewSplit;
-  if (activeTab) {
-    activeTab.classList.add("bg-white", "dark:bg-slate-700", "text-primary-600", "dark:text-primary-400", "shadow-sm");
-    activeTab.classList.remove("text-secondary-500", "hover:text-secondary-800", "dark:hover:text-white");
-  }
-
-  // Handle hidden state for preview and split based on formatting enabled state
-  if (!window.isFormattingEnabled) {
-    if (btnViewPreview) btnViewPreview.classList.add("hidden");
-    if (btnViewSplit) btnViewSplit.classList.add("hidden");
-  } else {
-    if (btnViewPreview) btnViewPreview.classList.remove("hidden");
-    if (btnViewSplit) btnViewSplit.classList.remove("hidden");
-  }
 
   // Toggle grid and layout columns
   if (mode === 'edit') {
@@ -1163,7 +1107,7 @@ function setViewMode(mode) {
     }
     if (stickyPane) {
       stickyPane.classList.remove("hidden");
-      stickyPane.classList.add("flex");
+      stickyPane.classList.remove("flex");
     }
     if (editorContentGrid) {
       editorContentGrid.classList.remove("grid-cols-2", "md:grid-cols-2");
@@ -1171,46 +1115,8 @@ function setViewMode(mode) {
     }
   }
 
-  // Hide/show formatting toolbar based on mode and formatting state
-  const formattingToolbar = document.getElementById("formattingToolbar");
-  if (formattingToolbar) {
-    if ((mode === 'edit' || mode === 'split') && window.isFormattingEnabled) {
-      formattingToolbar.classList.remove("hidden");
-    } else {
-      formattingToolbar.classList.add("hidden");
-    }
-  }
-
   updateCharCount();
 }
-
-if (btnViewEdit) btnViewEdit.addEventListener("click", () => setViewMode('edit'));
-if (btnViewPreview) btnViewPreview.addEventListener("click", () => setViewMode('preview'));
-if (document.getElementById("btnViewSplit")) document.getElementById("btnViewSplit").addEventListener("click", () => setViewMode('split'));
-
-  // Listeners for typing
-
-
-// Formatting Shortcuts Toolbar Logic
-const fmtUndo = document.getElementById("fmtUndo");
-const fmtRedo = document.getElementById("fmtRedo");
-const fmtBold = document.getElementById("fmtBold");
-const fmtItalic = document.getElementById("fmtItalic");
-const fmtUnderline = document.getElementById("fmtUnderline");
-const fmtStrikethrough = document.getElementById("fmtStrikethrough");
-const fmtHeading = document.getElementById("fmtHeading");
-const fmtListBullet = document.getElementById("fmtListBullet");
-const fmtListCheck = document.getElementById("fmtListCheck");
-const fmtCode = document.getElementById("fmtCode");
-const fmtQuote = document.getElementById("fmtQuote");
-const fmtLink = document.getElementById("fmtLink");
-const fmtTable = document.getElementById("fmtTable");
-const fmtColor = document.getElementById("fmtColor");
-const fmtColorDropdown = document.getElementById("fmtColorDropdown");
-const fmtColorPicker = document.getElementById("fmtColorPicker");
-const fmtFont = document.getElementById("fmtFont");
-const fmtFontDropdown = document.getElementById("fmtFontDropdown");
-const fmtRemove = document.getElementById("fmtRemove");
 
 function insertMarkdown(beforeText, afterText = "") {
   if (isLocked) return;
@@ -1233,139 +1139,6 @@ function insertMarkdown(beforeText, afterText = "") {
   textarea.dispatchEvent(event);
   renderMarkdownPreview();
 }
-
-if (fmtUndo) {
-  fmtUndo.addEventListener("click", () => {
-    clipboardTextArea.focus();
-    document.execCommand("undo");
-  });
-}
-if (fmtRedo) {
-  fmtRedo.addEventListener("click", () => {
-    clipboardTextArea.focus();
-    document.execCommand("redo");
-  });
-}
-
-if (fmtBold) fmtBold.addEventListener("click", () => insertMarkdown("**", "**"));
-if (fmtItalic) fmtItalic.addEventListener("click", () => insertMarkdown("*", "*"));
-// Underline: uses HTML <u> tag (rendered by marked.js in preview)
-if (fmtUnderline) fmtUnderline.addEventListener("click", () => insertMarkdown("<u>", "</u>"));
-// Strikethrough: standard GFM ~~text~~ syntax
-if (fmtStrikethrough) fmtStrikethrough.addEventListener("click", () => insertMarkdown("~~", "~~"));
-if (fmtHeading) fmtHeading.addEventListener("click", () => insertMarkdown("# "));
-if (fmtListBullet) fmtListBullet.addEventListener("click", () => insertMarkdown("- "));
-if (fmtListCheck) fmtListCheck.addEventListener("click", () => insertMarkdown("- [ ] "));
-if (fmtCode) fmtCode.addEventListener("click", () => insertMarkdown("```\n", "\n```"));
-if (fmtQuote) fmtQuote.addEventListener("click", () => insertMarkdown("> "));
-if (fmtLink) fmtLink.addEventListener("click", () => insertMarkdown("[", "](url)"));
-
-// Remove Formatting: strips common markdown & HTML inline formatting from selected text
-if (fmtRemove) {
-  fmtRemove.addEventListener("click", () => {
-    if (isLocked) return;
-    const textarea = clipboardTextArea;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const selected = text.substring(start, end);
-
-    if (!selected) {
-      showNotification("Select text first to remove formatting.", "info");
-      return;
-    }
-
-    // Strip markdown: **bold**, *italic*, ~~strike~~, `code`, # headings, > quotes,
-    // HTML tags like <u>, <span style=...>, <b>, <i>, <em>, <strong>
-    let cleaned = selected
-      .replace(/\*\*(.+?)\*\*/gs, '$1')       // bold
-      .replace(/\*(.+?)\*/gs, '$1')            // italic
-      .replace(/~~(.+?)~~/gs, '$1')            // strikethrough
-      .replace(/`{1,3}([^`]+)`{1,3}/gs, '$1') // inline code / code blocks
-      .replace(/^#{1,6}\s+/gm, '')            // headings
-      .replace(/^>\s+/gm, '')                 // blockquotes
-      .replace(/^-\s+\[[ x]\]\s+/gm, '')     // checklists
-      .replace(/^-\s+/gm, '')                 // bullet lists
-      .replace(/<[^>]+>/g, '');               // all HTML tags
-
-    textarea.value = text.substring(0, start) + cleaned + text.substring(end);
-    textarea.focus();
-    textarea.selectionStart = start;
-    textarea.selectionEnd = start + cleaned.length;
-
-    // Sync to Firebase and update overlay
-    const event = new Event('input', { bubbles: true });
-    textarea.dispatchEvent(event);
-    renderMarkdownPreview();
-    showNotification("Formatting removed.", "success");
-  });
-}
-
-// Table format shortcut
-if (fmtTable) {
-  fmtTable.addEventListener("click", () => {
-    insertMarkdown("\n\n| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n\n");
-  });
-}
-
-// Text Color Dropdown Logic
-if (fmtColor && fmtColorDropdown) {
-  fmtColor.addEventListener("click", (e) => {
-    e.stopPropagation();
-    fmtColorDropdown.classList.toggle("hidden");
-    if (fmtFontDropdown) fmtFontDropdown.classList.add("hidden");
-  });
-}
-
-// Text Font Dropdown Logic
-if (fmtFont && fmtFontDropdown) {
-  fmtFont.addEventListener("click", (e) => {
-    e.stopPropagation();
-    fmtFontDropdown.classList.toggle("hidden");
-    if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
-  });
-}
-
-// Close dropdowns on click outside
-document.addEventListener("click", () => {
-  if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
-  if (fmtFontDropdown) fmtFontDropdown.classList.add("hidden");
-});
-
-// Prevent dropdown close on clicking inside the dropdown container
-if (fmtColorDropdown) {
-  fmtColorDropdown.addEventListener("click", (e) => e.stopPropagation());
-}
-if (fmtFontDropdown) {
-  fmtFontDropdown.addEventListener("click", (e) => e.stopPropagation());
-}
-
-// Color preset listeners
-document.querySelectorAll(".color-preset").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const color = btn.getAttribute("data-color");
-    insertMarkdown(`<span style="color: ${color}">`, '</span>');
-    if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
-  });
-});
-
-// Custom color picker listener
-if (fmtColorPicker) {
-  fmtColorPicker.addEventListener("change", (e) => {
-    const color = e.target.value;
-    insertMarkdown(`<span style="color: ${color}">`, '</span>');
-    if (fmtColorDropdown) fmtColorDropdown.classList.add("hidden");
-  });
-}
-
-// Font preset listeners
-document.querySelectorAll(".font-preset").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const font = btn.getAttribute("data-font");
-    insertMarkdown(`<span style="font-family: ${font}">`, '</span>');
-    if (fmtFontDropdown) fmtFontDropdown.classList.add("hidden");
-  });
-});
 
 // Clear Clipboard
 // Clear Clipboard
@@ -2106,10 +1879,7 @@ function updateCharCount() {
   if (charCountEl) {
     charCountEl.textContent = `${count} char${count !== 1 ? 's' : ''}`;
   }
-  const dockCharCount = document.getElementById("dockCharCount");
-  if (dockCharCount) {
-    dockCharCount.textContent = displayText;
-  }
+
   const focusWordCount = document.getElementById("focusWordCount");
   if (focusWordCount) {
     focusWordCount.textContent = `${words} word${words !== 1 ? 's' : ''}`;
@@ -3047,16 +2817,7 @@ if (document.readyState === 'loading') {
     });
   }
 
-  // Search Everywhere button opens command palette
-  const searchEverywhereBtn = document.getElementById("navSearchEverywhereBtn");
-  if (searchEverywhereBtn) {
-    searchEverywhereBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (typeof openCommandPalette === "function") {
-        openCommandPalette();
-      }
-    });
-  }
+
 
   // ── Share dropdown toggle ───────────────────────────────────────────────
   const shareDropdownBtn = document.getElementById("navShareDropdownBtn");

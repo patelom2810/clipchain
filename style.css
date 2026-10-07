@@ -1894,10 +1894,7 @@ mark {
   color: var(--text-primary) !important;
 }
 
-.glass-dock #dockCharCount {
-  color: var(--text-secondary) !important;
-  opacity: 0.7;
-}
+
 
 .glass-dock .dock-btn {
   width: 44px !important;
@@ -2074,10 +2071,7 @@ html.dark .glass-dock span {
   color: white !important;
 }
 
-html.dark .glass-dock #dockCharCount {
-  color: #94a3b8 !important;
-  opacity: 1;
-}
+
 
 html.dark .glass-dock .dock-btn {
   background-color: rgba(30, 41, 59, 0.6) !important;
@@ -3139,68 +3133,7 @@ body.app-layout .app-navbar {
   width: 100% !important;
 }
 
-/* ==========================================================================
-   FORMATTING TOOLBAR — Clean single-row design
-   ========================================================================== */
-#formattingToolbar {
-  flex-shrink: 0 !important;
-  flex-wrap: wrap;
-}
 
-/* Individual formatting button */
-.fmt-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 5px 8px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background 0.13s ease, color 0.13s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  line-height: 1;
-  font-family: var(--font-main);
-}
-.fmt-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
-  color: var(--text-primary);
-}
-.fmt-btn:active {
-  background: rgba(0, 0, 0, 0.1);
-}
-[data-theme="dark"] .fmt-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f1f5f9;
-}
-[data-theme="dark"] .fmt-btn:active {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* Labeled variant — icon + text label */
-.fmt-btn .fmt-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
-/* Thin vertical separator between groups */
-.fmt-sep {
-  width: 1px;
-  height: 16px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 1px;
-  flex-shrink: 0;
-  margin: 0 4px;
-}
-[data-theme="dark"] .fmt-sep {
-  background: rgba(255, 255, 255, 0.12);
-}
 
 
 /* Editor card grid fills the space between toolbars and footer */
@@ -3371,29 +3304,7 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
     font-size: 16px !important;
   }
 
-  /* Formatting Toolbar horizontal scroll */
-  #formattingToolbar {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    scrollbar-width: none !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-  #formattingToolbar::-webkit-scrollbar {
-    display: none !important;
-  }
 
-  /* Reposition format dropdowns on mobile to prevent clipping */
-  #fmtColorDropdown,
-  #fmtFontDropdown {
-    position: fixed !important;
-    top: auto !important;
-    bottom: 80px !important;
-    left: 16px !important;
-    right: 16px !important;
-    width: auto !important;
-    max-width: calc(100vw - 32px) !important;
-    z-index: 100 !important;
-  }
 
   /* Reposition self-destruct menu on mobile to prevent clipping inside scrollable dock */
   #selfDestructMenu {
@@ -3524,7 +3435,6 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
 .navbar-id-pill,
 .navbar-icon-btn,
 .dock-btn,
-.fmt-btn,
 .custom-dropdown-menu,
 #mobileUsername,
 #passwordInput {
@@ -3532,7 +3442,6 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
 }
 
 /* Fix Icon & Text Vertical Baseline Alignment */
-.fmt-btn,
 .widget-back-btn,
 .footer-built-badge,
 .footer-logo {
@@ -3542,16 +3451,7 @@ html.dark body.app-layout .glass-dock .dock-btn:hover {
   gap: 6px !important;
 }
 
-/* Standardize Button Spacing */
-.fmt-btn {
-  padding: 6px 10px !important;
-}
 
-/* Typography Hierarchy Adjustments */
-#dockCharCount {
-  font-size: 10px !important;
-  letter-spacing: 0.02em;
-}
 
 /* ==========================================================================
    PREMIUM BROWSER-LIKE TABS SYSTEM
